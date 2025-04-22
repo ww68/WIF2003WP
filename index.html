@@ -56,26 +56,31 @@
                 <span class="navbar-toggler-icon"></span>
             </button>
         
-            <div class="collapse navbar-collapse" id="navbarContent">
+            <div class="collapse navbar-collapse justify-content-between" id="navbarContent">
         
-                <form class="d-flex me-3 w-50 d-none d-lg-flex" role="search">
-                    <input class="form-control me-2" type="search" placeholder="Search movies" aria-label="Search">
-                    <button class="btn btn-outline-light" type="submit"><i class="fas fa-search"></i></button>
-                </form>
-        
-                <ul class="navbar-nav ms-auto align-items-lg-center">
-                <li class="nav-item w-100 mobile-search d-lg-none mb-2">
+                <div class="mx-auto d-none d-lg-block w-50">
                     <form class="d-flex" role="search">
                         <input class="form-control me-2" type="search" placeholder="Search movies" aria-label="Search">
-                        <button class="btn btn-outline-light" type="submit"><i class="fas fa-search"></i></button>
+                        <button class="btn btn-outline-light" type="submit">
+                        <i class="fas fa-search"></i>
+                        </button>
                     </form>
-                </li>
+                </div>
         
-                <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
-                <li class="nav-item"><a class="nav-link" href="watchlist.html">WatchList</a></li>
-                <li class="nav-item"><a class="nav-link" href="trendingchart.html">Trending Chart</a></li>
-        
-                <li class="nav-item d-lg-none"><a class="nav-link profile-mobile" href="profile.html">Profile</a></li>
+
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item w-100 mobile-search d-lg-none mb-2">
+                        <form class="d-flex" role="search">
+                            <input class="form-control me-2" type="search" placeholder="Search movies" aria-label="Search">
+                            <button class="btn btn-outline-light" type="submit"><i class="fas fa-search"></i></button>
+                        </form>
+                    </li>
+            
+                    <li class="nav-item"><a class="nav-link active" href="index.html">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="watchlist.html">WatchList</a></li>
+                    <li class="nav-item"><a class="nav-link" href="trendingchart.html">Trending Chart</a></li>
+            
+                    <li class="nav-item d-lg-none"><a class="nav-link profile-mobile" href="profile.html">Profile</a></li>
                 </ul>
         
                 <a href="profile.html" class="ms-3 d-none d-lg-block profile-desktop">
