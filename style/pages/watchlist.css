@@ -1,0 +1,30 @@
+.card {
+    background-color: #171717; 
+}
+
+.truncate-description {
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;      
+    -webkit-box-orient: vertical;
+}
+
+.img-wrapper {
+    height: 250px; 
+    overflow: hidden;
+    border-top-left-radius: 0.375rem;
+    border-bottom-left-radius: 0.375rem;
+}
+
+    .img-wrapper img {
+    height: 100%;
+    width: 100%;
+    object-fit: cover;
+}
+
+.bookmark-circle {
+    background-color: rgba(0, 0, 0, 0.595);
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+}
