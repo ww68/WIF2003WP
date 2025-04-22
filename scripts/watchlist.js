@@ -1,0 +1,94 @@
+function renderWatchlist() {
+    const container = document.getElementById("watchlistContainer");
+    const watchlist = JSON.parse(localStorage.getItem("watchlist")) || [
+    {
+        id: "john-wick",
+        title: "John Wick",
+        year: 2014,
+        description: "Ex-hitman John Wick comes out of retirement to track down the gangsters that took everything from him.",
+        img: "images/watchlist/watchlist-john-wick.avif",
+        imdb: "7.5"
+    },
+    {
+        id: "avengers-endgame",
+        title: "Avengers: Endgame",
+        year: 2019,
+        description: "After the devastating events of Infinity War, the universe is in ruins due to the efforts of the Mad Titan, Thanos.",
+        img: "images/watchlist/watchlist-avengers-endgame.avif",
+        imdb: "8.4"
+    },
+    {
+        id: "electric-state",
+        title: "The Electric State",
+        year: 2025,
+        description: "An orphaned teen hits the road with a mysterious robot to find her long-lost brother, teaming up with a smuggler and his wisecracking sidekick.",
+        img: "images/watchlist/watchlist-the-electric-state.avif",
+        imdb: "6.9"
+    }];
+
+    container.innerHTML = "";
+
+    if (watchlist.length === 0) {
+    container.innerHTML = `
+        <div class="d-flex justify-content-center align-items-center vh-100">
+        <div class="text-center px-3">
+        <h4 class="fw-bold mb-2">Your Watchlist</h4>
+        <p class="text-muted mb-4">You haven’t added any movies yet. Start exploring and save your favorites to watch later — all in one place.</p>
+        <a href="index.html" class="btn btn-primary fw-semibold px-4 py-2">
+            Discover something new to watch
+        </a>
+        </div>
+        </div>`;
+    return;
+    }
+
+    watchlist.forEach(movie => {
+    const card = document.createElement("div");
+    card.className = "col-sm-12 col-md-6 col-lg-4 movie-card";
+    card.innerHTML = `
+        <div class="card h-100 text-white">
+        <div class="row g-0 d-flex align-items-stretch">
+            <div class="position-absolute top-0 start-0 ms-2 mt-2">
+            <div class="bookmark-circle d-flex align-items-center justify-content-center">
+                <i class="fa-solid fa-bookmark text-warning fs-6 bookmark-icon" onclick="removeFromWatchlist('${movie.id}', this)"></i>
+            </div>
+            </div>
+            <div class="col-5">
+            <div class="img-wrapper">
+                <img src="${movie.img}" class="img-fluid h-100 rounded-start object-fit-cover" alt="${movie.title}">
+            </div>
+            </div>
+            <div class="col-7 d-flex flex-column p-3">
+            <h5 class="card-title">${movie.title} <span class="text-muted fs-6">(${movie.year})</span></h5>
+            <p class="card-text small text-muted mt-3 truncate-description">${movie.description}</p>
+            <span class="imdb-badge mb-2">IMDb ${movie.imdb}</span>
+            <a href="#" class="btn btn-primary mt-auto w-100"><i class="fab fa-netflix me-2"></i>Watch now</a>
+            </div>
+        </div>
+        </div>`;
+    container.appendChild(card);
+    });
+}
+
+function removeFromWatchlist(id, icon) {
+    let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
+    watchlist = watchlist.filter(movie => movie.id !== id);
+    localStorage.setItem("watchlist", JSON.stringify(watchlist));
+
+    const card = icon.closest(".movie-card");
+    if (card) card.remove();
+
+    if (watchlist.length === 0) {
+    document.getElementById("watchlistContainer").innerHTML = `
+        <div class="d-flex justify-content-center align-items-center vh-100">
+        <div class="text-center px-3">
+        <h4 class="fw-bold mb-2">Your Watchlist</h4>
+        <p class="text-muted mb-4">You haven’t added any movies yet. Start exploring and save your favorites to watch later — all in one place.</p>
+        <a href="index.html" class="btn btn-primary fw-semibold px-4 py-2">
+            Discover something new to watch
+        </a>
+        </div>
+    </div>`;
+    }
+}
+document.addEventListener("DOMContentLoaded", renderWatchlist);
