@@ -48,6 +48,17 @@
 
         .list-group-item.no-border {
             border: none !important;
+            padding: 0.75rem 1rem;
+            font-size: 1.1rem;
+        }
+
+        .list-group .list-group-item + .list-group-item {
+            margin-top: 0.5rem;
+        }
+
+        #historyContainer > div {
+            min-width: 180px;
+            scroll-snap-align: start;
         }
       </style>
 </head>
@@ -95,19 +106,38 @@
     </nav>
      
     <main> 
-        <div class="container my-5">
-            <div class="d-flex align-items-center mb-4">
+
+        <div class="container mb-5">
+
+            <div class="list-group-item bg-dark text-white no-border d-flex align-items-center mb-4">
                 <img src="images/defaultAvatarProfile.jpg" alt="Profile Image" class="rounded-circle me-3" width="80" height="80">
                 <h2 class="mb-0">User Name</h2>
             </div>
         
+            <div class="list-group">
+                <a href="editprofile.html" class="list-group-item list-group-item-action bg-dark text-white no-border">Edit Profile</a>
+                <a href="#" class="list-group-item list-group-item-action bg-dark text-white no-border" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
+                <a href="preference.html" class="list-group-item list-group-item-action bg-dark text-white no-border">Update Preferences</a>
+            </div>
+
             <div class="list-group mb-4">
-                <a href="editprofile.html" class="list-group-item list-group-item-action bg-dark text-white no-border mb-3">Edit Profile</a>
-                <a href="#" class="list-group-item list-group-item-action bg-dark text-white no-border mb-3" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
-                <a href="preference.html" class="list-group-item list-group-item-action bg-dark text-white no-border mb-3">Update Preferences</a>
-                <a href="#" class="list-group-item list-group-item-action bg-dark text-white no-border mb-3">Log Out</a>
-                <a href="#" class="list-group-item list-group-item-action bg-dark text-danger no-border mb-3">Delete account permanently</a>
-              </div>
+                <div class="list-group-item bg-dark text-white no-border">
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <span class="mb-0 fw-normal">History</span>
+                        <a href="history.html" class="btn btn-sm btn-outline-light">View all</a>
+                    </div>
+            
+                    <div class="d-flex overflow-auto gap-3" id="historyContainer" style="scroll-snap-type: x mandatory;">
+                        
+                    </div>
+                </div>
+            </div>
+            
+            <div class="list-group">
+                <a href="#" class="list-group-item list-group-item-action bg-dark text-white no-border">Log Out</a>
+                <a href="#" class="list-group-item list-group-item-action bg-dark text-danger no-border">Delete account permanently</a>
+            </div>
+
         </div>
 
         <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
@@ -197,6 +227,42 @@
                 document.getElementById("newPassword").value = "";
                 document.getElementById("confirmNewPassword").value = "";
             }, 1500);
+            });
+
+            // Sample hardcoded history data
+            const historyData = [
+                {
+                    thumbnail: "https://i.ytimg.com/vi/0sdzZ8xB0nI/hqdefault.jpg",
+                    title: "Get City API Call",
+                    channel: "Your JS"
+                },
+                {
+                    thumbnail: "https://i.ytimg.com/vi/6Jfk8ic3KVk/hqdefault.jpg",
+                    title: "React",
+                    channel: "Curso Desde Cero"
+                },
+                {
+                    thumbnail: "https://i.ytimg.com/vi/GnG-Sf2S9z0/hqdefault.jpg",
+                    title: "My Mix",
+                    channel: "BabyMonster, LE SSERAFIM..."
+                }
+            ];
+
+            const historyContainer = document.getElementById("historyContainer");
+
+            historyData.forEach(item => {
+                const div = document.createElement("div");
+                div.style.minWidth = "180px";
+                div.style.scrollSnapAlign = "start";
+                div.innerHTML = `
+                    <img src="${item.thumbnail}" 
+                        alt="${item.title}" 
+                        class="img-fluid rounded mb-2" 
+                        style="height: 100px; width: 100%; object-fit: cover;">
+                    <p class="mb-0 fw-semibold small">${item.title}</p>
+                    <small class="text-muted">${item.channel}</small>
+                `;
+                historyContainer.appendChild(div);
             });
     </script>
 </body>
