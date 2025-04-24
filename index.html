@@ -30,7 +30,7 @@
                 <div class="mx-auto d-none d-lg-block w-50">
                     <form class="d-flex" role="search">
                         <input class="form-control me-2" type="search" placeholder="Search movies" aria-label="Search">
-                        <button class="btn btn-outline-light" type="submit">
+                        <button class="btn btn-outline-light searchBtn" type="submit">
                         <i class="fas fa-search"></i>
                         </button>
                     </form>
@@ -61,46 +61,48 @@
     </nav>
      
     <main> 
-        <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-          
-              <!-- Slide 1 -->
-                <div class="carousel-item active hero-slide" style="background-image: url('movie-website-master/img/1.jpeg');">
-                    <div class="carousel-caption text-start">
-                        <h1 class="fw-bold">Inception</h1>
-                        <p>A mind-bending thriller that dives into the world of dreams and reality. A mind-bending thriller that dives into the world of dreams and reality. A mind-bending thriller that dives into the world of dreams and reality.</p>
+        <section id="carousel" class="pt-5">
+            <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner">
+              
+                  <!-- Slide 1 -->
+                    <div class="carousel-item active hero-slide" style="background-image: url('movie-website-master/img/1.jpeg');">
+                        <div class="carousel-caption text-start">
+                            <h1 class="fw-bold">Inception</h1>
+                            <p>A mind-bending thriller that dives into the world of dreams and reality. A mind-bending thriller that dives into the world of dreams and reality. A mind-bending thriller that dives into the world of dreams and reality.</p>
+                            <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
+                        </div>
+                    </div>
+              
+                  <!-- Slide 2 -->
+                    <div class="carousel-item hero-slide" style="background-image: url('movie-website-master/img/11.jpg');">
+                        <div class="carousel-caption text-start">
+                        <h1 class="fw-bold">Interstellar</h1>
+                        <p>Humanity’s last chance lies in a journey beyond the stars. Humanity’s last chance lies in a journey beyond the stars. Humanity’s last chance lies in a journey beyond the stars. Humanity’s last chance lies in a journey beyond the stars.</p>
                         <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
+                        </div>
                     </div>
-                </div>
-          
-              <!-- Slide 2 -->
-                <div class="carousel-item hero-slide" style="background-image: url('movie-website-master/img/11.jpg');">
-                    <div class="carousel-caption text-start">
-                    <h1 class="fw-bold">Interstellar</h1>
-                    <p>Humanity’s last chance lies in a journey beyond the stars. Humanity’s last chance lies in a journey beyond the stars. Humanity’s last chance lies in a journey beyond the stars. Humanity’s last chance lies in a journey beyond the stars.</p>
-                    <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
+              
+                  <!-- Slide 3 -->
+                    <div class="carousel-item hero-slide" style="background-image: url('movie-website-master/img/12.jpg');">
+                        <div class="carousel-caption text-start">
+                            <h1 class="fw-bold">The Dark Knight</h1>
+                            <p>The rise of Gotham’s vigilante in a battle against chaos and fear. The rise of Gotham’s vigilante in a battle against chaos and fear. The rise of Gotham’s vigilante in a battle against chaos and fear.</p>
+                            <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
+                        </div>
                     </div>
+              
                 </div>
-          
-              <!-- Slide 3 -->
-                <div class="carousel-item hero-slide" style="background-image: url('movie-website-master/img/12.jpg');">
-                    <div class="carousel-caption text-start">
-                        <h1 class="fw-bold">The Dark Knight</h1>
-                        <p>The rise of Gotham’s vigilante in a battle against chaos and fear. The rise of Gotham’s vigilante in a battle against chaos and fear. The rise of Gotham’s vigilante in a battle against chaos and fear.</p>
-                        <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
-                    </div>
-                </div>
-          
+              
+                <!-- Controls -->
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
+                     <span class="carousel-control-next-icon"></span>
+                </button>
             </div>
-          
-            <!-- Controls -->
-            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-                 <span class="carousel-control-next-icon"></span>
-            </button>
-        </div>
+        </section>
 
 
         <div class="page-black">
