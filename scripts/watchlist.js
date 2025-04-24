@@ -24,6 +24,22 @@ function renderWatchlist() {
         description: "An orphaned teen hits the road with a mysterious robot to find her long-lost brother, teaming up with a smuggler and his wisecracking sidekick.",
         img: "images/watchlist/watchlist-the-electric-state.avif",
         imdb: "6.9"
+    },
+    {
+        id: "black-mirror",
+        title: "Black Mirror",
+        year: 2011,
+        description: "Featuring stand-alone dramas -- sharp, suspenseful, satirical tales that explore techno-paranoia -- \"Black Mirror\" is a contemporary reworking of \"The Twilight Zone\" with stories that tap into the collective unease about the modern world.",
+        img: "images/watchlist/watchlist-black-mirror.avif",
+        imdb: "8.7"
+    },
+    {
+        id: "conclave",
+        title: "Conclave",
+        year: 2025,
+        description: "When Cardinal Lawrence is tasked with leading one of the world's most secretive and ancient events, selecting a new Pope, he finds himself at the center of a web of conspiracies and intrigue that could shake the very foundation of the Catholic Church.",
+        img: "images/watchlist/watchlist-conclave.avif",
+        imdb: "7.4"
     }];
 
     container.innerHTML = "";
