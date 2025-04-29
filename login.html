@@ -27,12 +27,12 @@
             .image-section {
                 width: 50vw;
                 max-width: 800px;
-                background: url('images/signup.png') no-repeat center center/cover;
+                background: url('images/login.png') no-repeat center center/cover;
                 position: relative;
             }
 
             .image-section::after {
-                content: "Catch Vibes, Not Spoilers.";
+                content: "No Just Watching - You're Part of It.";
                 position: absolute;
                 bottom: 10px;
                 right: 10px;
@@ -104,18 +104,18 @@
                 background-color: #483dcb;
             }
 
-            .login-link {
+            .signup-link {
                 text-align: center;
                 margin-top: 1rem;
                 font-size: 0.9rem;
             }
 
-            .login-link a {
+            .signup-link a {
                 color: #007bff;
                 text-decoration: none;
             }
 
-            .login-link a:hover {
+            .signup-link a:hover {
                 text-decoration: underline;
             }
 
@@ -135,40 +135,37 @@
             <div class="image-section"></div>
             <div class="form-section">
                 <div class="form-box">
-                    <h2>Start Sign Up</h2>
-                    <p>Explore Movie</p>
+                    <h2>LOG IN</h2>
+                    <p>Step Into the Spotlight</p>
                     <form>
-                        <label for="username">Username</label>
-                        <input type="text" id="username" placeholder="Enter your username" required />
-
                         <label for="email">Email</label>
                         <input type="email" id="email" placeholder="Enter your email" required />
 
                         <label for="password">Password</label>
-                        <input type="password" id="password" placeholder="Set a password" required />
+                        <input type="password" id="password" placeholder="Enter your password" required />
 
-                        <button type="submit" class="btn-primary">Sign Up</button>
+                        <button type="submit" class="btn-primary">Log In</button>
                     </form>
-                    <div class="login-link">
-                        Already have account? <a href="login.html">Login here</a>
+                    <div class="signup-link">
+                        Not yet have an account? <a href="signup.html">Create here</a>
                     </div>
                 </div>
             </div>
         </div>
 
         <script>
-        const saveBtn = document.querySelector(".btn-primary");
-        document.querySelector("form").addEventListener("submit", (e) => {
-            e.preventDefault();
-
-            saveBtn.disabled = true;
-            saveBtn.textContent = "Saving...";
-
-            setTimeout(() => {
-                alert("You have sign up successfully!");
-                window.location.href = "login.html";
-            }, 1000);
-        });
+            const saveBtn = document.querySelector(".btn-primary");
+            document.querySelector("form").addEventListener("submit", (e) => {
+                e.preventDefault();
+    
+                saveBtn.disabled = true;
+                saveBtn.textContent = "Login...";
+    
+                setTimeout(() => {
+                    alert("You have log in successfully!");
+                    window.location.href = "index.html";
+                }, 1000);
+            });
         </script>
     </body>
 </html>
