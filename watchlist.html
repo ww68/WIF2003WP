@@ -50,7 +50,6 @@
                     <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
                     <li class="nav-item"><a class="nav-link active" href="watchlist.html">WatchList</a></li>
                     <li class="nav-item"><a class="nav-link" href="trending.html">Trending</a></li>
-                    <li class="nav-item"><a class="nav-link" href="trending.html">Trending</a></li>
             
                     <li class="nav-item d-lg-none"><a class="nav-link profile-mobile" href="profile.html">Profile</a></li>
                 </ul>
@@ -66,7 +65,23 @@
 
     <!-- watchlist -->
     <section id="watchlist" class="pt-5">
+        <div class="container pt-5 mb-4">
+            <h2 class="fw-bold text-white">Your Watchlist</h2>
+        </div>          
         <div class="container my-5">
+            <div class="watclishCategory mb-4">
+                <ul class="nav nav-pills mb-5" id="watchlistFilter">
+                    <li class="nav-item">
+                      <button class="nav-link active" data-filter="all">All</button>
+                    </li>
+                    <li class="nav-item">
+                      <button class="nav-link" data-filter="unwatched">Unwatched</button>
+                    </li>
+                    <li class="nav-item">
+                      <button class="nav-link" data-filter="watched">Watched</button>
+                    </li>
+                </ul>
+            </div>
             <div id="watchlistContainer" class="row g-4"></div>        
         </div>
     </section>
