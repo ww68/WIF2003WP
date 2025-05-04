@@ -80,10 +80,15 @@ function isInWatchlist(movieId) {
     return watchlist.some(movie => movie.id === movieId);
 }
 
-// Show notification (you can replace this with a proper toast implementation)
+// Show notification
 function showToast(message) {
-    console.log(message); // Logs to console
-    // alert(message); // Or use a simple alert for testing
+    const toast = document.getElementById('toast');
+    toast.textContent = message;
+    toast.classList.add('show');
+
+    setTimeout(() => {
+        toast.classList.remove('show');
+    }, 2000); 
 }
 
 // Initialize icons and attach event listeners on load
