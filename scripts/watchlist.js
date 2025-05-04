@@ -157,7 +157,7 @@ function renderWatchlist(filter = "all") {
                     ${watchStatus}
                 </div>
             </div>
-            <p class="card-text small text-muted mb-auto truncate-description">${movie.description}</p>
+            <p class="card-text small text-muted mb-5 truncate-description">${movie.description}</p>
             <div class="d-flex">
                 <a href="#" class="btn btn-primary flex-grow-1">
                 <i class="fab fa-netflix me-2"></i>Watch now
