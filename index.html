@@ -61,368 +61,73 @@
     </nav>
      
     <main> 
-        <section id="carousel" class="pt-5">
+        <section id="carousel-now-playing" class="pt-5">
             <div id="heroCarousel" class="carousel slide" data-bs-ride="carousel">
-                <div class="carousel-inner">
-              
-                  <!-- Slide 1 -->
-                    <div class="carousel-item active hero-slide" style="background-image: url('movie-website-master/img/1.jpeg');">
-                        <div class="carousel-caption text-start">
-                            <h1 class="fw-bold">Inception</h1>
-                            <p>A mind-bending thriller that dives into the world of dreams and reality. A mind-bending thriller that dives into the world of dreams and reality. A mind-bending thriller that dives into the world of dreams and reality.</p>
-                            <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
-                        </div>
-                    </div>
-              
-                  <!-- Slide 2 -->
-                    <div class="carousel-item hero-slide" style="background-image: url('movie-website-master/img/11.jpg');">
-                        <div class="carousel-caption text-start">
-                        <h1 class="fw-bold">Interstellar</h1>
-                        <p>Humanity’s last chance lies in a journey beyond the stars. Humanity’s last chance lies in a journey beyond the stars. Humanity’s last chance lies in a journey beyond the stars. Humanity’s last chance lies in a journey beyond the stars.</p>
-                        <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
-                        </div>
-                    </div>
-              
-                  <!-- Slide 3 -->
-                    <div class="carousel-item hero-slide" style="background-image: url('movie-website-master/img/12.jpg');">
-                        <div class="carousel-caption text-start">
-                            <h1 class="fw-bold">The Dark Knight</h1>
-                            <p>The rise of Gotham’s vigilante in a battle against chaos and fear. The rise of Gotham’s vigilante in a battle against chaos and fear. The rise of Gotham’s vigilante in a battle against chaos and fear.</p>
-                            <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
-                        </div>
-                    </div>
-              
-                </div>
-              
-                <!-- Controls -->
+                <div class="carousel-inner" id="carousel-content"></div>
                 <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
                     <span class="carousel-control-prev-icon"></span>
                 </button>
                 <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-                     <span class="carousel-control-next-icon"></span>
+                    <span class="carousel-control-next-icon"></span>
                 </button>
             </div>
         </section>
 
-
+        <!-- Top 10 Trending Movies -->
         <div class="page-black">
-
-        <div class="movie-list-container">
-            <h1 class="movie-list-title"> Top 10 Trending Movies</h1>
-            <div class="movie-list-wrapper">
-                <div class="movie-list">
-                    <div class="movie-list-item" movie-id="her">
-                        <div class="bookmark-wrapper">
-                            <div class="bookmark-circle d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-bookmark bookmark-icon"></i>
-                            </div>
-                        </div>
-                        <img class="movie-list-item-img" src="movie-website-master/img/1.jpeg" alt="">
-                        <span class="movie-list-item-title">Her</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button" onclick="window.location.href='movie.html?id=her'">Watch</button>
-                    </div>
-                    <div class="movie-list-item" movie-id="star-wars">
-                        <div class="bookmark-wrapper">
-                            <div class="bookmark-circle d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-bookmark bookmark-icon"></i>
-                            </div>
-                        </div>
-                        <img class="movie-list-item-img" src="movie-website-master/img/2.jpeg" alt="">
-                        <span class="movie-list-item-title">Star Wars</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button" onclick="window.location.href='movie.html?id=star-wars'">Watch</button>
-                    </div>
-                    <div class="movie-list-item" movie-id="storm">
-                        <div class="bookmark-wrapper">
-                            <div class="bookmark-circle d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-bookmark bookmark-icon"></i>
-                            </div>
-                        </div>
-                        <img class="movie-list-item-img" src="movie-website-master/img/3.jpg" alt="">
-                        <span class="movie-list-item-title">Storm</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button" onclick="window.location.href='movie.html?id=storm'">Watch</button>
-                    </div>
-                    <div class="movie-list-item" movie-id="1917">
-                        <div class="bookmark-wrapper">
-                            <div class="bookmark-circle d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-bookmark bookmark-icon"></i>
-                            </div>
-                        </div>
-                        <img class="movie-list-item-img" src="movie-website-master/img/4.jpg" alt="">
-                        <span class="movie-list-item-title">1917</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button" onclick="window.location.href='movie.html?id=1917'">Watch</button>
-                    </div>
-                    <div class="movie-list-item" movie-id="avengers">
-                        <div class="bookmark-wrapper">
-                            <div class="bookmark-circle d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-bookmark bookmark-icon"></i>
-                            </div>
-                        </div>
-                        <img class="movie-list-item-img" src="movie-website-master/img/5.jpg" alt="">
-                        <span class="movie-list-item-title">Avengers</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button" onclick="window.location.href='movie.html?id=avengers'">Watch</button>
-                    </div>
-                    <div class="movie-list-item" movie-id="rampage">
-                        <div class="bookmark-wrapper">
-                            <div class="bookmark-circle d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-bookmark bookmark-icon"></i>
-                            </div>
-                        </div>
-                        <img class="movie-list-item-img" src="movie-website-master/img/6.jpg" alt="">
-                        <span class="movie-list-item-title">Rampage</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button" onclick="window.location.href='movie.html?id=rampage'">Watch</button>
-                    </div>
-                    <div class="movie-list-item" movie-id="ender-game">
-                        <div class="bookmark-wrapper">
-                            <div class="bookmark-circle d-flex align-items-center justify-content-center">
-                                <i class="fa-solid fa-bookmark bookmark-icon"></i>
-                            </div>
-                        </div>
-                        <img class="movie-list-item-img" src="movie-website-master/img/7.jpg" alt="">
-                        <span class="movie-list-item-title">Ender's Game</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button" onclick="window.location.href='movie.html?id=ender-game'">Watch</button>
-                    </div>
+            <div class="movie-list-container">
+                <h1 class="movie-list-title">Top 10 Trending Movies</h1>
+                <div class="movie-list-wrapper">
+                    <div class="movie-list" id="top-trending"></div>
+                    <i class="fas fa-chevron-right arrow"></i>
                 </div>
-                <i class="fas fa-chevron-right arrow"></i>
             </div>
         </div>
-    </div>
-
-    <div class="page-black">
-        <div class="movie-list-container">
-            <h1 class="movie-list-title">New Releases</h1>
-            <div class="movie-list-wrapper">
-                <div class="movie-list">
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/7.jpg" alt="">
-                        <span class="movie-list-item-title">Her</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/6.jpg" alt="">
-                        <span class="movie-list-item-title">Star Wars</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/12.jpg" alt="">
-                        <span class="movie-list-item-title">Storm</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/11.jpg" alt="">
-                        <span class="movie-list-item-title">1917</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/10.jpg" alt="">
-                        <span class="movie-list-item-title">Avengers</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/9.jpg" alt="">
-                        <span class="movie-list-item-title">Her</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/8.jpg" alt="">
-                        <span class="movie-list-item-title">Her</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                </div>
-                <i class="fas fa-chevron-right arrow"></i>
-            </div>
-        </div>
-        </div>
-
         
-        <div id="heroCarousel1" class="carousel slide" data-bs-ride="carousel">
-            <div class="carousel-inner">
-          
-              <!-- Slide 1 -->
-                <div class="carousel-item active hero-slide" style="background-image: url('movie-website-master/img/1.jpeg');">
-                    <div class="carousel-caption text-start">
-                        <h1 class="fw-bold">Inception</h1>
-                        <p>A mind-bending thriller that dives into the world of dreams and reality.</p>
-                        <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
-                    </div>
-                </div>
-          
-              <!-- Slide 2 -->
-                <div class="carousel-item hero-slide" style="background-image: url('movie-website-master/img/11.jpg');">
-                    <div class="carousel-caption text-start">
-                    <h1 class="fw-bold">Interstellar</h1>
-                    <p>Humanity’s last chance lies in a journey beyond the stars.</p>
-                    <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
-                    </div>
-                </div>
-          
-              <!-- Slide 3 -->
-                <div class="carousel-item hero-slide" style="background-image: url('movie-website-master/img/12.jpg');">
-                    <div class="carousel-caption text-start">
-                        <h1 class="fw-bold">The Dark Knight</h1>
-                        <p>The rise of Gotham’s vigilante in a battle against chaos and fear.</p>
-                        <a href="#" class="btn btn-primary btn-lg"><i class="fas fa-play me-2"></i>Watch Now</a>
-                    </div>
-                </div>
-          
-            </div>
-          
-            <!-- Controls -->
-            <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel1" data-bs-slide="prev">
-                <span class="carousel-control-prev-icon"></span>
-            </button>
-            <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel1" data-bs-slide="next">
-                 <span class="carousel-control-next-icon"></span>
-            </button>
-        </div>
-
-
+        <!-- New Releases -->
         <div class="page-black">
-        <div class="movie-list-container">
-            <h1 class="movie-list-title">Horor</h1>
-            <div class="movie-list-wrapper">
-                <div class="movie-list">
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/1.jpeg" alt="">
-                        <span class="movie-list-item-title">Her</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/2.jpeg" alt="">
-                        <span class="movie-list-item-title">Star Wars</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/3.jpg" alt="">
-                        <span class="movie-list-item-title">Storm</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/4.jpg" alt="">
-                        <span class="movie-list-item-title">1917</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/5.jpg" alt="">
-                        <span class="movie-list-item-title">Avengers</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/6.jpg" alt="">
-                        <span class="movie-list-item-title">Her</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/7.jpg" alt="">
-                        <span class="movie-list-item-title">Her</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
+            <div class="movie-list-container">
+                <h1 class="movie-list-title">New Releases</h1>
+                <div class="movie-list-wrapper">
+                    <div class="movie-list" id="new-releases"></div>
+                    <i class="fas fa-chevron-right arrow"></i>
                 </div>
-                <i class="fas fa-chevron-right arrow"></i>
             </div>
         </div>
-    </div>
-
-    <div class="page-black">
-        <div class="movie-list-container">
-            <h1 class="movie-list-title"> Comedy</h1>
-            <div class="movie-list-wrapper">
-                <div class="movie-list">
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/7.jpg" alt="">
-                        <span class="movie-list-item-title">Her</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/6.jpg" alt="">
-                        <span class="movie-list-item-title">Star Wars</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/12.jpg" alt="">
-                        <span class="movie-list-item-title">Storm</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/11.jpg" alt="">
-                        <span class="movie-list-item-title">1917</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/10.jpg" alt="">
-                        <span class="movie-list-item-title">Avengers</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/9.jpg" alt="">
-                        <span class="movie-list-item-title">Her</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
-                    <div class="movie-list-item">
-                        <img class="movie-list-item-img" src="movie-website-master/img/8.jpg" alt="">
-                        <span class="movie-list-item-title">Her</span>
-                        <p class="movie-list-item-desc">Lorem ipsum dolor sit amet consectetur adipisicing elit. At
-                            hic fugit similique accusantium.</p>
-                        <button class="movie-list-item-button">Watch</button>
-                    </div>
+        
+        <section id="carousel-trending">
+            <div id="heroCarousel1" class="carousel slide" data-bs-ride="carousel">
+                <div class="carousel-inner" id="carousel-content-1"></div>
+                <button class="carousel-control-prev" type="button" data-bs-target="#heroCarousel1" data-bs-slide="prev">
+                    <span class="carousel-control-prev-icon"></span>
+                </button>
+                <button class="carousel-control-next" type="button" data-bs-target="#heroCarousel1" data-bs-slide="next">
+                    <span class="carousel-control-next-icon"></span>
+                </button>
+            </div>
+        </section>
+        
+        <!-- Horror -->
+        <div class="page-black">
+            <div class="movie-list-container">
+                <h1 class="movie-list-title">Horror</h1>
+                <div class="movie-list-wrapper">
+                    <div class="movie-list" id="horror-movies"></div>
+                    <i class="fas fa-chevron-right arrow"></i>
                 </div>
-                <i class="fas fa-chevron-right arrow"></i>
             </div>
         </div>
-    </div>
+        
+        <!-- Comedy -->
+        <div class="page-black">
+            <div class="movie-list-container">
+                <h1 class="movie-list-title">Comedy</h1>
+                <div class="movie-list-wrapper">
+                    <div class="movie-list" id="comedy-movies"></div>
+                    <i class="fas fa-chevron-right arrow"></i>
+                </div>
+            </div>
+        </div>
      
     </main>
 
