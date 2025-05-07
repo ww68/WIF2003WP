@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Movie Search</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #121212;
+      color: white;
+    }
+    .recent-tag {
+      background-color: #343a40;
+      padding: 4px 12px;
+      border-radius: 50px;
+      font-size: 0.875rem;
+      cursor: pointer;
+    }
+    .movie-card {
+      background-color: #2c2f33;
+      border-radius: 0.5rem;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .movie-card img {
+      border-radius: 0.375rem;
+      width: 80px;
+      height: 120px;
+      object-fit: cover;
+    }
+    .movie-info {
+      flex-grow: 1;
+    }
+    .movie-info p, .movie-info small {
+      color: #e0e0e0;
+    }
+    .btn-favorite {
+      color: white;
+      border: 1px solid white;
+    }
+    .form-range {
+      width: 100%;
+    }
+    .pagination{
+        justify-content: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container py-4">
+    <!-- Search Controls -->
+    <div class="row g-3 align-items-center mb-4">
+      <div class="col-auto">
+        <select id="filterDropdown" class="form-select">
+          <option value="All">🔍 All</option>
+          <option value="Title">🏷 Title</option>
+          <option value="Year">📅 Year</option>
+          <option value="Genre">🎬 Genre</option>
+          <option value="Actor">🧑‍🎤 Actor</option>
+        </select>
+      </div>
+      <div class="col">
+        <input type="text" class="form-control" placeholder="Search movies, genres, actors..." id="searchInput">
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-outline-light" id="voiceBtn">🎤</button>
+      </div>
+      <div class="col-auto">
+        <button class="btn btn-outline-light" id="toggleFilters">☰ Filters</button>
+      </div>
+    </div>
+
+
+    <!-- Advanced Filters -->
+    <div class="advanced-filters p-3 rounded bg-dark mb-4" id="filtersSection" style="display:none">
+      <h6 class="text-uppercase">Sort Options</h6>
+      <select class="form-select mb-3" id="filterSort">
+        <option value="popularity.desc">Most Popular</option>
+        <option value="release_date.desc">Newest</option>
+        <option value="vote_average.desc">Top Rated</option>
+        <option value="revenue.desc">Box Office</option>
+      </select>
+
+
+      <h6 class="text-uppercase mt-4">Filters</h6>
+      <div class="row g-3">
+        <div class="col-md-4">
+          <label>Genre</label>
+          <input type="text" class="form-control" id="filterGenre" placeholder="e.g. Action">
+        </div>
+        <div class="col-md-4">
+          <label>Language <span data-bs-toggle="tooltip" title="Use 2-letter ISO code like 'en' or 'ja'">❓</span></label>
+          <input type="text" class="form-control" id="filterLanguage" placeholder="e.g. English">
+        </div>
+        <div class="col-md-4">
+          <label>Release Year</label>
+          <input type="number" class="form-control" id="filterYear" placeholder="e.g. 2024">
+        </div>
+        <div class="col-md-6 mt-3">
+          <label>Minimum Rating</label>
+          <input type="range" min="0" max="10" step="0.1" class="form-range" id="filterRatingRange">
+          <div id="ratingValue" class="text-muted small">5.0</div>
+        </div>
+        <div class="col-md-6 mt-3">
+          <label>Actor</label>
+          <input type="text" class="form-control" id="filterActor" placeholder="e.g. Tom Hanks">
+        </div>
+      </div>
+      <div class="text-end mt-3">
+        <button class="btn btn-primary" onclick="applyAdvancedFilters()">Apply Filters</button>
+        <button class="btn btn-secondary" onclick="resetFilters()">Reset</button>
+      </div>
+    </div>
+
+
+    <!-- Recent Searches -->
+    <div class="mb-4">
+      <h5>Recent Searches</h5>
+      <div class="d-flex flex-wrap gap-2" id="recentSearches"></div>
+    </div>
+
+
+    <!-- Movie Results -->
+    <div>
+      <h5 class="mb-3">Movies</h5>
+      <div class="d-grid gap-3" id="resultsContainer"></div>
+    </div>
+  </div>
+
+
+  <nav class="mt-4">
+    <ul class="pagination">
+        <li class="page-item"><a class="page-link" href="#" id="prevPage">Previous</a></li>
+        <li class="page-item"><a class="page-link" href="#" id="nextPage">Next</a></li>
+    </ul>
+  </nav>
+
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  <script>
+    const TMDB_API_KEY = 'b5ca748da01c92488ef670a84e31c784';
+    const API_BASE = 'https://api.themoviedb.org/3';
+    const IMG_BASE = 'https://image.tmdb.org/t/p/w200';
+
+
+    let currentPage = 1;
+    let currentQuery = '';
+    let currentFilter = 'All';
+   
+    const genreMap = {};
+    fetch(`${API_BASE}/genre/movie/list?api_key=${TMDB_API_KEY}`)
+      .then(res => res.json())
+      .then(data => {
+        data.genres.forEach(g => genreMap[g.id] = g.name);
+        loadTrending();
+      });
+
+
+    const ratingSlider = document.getElementById("filterRatingRange");
+    const ratingValue = document.getElementById("ratingValue");
+    ratingSlider.addEventListener("input", () => {
+      ratingValue.innerText = parseFloat(ratingSlider.value).toFixed(1);
+    });
+
+
+    function loadTrending() {
+      fetch(`${API_BASE}/trending/movie/day?api_key=${TMDB_API_KEY}`)
+        .then(res => res.json())
+        .then(data => renderMovies(data.results));
+    }
+
+
+    function renderMovies(movies) {
+      const container = document.getElementById('resultsContainer');
+      container.innerHTML = '';
+      movies.forEach(movie => {
+        const title = movie.title || 'No Title';
+        const genres = movie.genre_ids?.map(id => genreMap[id]).join(', ') || 'Unknown Genre';
+        const release = movie.release_date || 'Unknown';
+        const pop = Math.round(movie.popularity || 0);
+        const img = movie.poster_path ? `${IMG_BASE}${movie.poster_path}` : 'https://via.placeholder.com/80x120';
+
+
+       
+        container.innerHTML += `
+          <div class="movie-card">
+            <img src="${img}" alt="${title}">
+            <div class="movie-info">
+              <p class="mb-0 fw-semibold">${title}</p>
+              <small>${genres}</small><br>
+              <small>${release}</small>
+            </div>
+            <div class="text-end">
+              <span class="text-warning">🔥 ${pop}K</span><br>
+              <button class="btn btn-sm btn-favorite mt-2">❤ Save</button>
+            </div>
+          </div>`;
+      });
+    }
+
+
+    function storeRecentSearch(query) {
+      let searches = JSON.parse(localStorage.getItem('recentSearches')) || [];
+      if (!searches.includes(query)) {
+        searches.unshift(query);
+        if (searches.length > 5) searches.pop();
+        localStorage.setItem('recentSearches', JSON.stringify(searches));
+        displayRecentSearches();
+      }
+    }
+
+
+    function displayRecentSearches() {
+      const searches = JSON.parse(localStorage.getItem('recentSearches')) || [];
+      const container = document.getElementById('recentSearches');
+      container.innerHTML = '';
+      searches.forEach(term => {
+        const tag = document.createElement('span');
+        tag.className = 'recent-tag';
+        tag.innerText = term;
+        tag.onclick = () => {
+          document.getElementById('searchInput').value = term;
+          searchMovies(term);
+        };
+        container.appendChild(tag);
+      });
+    }
+
+
+    function searchMovies(query) {
+      const type = document.getElementById('filterDropdown').value;
+      let url = `${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}`;
+      if (type === 'Year') {
+        url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}&primary_release_year=${query}`;
+      } else if (type === 'Genre') {
+        const genreId = Object.entries(genreMap).find(([id, name]) => name.toLowerCase() === query.toLowerCase())?.[0];
+        if (genreId) url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}&with_genres=${genreId}`;
+      }
+      fetch(url)
+        .then(res => res.json())
+        .then(data => renderMovies(data.results));
+    }
+
+
+    function applyAdvancedFilters() {
+      const genre = document.getElementById('filterGenre').value;
+      const language = document.getElementById('filterLanguage').value;
+      const year = document.getElementById('filterYear').value;
+      const rating = ratingSlider.value;
+      const actor = document.getElementById('filterActor').value;
+      const sort = document.getElementById('filterSort').value;
+
+
+      let url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}`;
+      if (genre) {
+        const genreId = Object.entries(genreMap).find(([id, name]) => name.toLowerCase() === genre.toLowerCase())?.[0];
+        if (genreId) url += `&with_genres=${genreId}`;
+      }
+      if (language) url += `&with_original_language=${language.toLowerCase().substring(0, 2)}`;
+      if (year) url += `&primary_release_year=${year}`;
+      if (rating) url += `&vote_average.gte=${rating}`;
+      if (sort) url += `&sort_by=${sort}`;
+
+
+      fetch(url)
+        .then(res => res.json())
+        .then(data => renderMovies(data.results));
+    }
+
+
+    function resetFilters() {
+      document.querySelectorAll('.advanced-filters input, .advanced-filters select').forEach(el => el.value = '');
+      ratingSlider.value = 5;
+      ratingValue.innerText = '5.0';
+      loadTrending();
+    }
+
+
+    document.getElementById('toggleFilters').addEventListener('click', () => {
+      const section = document.getElementById('filtersSection');
+      section.style.display = section.style.display === 'none' ? 'block' : 'none';
+    });
+
+
+    document.getElementById('voiceBtn').addEventListener('click', () => {
+      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+      recognition.lang = 'en-US';
+      recognition.onresult = function(event) {
+        const transcript = event.results[0][0].transcript;
+        document.getElementById('searchInput').value = transcript;
+        storeRecentSearch(transcript);
+        searchMovies(transcript);
+      };
+      recognition.onerror = function(event) {
+        alert('Voice search error: ' + event.error);
+      };
+      recognition.start();
+    });
+
+
+    document.getElementById('prevPage').addEventListener('click', (e) => {
+      e.preventDefault();
+      if (currentPage > 1) {
+        currentPage--;
+        searchMovies();
+      }
+    });
+
+
+    document.getElementById('nextPage').addEventListener('click', (e) => {
+      e.preventDefault();
+      currentPage++;
+      searchMovies();
+    });
+
+
+   
+
+
+    document.getElementById('searchInput').addEventListener('keypress', function(e) {
+      if (e.key === 'Enter') {
+        const query = this.value.trim();
+        if (query) {
+          storeRecentSearch(query);
+          searchMovies(query);
+        }
+      }
+    });
+
+
+    document.addEventListener('DOMContentLoaded', () => {
+      displayRecentSearches();
+      const tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'));
+      tooltipTriggerList.map(el => new bootstrap.Tooltip(el));
+    });
+  </script>
+</body>
+</html>
