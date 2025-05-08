@@ -160,16 +160,6 @@ function getUrlParameter(name) {
 function loadMovieData() {
     const movieId = getUrlParameter('id');
 
-    if (!movieId || !movieData[movieId]) {
-        document.getElementById('movie-content').innerHTML = `
-            <div class="container mt-5 text-center">
-                <h2>Movie not found</h2>
-                <p>The movie you're looking for doesn't exist or has been removed.</p>
-                <a href="index.html" class="btn btn-primary">Return to Homepage</a>
-            </div>`;
-        return;
-    }
-
     const movie = movieData[movieId];
 
     const movieHTML = `
@@ -247,6 +237,32 @@ function loadMovieData() {
                         </div>`).join('')}
                 </div>
             </div>
+
+        <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+            <form id="review-form">
+                <div class="rating">
+                    <label for="stars">Rate this movie:</label>
+                    <div class="stars" id="stars">
+                        <span class="star" data-value="1">★</span>
+                        <span class="star" data-value="2">★</span>
+                        <span class="star" data-value="3">★</span>
+                        <span class="star" data-value="4">★</span>
+                        <span class="star" data-value="5">★</span>
+                    </div>
+                    <div class="rating-number">
+                        <span id="rating-number">0</span>/5.0
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="comment">Leave a comment:</label>
+                    <textarea id="comment" class="form-control" rows="4" placeholder="Write your comment here..."></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary mt-3" id="submit">Submit</button>
+            </form>
+
+            <div id="review-list"></div>
+        </div>
+
 
             <div class="tab-pane fade" id="similar" role="tabpanel">
                 <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
@@ -345,3 +361,4 @@ function showToast(message) {
 }
 
 document.addEventListener('DOMContentLoaded', loadMovieData);
+
