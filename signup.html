@@ -1,162 +1,240 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-        <title>Sign Up</title>
-        <style>
-            * {
-                margin: 0;
-                padding: 0;
-                box-sizing: border-box;
-            }
-
-            body {
-                font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-                background-color: #0b071c;
-                color: #fff;
-                display: flex;
-                height: 100vh;
-            }
-
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sign Up - Movie Explorer</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+        }
+        
+        body {
+            background-color: #0a0a14;
+            color: white;
+            height: 100vh;
+            overflow: hidden;
+        }
+        
+        .container {
+            display: flex;
+            height: 100vh;
+            width: 100%;
+        }
+        
+        .image-side {
+            position: relative;
+            width: 50%;
+            overflow: hidden;
+        }
+        
+        .image-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4);
+            z-index: 10;
+        }
+        
+        .background-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .caption {
+            position: absolute;
+            bottom: 16px;
+            left: 16px;
+            color: white;
+            z-index: 20;
+            font-size: 14px;
+        }
+        
+        .form-side {
+            width: 50%;
+            background-color: #0a0a14;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px;
+        }
+        
+        .form-container {
+            width: 100%;
+            max-width: 400px;
+        }
+        
+        .header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .header h2 {
+            color: #00c8ff;
+            font-size: 20px;
+            font-weight: 500;
+            letter-spacing: 1px;
+        }
+        
+        .header p {
+            margin-top: 4px;
+            color: #b0b0b0;
+        }
+        
+        .form-box {
+            background-color: #111122;
+            border-radius: 8px;
+            padding: 32px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+        }
+        
+        .form-group input {
+            width: 100%;
+            padding: 10px 12px;
+            background-color: transparent;
+            border: 1px solid #333344;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        
+        .form-group input:focus {
+            border-color: #5d4fff;
+        }
+        
+        .form-group input::placeholder {
+            color: #666677;
+        }
+        
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #5d4fff;
+            border: none;
+            border-radius: 4px;
+            color: white;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        
+        button:hover {
+            background-color: #4a3ee0;
+        }
+        
+        .form-footer {
+            text-align: center;
+            margin-top: 24px;
+            font-size: 14px;
+        }
+        
+        .form-footer a {
+            color: #00c8ff;
+            text-decoration: none;
+        }
+        
+        .form-footer a:hover {
+            text-decoration: underline;
+        }
+        
+        @media (max-width: 768px) {
             .container {
-                display: flex;
+                flex-direction: column;
+            }
+            
+            .image-side {
+                display: none;
+            }
+            
+            .form-side {
                 width: 100%;
+                height: 100%;
             }
-
-            .image-section {
-                width: 50vw;
-                max-width: 800px;
-                background: url('images/signup.png') no-repeat center center/cover;
-                position: relative;
-            }
-
-            .image-section::after {
-                content: "Catch Vibes, Not Spoilers.";
-                position: absolute;
-                bottom: 10px;
-                right: 10px;
-                font-size: 0.9rem;
-                color: white;
-                font-weight: bold;
-            }
-
-            .form-section {
-                flex: 2;
-                display: flex;
-                justify-content: center;
-                align-items: center;
-                padding: 4rem;
-            }
-
-            .form-box {
-                background-color: white;
-                color: black;
-                padding: 3rem;
-                border-radius: 15px;
-                width: 100%;
-                max-width: 500px;
-                box-shadow: 0 0 0 2px #008cff;
-            }
-
-            .form-box h2 {
-                text-align: center;
-                margin-bottom: 0.2rem;
-                color: #00bfff;
-                text-transform: uppercase;
-            }
-
-            .form-box p{
-                text-align: center;
-                font-weight: bold;
-                margin-bottom: 2rem;
-            }
-
-            .form-box label {
-                display: block;
-                font-weight: bold;
-                margin-bottom: 0.3rem;
-            }
-
-            .form-box input {
-                width: 100%;
-                padding: 1.2rem;
-                margin-bottom: 1.5rem;
-                font-size: 1.1rem;
-                border: 1px solid #aaa;
-                border-radius: 10px;
-                outline: none;
-            }
-
-            .form-box button {
-                width: 100%;
-                padding: 1.2rem;
-                background-color: #5c4dff;
-                color: white;
-                border: none;
-                border-radius: 10px;
-                font-weight: bold;
-                cursor: pointer;
-                font-size: 1rem;
-            }
-
-            .form-box button:hover {
-                background-color: #483dcb;
-            }
-
-            .login-link {
-                text-align: center;
-                margin-top: 1rem;
-                font-size: 0.9rem;
-            }
-
-            .login-link a {
-                color: #007bff;
-                text-decoration: none;
-            }
-
-            .login-link a:hover {
-                text-decoration: underline;
-            }
-
-            @media screen and (max-width: 768px){
-                .container {
-                    flex-direction: column;
-                }
-
-                .image-section {
-                    height: 300px;
-                }
-            }
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="image-section"></div>
-            <div class="form-section">
-                <div class="form-box">
-                    <h2>Start Sign Up</h2>
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Left side - Image -->
+        <div class="image-side">
+            <div class="image-overlay"></div>
+            <img src="images/login.png" alt="Fire performance" class="background-image">
+            <div class="caption">Catch Vibes, Not Sanders.</div>
+        </div>
+        
+        <!-- Right side - Form -->
+        <div class="form-side">
+            <div class="form-container">
+                <div class="header">
+                    <h2>START SIGN UP</h2>
                     <p>Explore Movie</p>
-                    <form>
-                        <label for="username">Username</label>
-                        <input type="text" id="username" placeholder="Enter your username" required />
-
-                        <label for="email">Email</label>
-                        <input type="email" id="email" placeholder="Enter your email" required />
-
-                        <label for="password">Password</label>
-                        <input type="password" id="password" placeholder="Set a password" required />
-
+                </div>
+                
+                <div class="form-box">
+                    <form id="signup-form">
+                        <div class="form-group">
+                            <label for="username">Username</label>
+                            <input 
+                                type="text" 
+                                id="username" 
+                                name="username" 
+                                placeholder="Enter your username" 
+                                required
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                name="email" 
+                                placeholder="Enter your email" 
+                                required
+                            >
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="password">Password</label>
+                            <input 
+                                type="password" 
+                                id="password" 
+                                name="password" 
+                                placeholder="Set a password" 
+                                required
+                                minlength="6"
+                            >
+                        </div>
+                        
                         <button type="submit" class="btn-primary">Sign Up</button>
                     </form>
-                    <div class="login-link">
-                        Already have account? <a href="login.html">Login here</a>
-                    </div>
+                </div>
+                
+                <div class="form-footer">
+                    Already have account? <a href="login.html">LOG IN HERE</a>
                 </div>
             </div>
         </div>
+    </div>
 
-        <script>
+    <script>
         const saveBtn = document.querySelector(".btn-primary");
         document.querySelector("form").addEventListener("submit", (e) => {
             e.preventDefault();
@@ -169,6 +247,6 @@
                 window.location.href = "login.html";
             }, 1000);
         });
-        </script>
-    </body>
+    </script>
+</body>
 </html>
