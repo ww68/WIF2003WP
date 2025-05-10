@@ -39,27 +39,7 @@ function renderWatchlist(filter = "all") {
     console.log("Filtered watchlist:", filteredWatchlist);
 
     if (filteredWatchlist.length === 0) {
-        if (!watchlist || watchlist.length === 0) {
-            container.innerHTML = `
-                <div class="d-flex justify-content-center align-items-center vh-100">
-                <div class="text-center px-3">
-                <h4 class="fw-bold mb-2">Your Watchlist</h4>
-                <p class="text-muted mb-4">You haven't added any movies yet. Start exploring and save your favorites to watch later — all in one place.</p>
-                <a href="index.html" class="btn btn-primary fw-semibold px-4 py-2">
-                    Discover something new to watch
-                </a>
-                </div>
-                </div>`;
-        } else {
-            // No movies matching filter
-            container.innerHTML = `
-                <div class="d-flex justify-content-center align-items-center vh-100">
-                <div class="text-center px-3">
-                <h4 class="fw-bold mb-2">No ${filter} movies</h4>
-                <p class="text-muted mb-4">You don't have any ${filter} movies in your watchlist.</p>
-                </div>
-                </div>`;
-        }
+        renderEmptyState(filter, watchlist.length === 0);
         return;
     }    
     
@@ -141,32 +121,11 @@ function removeFromWatchlist(id, icon) {
             watchlist.filter(movie => !movie.watched);
 
     if (filteredWatchlist.length === 0) {
-        const container = document.getElementById("watchlistContainer");
-        if (watchlist.length === 0) {
-            container.innerHTML = `
-                <div class="d-flex justify-content-center align-items-center vh-100">
-                <div class="text-center px-3">
-                <h4 class="fw-bold mb-2">Your Watchlist</h4>
-                <p class="text-muted mb-4">You haven’t added any movies yet. Start exploring and save your favorites to watch later — all in one place.</p>
-                <a href="index.html" class="btn btn-primary fw-semibold px-4 py-2">
-                    Discover something new to watch
-                </a>
-                </div>
-                </div>`;
-        } else {
-            container.innerHTML = `
-                <div class="d-flex justify-content-center align-items-center vh-100">
-                <div class="text-center px-3">
-                <h4 class="fw-bold mb-2">No ${activeFilter} movies</h4>
-                <p class="text-muted mb-4">You don't have any ${activeFilter} movies in your watchlist.</p>
-                </div>
-                </div>`;
-        } 
-    
+        renderEmptyState(activeFilter, watchlist.length === 0);
     }
 }
 function toggleWatchedStatus(id) {
-    let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
+    let watchlist = JSON.parse(localStorage.getItem("watchlist") || "[]");
     const index = watchlist.findIndex(movie => movie.id === String(id));
     
     if (index !== -1) {
@@ -179,5 +138,26 @@ function toggleWatchedStatus(id) {
         
         // Re-render the watchlist with the current filter
         renderWatchlist(activeFilter);
+    }
+}
+
+function renderEmptyState(filter, isCompletelyEmpty) {
+    const container = document.getElementById("watchlistContainer");
+
+    if (isCompletelyEmpty) {
+        container.innerHTML = `
+            <div class="text-center mt-5 p-3">
+                <img src="https://cdn-icons-png.flaticon.com/512/4076/4076549.png" alt="Empty Watchlist" width="120" class="mb-3">
+                <p class="text-muted mb-4">You haven’t added any movies yet. Start exploring and save your favorites to watch later — all in one place.</p>
+                <a href="index.html" class="btn btn-primary fw-semibold px-4 py-2">
+                    Discover something new to watch
+                </a>
+            </div>`;
+    } else {
+        container.innerHTML = `
+            <div class="text-center p-3 empty-movie-notification">
+                <h4 class="fw-bold mb-2">No ${filter} movies</h4>
+                <p class="text-muted mb-4">You don't have any ${filter} movies in your watchlist.</p>
+            </div>`;
     }
 }
