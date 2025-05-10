@@ -130,7 +130,6 @@ body {
 .cast-card .card-img-top {
     height: 200px;
     object-fit: cover;
-    border: 3px solid #0d6efd;
 }
 
 @media (max-width: 576px) {
@@ -141,12 +140,21 @@ body {
 
 .similar-movie-card {
     cursor: pointer;
+    border: 3px solid #0d6efd;
 }
 
 .similar-movie-card img {
     width: 100%;
-    height: 250px;
+    height: 280px;
     object-fit: cover;
+}
+
+.similar-movie-card .card-title {
+    min-height: 48px; 
+}
+
+.similar-movie-card .card-body {
+    min-height: 120px;
 }
 
 .similar-movie-card .btn.active {
