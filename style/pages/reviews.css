@@ -1,4 +1,3 @@
-/* Style the stars */
 .stars {
     display: flex;
     justify-content: space-between;
@@ -16,19 +15,16 @@
     color: gold;
 }
 
+.star:hover {
+    color: gold;
+}
+
 .rating-number {
     font-size: 15px;
     margin-top: 5px;
     color: gold;
 }
 
-/* Hover effect */
-.star.hover,
-.star:hover {
-    color: gold;
-}
-
-/* Styling for the textarea and button */
 textarea.form-control {
     width: 100%;
     padding: 10px;
@@ -36,8 +32,8 @@ textarea.form-control {
     border-radius: 4px;
 }
 
-button.btn {
-    background-color: #007bff;
+.buttonPost.btn {
+    background-color: purple;
     color: white;
     padding: 10px 15px;
     border: none;
@@ -45,8 +41,8 @@ button.btn {
     cursor: pointer;
 }
 
-button.btn:hover {
-    background-color: #0056b3;
+.buttonPost.btn:hover {
+    background-color: lightpink;
 }
 
 .review {
@@ -55,24 +51,17 @@ button.btn:hover {
     background: #333;
     border-radius: 8px;
 }
-.review strong {
-    color: white;
-}
 
-.review-stars {
-    font-size: 30px;
+.gold-star {
     color: gold;
-    margin-bottom: 5px;
 }
 
-.delete-btn {
-    background-color: black;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    cursor: pointer;
-    border-radius: 4px;
-}
+
+
+
+
+
+
 
 
 
