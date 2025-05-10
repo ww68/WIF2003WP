@@ -1,7 +1,7 @@
 const API_KEY = '9a56291f8d522c5f874ed7812f062758';
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
-const historyContainer = document.getElementById('history-container');
+const historyContainer = document.getElementById('history-sections');
 const emptyState = document.getElementById('empty-state');
 
 const historyIds = JSON.parse(localStorage.getItem('watchHistory')) || [];
@@ -10,23 +10,53 @@ async function getMovieDetails(movieId) {
   const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`);
   return response.json();
 }
+function createHistorySection(label, movieIds) {
+    const section = document.createElement('div');
+    section.classList.add('page-black');
+    const sectionId = `history-${label.replace(/\s+/g, '-').toLowerCase()}`;
+    
+    section.innerHTML = `
+        <div class="movie-list-container">
+            <h1 class="movie-list-title">${label}</h1>
+            <div class="history-movie-grid" id="${sectionId}"></div>
+        </div>
+    `;
+    
+    historyContainer.appendChild(section);
+    return sectionId;
+}
 
-function createMovieCard(movie) {
-  const col = document.createElement('div');
-  col.className = 'col-md-3 col-sm-6 mb-4';
-
-  col.innerHTML = `
-    <div class="card h-100 shadow-sm border-0">
-      <img src="${IMAGE_URL + movie.poster_path}" class="card-img-top" alt="${movie.title}">
-      <div class="card-body">
-        <h6 class="card-title text-truncate" title="${movie.title}">${movie.title}</h6>
-        <p class="text-muted small mb-0"> ${movie.release_date.split('-')[0]}</p>
-        <p class="text-muted small mb-0"> ${movie.genres.map(g => g.name).join(', ')}</p>
-      </div>
-    </div>
-  `;
-
-  return col;
+function createHistoryMovieCard(movie) {
+    const movieItem = document.createElement('div');
+    movieItem.classList.add('history-movie-item');
+    movieItem.setAttribute('movie-id', movie.id);
+    
+    movieItem.innerHTML = `
+        <div class="history-poster-wrapper">
+            <img class="history-movie-poster" src="${IMAGE_URL + movie.poster_path}" alt="${movie.title}">
+            <div class="history-movie-overlay">
+                <div class="history-movie-actions">
+                    <i class="bi bi-x-lg history-delete-icon"></i>
+                </div>
+                <div class="history-movie-info">
+                    <span class="history-movie-title">${movie.title}</span>
+                    <p class="history-movie-meta">${movie.release_date.split('-')[0]} | ${movie.genres.slice(0, 2).map(g => g.name).join(', ')}</p>
+                    <button class="history-watch-button" onclick="watchMovie(${movie.id})">Watch Again</button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    // Add delete functionality
+    const deleteBtn = movieItem.querySelector('.history-delete-icon');
+    deleteBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        removeFromHistory(movie.id);
+        movieItem.remove();
+        checkEmptyState();
+    });
+    
+    return movieItem;
 }
 
 async function loadHistory() {
@@ -40,8 +70,9 @@ async function loadHistory() {
     const grouped = {};
     let lastId = null;
 
+    // Group by date and remove duplicates
     for (const entry of history) {
-        if (entry.id === lastId) continue; // skip consecutive duplicate
+        if (entry.id === lastId) continue;
         lastId = entry.id;
 
         const label = getDateLabel(entry.timestamp);
@@ -49,26 +80,22 @@ async function loadHistory() {
         grouped[label].push(entry.id);
     }
 
-    for (const label of Object.keys(grouped)) {
-        const section = document.createElement('div');
-        section.classList.add('mb-4');
-        section.innerHTML = `<h5 class="text-white mb-3">${label}</h5><div class="row" id="group-${label}"></div>`;
-        historyContainer.appendChild(section);
-
-        for (const id of grouped[label]) {
+    // Create sections and movie cards
+    for (const [label, movieIds] of Object.entries(grouped)) {
+        const sectionId = createHistorySection(label, movieIds);
+        const container = document.getElementById(sectionId);
+        
+        for (const id of movieIds) {
             try {
                 const movie = await getMovieDetails(id);
-                const card = createMovieCard(movie);
-                section.querySelector(`#group-${label}`).appendChild(card);
+                const card = createHistoryMovieCard(movie);
+                container.appendChild(card);
             } catch (err) {
                 console.error(`Failed to fetch movie ${id}`, err);
             }
         }
     }
 }
-
-
-loadHistory();
 
 function saveToHistory(movieId) {
     let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
@@ -104,6 +131,46 @@ function getDateLabel(dateStr) {
 
     return watchDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }); // e.g., "2 May"
 }
+
+function removeFromHistory(movieId) {
+  let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
+  history = history.filter(entry => entry.id !== movieId);
+  localStorage.setItem('watchHistory', JSON.stringify(history));
+}
+
+function checkEmptyState() {
+  const cardsLeft = document.querySelectorAll('#history-container .col-md-3');
+  if (cardsLeft.length === 0) {
+    emptyState.classList.remove('d-none');
+  }
+}
+
+document.getElementById('clear-history').addEventListener('click', () => {
+  if (confirm('Are you sure you want to delete all watch history?')) {
+    localStorage.removeItem('watchHistory');
+    historyContainer.innerHTML = '';
+    emptyState.classList.remove('d-none');
+  }
+});
+
+// Add this to handle the watch functionality
+function watchMovie(movieId) {
+    saveToHistory(movieId);
+    window.location.href = `movie.html?id=${movieId}`;
+}
+
+// Initialize the page
+loadHistory();
+
+// Clear history button
+document.getElementById('clear-history').addEventListener('click', () => {
+    if (confirm('Are you sure you want to delete all watch history?')) {
+        localStorage.removeItem('watchHistory');
+        historyContainer.innerHTML = '';
+        emptyState.classList.remove('d-none');
+    }
+});
+
   
 
 

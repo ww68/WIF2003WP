@@ -21,7 +21,8 @@ function createMovieCard(movie) {
              class="img-fluid rounded mb-2" 
              style="height: 100px; width: 100%; object-fit: cover;">
         <p class="mb-0 fw-semibold small">${movie.title}</p>
-        <small class="text-muted">${movie.release_date.slice(0, 4)}</small>
+        <small class="text-muted">${movie.release_date.split('-')[0]} | ${movie.genres.slice(0, 2).map(g => g.name).join(', ')}</small>
+
     `;
   
     return div;
