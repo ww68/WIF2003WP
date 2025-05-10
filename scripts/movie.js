@@ -1,310 +1,233 @@
-// hardcode now, will be replaced with API calls later
-const movieData = {
-    'her': {
-        title: 'Her',
-        year: '2013',
-        duration: '126 min',
-        rating: '8.0',
-        image: 'movie-website-master/img/1.jpeg',
-        banner: 'movie-website-master/img/1.jpeg',
-        director: 'Spike Jonze',
-        description: 'In a near future, a lonely writer develops an unlikely relationship with an operating system designed to meet his every need.',
-        genres: ['Romance', 'Sci-Fi', 'Drama'],
-        cast: [
-            { name: 'Joaquin Phoenix', role: 'Theodore', image: 'https://via.placeholder.com/150' },
-            { name: 'Scarlett Johansson', role: 'Samantha (voice)', image: 'https://via.placeholder.com/150' },
-            { name: 'Amy Adams', role: 'Amy', image: 'https://via.placeholder.com/150' }
-        ],
-        similar: [
-            { id: 'star-wars', title: 'Star Wars', image: 'movie-website-master/img/2.jpeg' },
-            { id: 'storm', title: 'Storm', image: 'movie-website-master/img/3.jpg' },
-            { id: '1917', title: '1917', image: 'movie-website-master/img/4.jpg' }
-        ]
-    },
-    'star-wars': {
-        title: 'Star Wars',
-        year: '1977',
-        duration: '121 min',
-        rating: '8.6',
-        image: 'movie-website-master/img/2.jpeg',
-        banner: 'movie-website-master/img/2.jpeg',
-        director: 'George Lucas',
-        description: 'Luke Skywalker joins forces with a Jedi Knight, a cocky pilot, a Wookiee and two droids to save the galaxy from the Empire\'s world-destroying battle station, while also attempting to rescue Princess Leia from the mysterious Darth Vader.',
-        genres: ['Action', 'Adventure', 'Fantasy'],
-        cast: [
-            { name: 'Mark Hamill', role: 'Luke Skywalker', image: 'https://via.placeholder.com/150' },
-            { name: 'Harrison Ford', role: 'Han Solo', image: 'https://via.placeholder.com/150' },
-            { name: 'Carrie Fisher', role: 'Princess Leia', image: 'https://via.placeholder.com/150' }
-        ],
-        similar: [
-            { id: 'her', title: 'Her', image: 'movie-website-master/img/1.jpeg' },
-            { id: 'storm', title: 'Storm', image: 'movie-website-master/img/3.jpg' },
-            { id: 'avengers', title: 'Avengers', image: 'movie-website-master/img/5.jpg' }
-        ]
-    },
-    'storm': {
-        title: 'Storm',
-        year: '2020',
-        duration: '118 min',
-        rating: '7.4',
-        image: 'movie-website-master/img/3.jpg',
-        banner: 'movie-website-master/img/3.jpg',
-        director: 'Example Director',
-        description: 'A thrilling tale of survival against the elements as a massive storm system threatens to destroy everything in its path.',
-        genres: ['Action', 'Thriller', 'Disaster'],
-        cast: [
-            { name: 'Actor One', role: 'Character One', image: 'https://via.placeholder.com/150' },
-            { name: 'Actor Two', role: 'Character Two', image: 'https://via.placeholder.com/150' },
-            { name: 'Actor Three', role: 'Character Three', image: 'https://via.placeholder.com/150' }
-        ],
-        similar: [
-            { id: '1917', title: '1917', image: 'movie-website-master/img/4.jpg' },
-            { id: 'avengers', title: 'Avengers', image: 'movie-website-master/img/5.jpg' },
-            { id: 'rampage', title: 'Rampage', image: 'movie-website-master/img/6.jpg' }
-        ]
-    },
-    '1917': {
-        title: '1917',
-        year: '2019',
-        duration: '119 min',
-        rating: '8.3',
-        image: 'movie-website-master/img/4.jpg',
-        banner: 'movie-website-master/img/4.jpg',
-        director: 'Sam Mendes',
-        description: 'During World War I, two British soldiers receive seemingly impossible orders. In a race against time, they must cross enemy territory to deliver a message that could potentially save 1,600 of their fellow comrades.',
-        genres: ['Drama', 'War', 'Action'],
-        cast: [
-            { name: 'George MacKay', role: 'Lance Corporal Schofield', image: 'https://via.placeholder.com/150' },
-            { name: 'Dean-Charles Chapman', role: 'Lance Corporal Blake', image: 'https://via.placeholder.com/150' },
-            { name: 'Mark Strong', role: 'Captain Smith', image: 'https://via.placeholder.com/150' }
-        ],
-        similar: [
-            { id: 'storm', title: 'Storm', image: 'movie-website-master/img/3.jpg' },
-            { id: 'avengers', title: 'Avengers', image: 'movie-website-master/img/5.jpg' },
-            { id: 'ender-game', title: 'Ender\'s Game', image: 'movie-website-master/img/7.jpg' }
-        ]
-    },
-    'avengers': {
-        title: 'Avengers',
-        year: '2012',
-        duration: '143 min',
-        rating: '8.0',
-        image: 'movie-website-master/img/5.jpg',
-        banner: 'movie-website-master/img/5.jpg',
-        director: 'Joss Whedon',
-        description: 'Earth\'s mightiest heroes must come together and learn to fight as a team if they are going to stop the mischievous Loki and his alien army from enslaving humanity.',
-        genres: ['Action', 'Adventure', 'Sci-Fi'],
-        cast: [
-            { name: 'Robert Downey Jr.', role: 'Tony Stark / Iron Man', image: 'https://via.placeholder.com/150' },
-            { name: 'Chris Evans', role: 'Steve Rogers / Captain America', image: 'https://via.placeholder.com/150' },
-            { name: 'Scarlett Johansson', role: 'Natasha Romanoff / Black Widow', image: 'https://via.placeholder.com/150' }
-        ],
-        similar: [
-            { id: 'star-wars', title: 'Star Wars', image: 'movie-website-master/img/2.jpeg' },
-            { id: 'rampage', title: 'Rampage', image: 'movie-website-master/img/6.jpg' },
-            { id: 'ender-game', title: 'Ender\'s Game', image: 'movie-website-master/img/7.jpg' }
-        ]
-    },
-    'rampage': {
-        title: 'Rampage',
-        year: '2018',
-        duration: '107 min',
-        rating: '6.1',
-        image: 'movie-website-master/img/6.jpg',
-        banner: 'movie-website-master/img/6.jpg',
-        director: 'Brad Peyton',
-        description: 'When three different animals become infected with a dangerous pathogen, a primatologist and a geneticist team up to stop them from destroying Chicago.',
-        genres: ['Action', 'Adventure', 'Sci-Fi'],
-        cast: [
-            { name: 'Dwayne Johnson', role: 'Davis Okoye', image: 'https://via.placeholder.com/150' },
-            { name: 'Naomie Harris', role: 'Dr. Kate Caldwell', image: 'https://via.placeholder.com/150' },
-            { name: 'Jeffrey Dean Morgan', role: 'Agent Russell', image: 'https://via.placeholder.com/150' }
-        ],
-        similar: [
-            { id: 'avengers', title: 'Avengers', image: 'movie-website-master/img/5.jpg' },
-            { id: 'ender-game', title: 'Ender\'s Game', image: 'movie-website-master/img/7.jpg' },
-            { id: 'storm', title: 'Storm', image: 'movie-website-master/img/3.jpg' }
-        ]
-    },
-    'ender-game': {
-        title: 'Ender\'s Game',
-        year: '2013',
-        duration: '114 min',
-        rating: '6.6',
-        image: 'movie-website-master/img/7.jpg',
-        banner: 'movie-website-master/img/7.jpg',
-        director: 'Gavin Hood',
-        description: 'Young Ender Wiggin is recruited by the International Military to lead the fight against the Formics, an insectoid alien race who had previously tried to invade Earth and had inflicted heavy losses on humankind.',
-        genres: ['Action', 'Adventure', 'Sci-Fi'],
-        cast: [
-            { name: 'Asa Butterfield', role: 'Ender Wiggin', image: 'https://via.placeholder.com/150' },
-            { name: 'Harrison Ford', role: 'Colonel Graff', image: 'https://via.placeholder.com/150' },
-            { name: 'Hailee Steinfeld', role: 'Petra Arkanian', image: 'https://via.placeholder.com/150' }
-        ],
-        similar: [
-            { id: 'star-wars', title: 'Star Wars', image: 'movie-website-master/img/2.jpeg' },
-            { id: 'avengers', title: 'Avengers', image: 'movie-website-master/img/5.jpg' },
-            { id: 'her', title: 'Her', image: 'movie-website-master/img/1.jpeg' }
-        ]
-    }
-};
+const API_KEY = '9a56291f8d522c5f874ed7812f062758';
+const BASE_URL = 'https://api.themoviedb.org/3';
+const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
-// Function to get URL parameters
-function getUrlParameter(name) {
-    name = name.replace(/[\[]/, '\\[').replace(/[\]]/, '\\]');
-    const regex = new RegExp('[\\?&]' + name + '=([^&#]*)');
-    const results = regex.exec(location.search);
-    return results === null ? '' : decodeURIComponent(results[1].replace(/\+/g, ' '));
+const urlParams = new URLSearchParams(window.location.search);
+const movieId = urlParams.get("id");
+
+async function fetchMovieDetails() {
+    try {
+        if (!movieId) {
+            document.getElementById('movie-content').innerHTML = '<div class="alert alert-danger">Movie ID is missing. Please return to the home page.</div>';
+            return;
+        }
+
+        const detailsUrl = `${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&language=en-US`;
+        const creditsUrl = `${BASE_URL}/movie/${movieId}/credits?api_key=${API_KEY}&language=en-US`;
+        const similarUrl = `${BASE_URL}/movie/${movieId}/similar?api_key=${API_KEY}&language=en-US`;
+        const videoUrl = `${BASE_URL}/movie/${movieId}/videos?api_key=${API_KEY}&language=en-US`;
+
+        const [detailsRes, creditsRes, similarRes, videoRes] = await Promise.all([
+            fetch(detailsUrl),
+            fetch(creditsUrl),
+            fetch(similarUrl),
+            fetch(videoUrl)
+        ]);
+
+        const movie = await detailsRes.json();
+        const credits = await creditsRes.json();
+        const similar = await similarRes.json();
+        const videos = await videoRes.json();
+
+        if (!movie || movie.success === false) {
+            document.getElementById('movie-content').innerHTML = '<div class="alert alert-danger">Movie not found or API error occurred.</div>';
+            return;
+        }
+
+        const backdropPath = movie.backdrop_path 
+            ? `url('https://image.tmdb.org/t/p/original${movie.backdrop_path}')`
+            : 'url("/images/default-backdrop.jpg")';
+            
+        const posterPath = movie.poster_path 
+            ? IMAGE_URL + movie.poster_path
+            : '/images/default-poster.jpg';
+
+        const director = credits.crew.find(person => person.job === 'Director')?.name || 'Unknown';
+        const castHTML = credits.cast.slice(0, 10).map(actor => `
+            <div class="col">
+                <div class="card bg-dark text-light border-secondary shadow-sm cast-card">
+                    <img src="${actor.profile_path ? IMAGE_URL + actor.profile_path : 'https://via.placeholder.com/150'}" class="card-img-top" alt="${actor.name}">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">${actor.name}</h5>
+                        <p class="card-text text-muted">${actor.character}</p>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        const similarHTML = similar.results.slice(0, 8).map(sim => `
+            <div class="col">
+                <div class="card bg-dark text-light shadow-sm border-secondary similar-movie-card" onclick="window.location.href='movie-description.html?id=${sim.id}'">
+                    <img 
+                        src="${sim.poster_path ? IMAGE_URL + sim.poster_path : '/images/default-poster.jpg'}" 
+                        class="card-img-top" 
+                        alt="${sim.title}" 
+                        onerror="this.onerror=null; this.src='/images/default-poster.jpg';"
+                    />
+                    <div class="card-body d-flex flex-column justify-content-between p-3">
+                        <h6 class="card-title text-center text-wrap">
+                            ${sim.title}
+                        </h6>
+                        <div class="">
+                            <button class="btn btn-sm btn-outline-light w-100" data-id="${sim.id}">
+                            <i class="far fa-bookmark me-2"></i>Watchlist
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+
+        const genres = movie.genres.map(g => `<span class="genre-badge">${g.name}</span>`).join('');
+
+        const trailer = videos.results.find(v => v.type === "Trailer" && v.site === "YouTube");
+        const trailerEmbed = trailer ? `<iframe width="100%" height="400" src="https://www.youtube.com/embed/${trailer.key}" frameborder="0" allowfullscreen></iframe>` : `<p>No trailer available.</p>`;
+
+        const movieHTML = `
+        <div class="movie-banner" style="background-image: url('https://image.tmdb.org/t/p/original${movie.backdrop_path}');">
+            <div class="container movie-info">
+                <h1 class="display-4 fw-bold">${movie.title}</h1>
+                <div class="movie-meta">
+                    <span><i class="far fa-calendar-alt me-2"></i> ${movie.release_date.split('-')[0]}</span>
+                    <span><i class="far fa-clock me-2"></i> ${movie.runtime} min</span>
+                    <span><i class="fas fa-star text-warning me-2"></i> ${movie.vote_average.toFixed(1)}/10</span>
+                    <span><i class="fas fa-user me-2"></i> Director: ${director}</span>
+                </div>
+                <div class="mb-3">${genres}</div>
+                <div class="action-buttons mt-4">
+                    <button class="btn btn-primary"><i class="fas fa-play me-2"></i>Watch Now</button>
+                    <button class="btn btn-outline-light" id="bookmarkBtn">
+                        <i class="far fa-bookmark me-2"></i> Watchlist
+                    </button>
+                    <button class="btn btn-outline-light"><i class="fas fa-share-alt me-2"></i>Share</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mt-5">
+            <div class="mb-5">
+                <h3 class="section-header text-uppercase">Synopsis</h3>
+                <p class="lead">${movie.overview || 'No synopsis available.'}</p>
+            </div>
+
+            <div class="mb-5">
+                <h3 class="section-header text-uppercase">Trailer</h3>
+                <div class="trailer-container">${trailerEmbed}</div>
+            </div>
+
+            <ul class="nav nav-tabs mb-4" id="movieContentTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="cast-tab" data-bs-toggle="tab" data-bs-target="#cast" type="button" role="tab" aria-controls="cast" aria-selected="true">
+                        <i class="fas fa-users me-2"></i>Cast & Crew
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                        <i class="fas fa-star me-2"></i>Reviews
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="similar-tab" data-bs-toggle="tab" data-bs-target="#similar" type="button" role="tab">
+                        <i class="fas fa-film me-2"></i>Similar Movies
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="movieContentTabsContent">
+                <div class="tab-pane fade show active" id="cast" role="tabpanel">
+                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4">${castHTML}</div>
+                </div>
+
+            <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                <form id="review-form">
+                    <div class="rating">
+                        <label for="stars">Rate this movie:</label>
+                        <div class="stars" id="stars">
+                            <span class="star" data-value="1">★</span>
+                            <span class="star" data-value="2">★</span>
+                            <span class="star" data-value="3">★</span>
+                            <span class="star" data-value="4">★</span>
+                            <span class="star" data-value="5">★</span>
+                        </div>
+                        <div class="rating-number">
+                            <span id="rating-number">0</span>/5.0
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label for="comment">Leave a comment:</label>
+                        <textarea id="comment" class="form-control" rows="4" placeholder="Write your comment here..."></textarea>
+                    </div>
+                    <button type="submit" class="btn btn-primary mt-3" id="submit">Submit</button>
+                </form>
+
+                <div id="review-list"></div>
+            </div>
+
+
+                <div class="tab-pane fade" id="similar" role="tabpanel">
+                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6 g-4">${similarHTML}</div>
+                </div>
+            </div>
+        </div>`;
+
+        document.getElementById('movie-content').innerHTML = movieHTML;
+
+        setupBookmarkButton(movie);
+        setupSimilarMoviesButtons(similar.results, movie);
+        
+    } catch (error) {
+        console.error("Failed to fetch movie details:", error);
+        document.getElementById('movie-content').innerHTML = `
+            <div class="container mt-5">
+                <div class="alert alert-danger">
+                    <h4>Error Loading Movie Details</h4>
+                    <p>We couldn't load this movie's information. Please try again later.</p>
+                    <button class="btn btn-outline-danger" onclick="window.location.reload()">Retry</button>
+                </div>
+            </div>`;
+    }
 }
 
-function loadMovieData() {
-    const movieId = getUrlParameter('id');
-
-    const movie = movieData[movieId];
-
-    const movieHTML = `
-    <div class="movie-banner" style="background-image: url('${movie.banner}');">
-        <div class="container movie-info">
-            <h1 class="display-4 fw-bold">${movie.title}</h1>
-            <div class="movie-meta">
-                <span><i class="far fa-calendar-alt me-2"></i> ${movie.year}</span>
-                <span><i class="far fa-clock me-2"></i> ${movie.duration}</span>
-                <span><i class="fas fa-star text-warning me-2"></i> ${movie.rating}/10</span>
-                <span><i class="fas fa-user me-2"></i> Director: ${movie.director}</span>
-            </div>
-            <div class="mb-3">
-                ${movie.genres.map(genre => `<span class="genre-badge">${genre}</span>`).join('')}
-            </div>
-            <div class="action-buttons mt-4">
-                <button class="btn btn-primary"><i class="fas fa-play me-2"></i>Watch Now</button>
-                <button class="btn btn-outline-light add-bookmark-btn" id="bookmarkBtn">
-                    <i class="far fa-bookmark me-2"></i> Add to Watchlist
-                </button>
-                <button class="btn btn-outline-light"><i class="fas fa-share-alt me-2"></i>Share</button>
-            </div>
-        </div>
-    </div>
-
-    <div class="container mt-5">
-        <div class="mb-5">
-            <h3 class="section-header text-uppercase">Synopsis</h3>
-            <p class="lead">${movie.description}</p>
-        </div>
-
-        <div class="mb-5">
-            <h3 class="section-header text-uppercase">Trailer</h3>
-            <div class="trailer-container">
-                ${movie.trailerEmbed ? movie.trailerEmbed : 
-                `<img src="${movie.trailerThumbnail || movie.banner}" alt="Movie Trailer Thumbnail" style="width: 100%; height: 100%; position: absolute;">
-                <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
-                    <button class="btn btn-primary btn-lg rounded-circle" style="width: 80px; height: 80px;">
-                        <i class="fas fa-play fa-2x"></i>
-                    </button>
-                </div>`}
-            </div>
-        </div>
-
-        <ul class="nav nav-tabs mb-4" id="movieContentTabs" role="tablist">
-            <li class="nav-item" role="presentation">
-                <button class="nav-link active" id="cast-tab" data-bs-toggle="tab" data-bs-target="#cast" type="button" role="tab" aria-controls="cast" aria-selected="true">
-                    <i class="fas fa-users me-2"></i>Cast & Crew
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
-                    <i class="fas fa-star me-2"></i>Reviews
-                </button>
-            </li>
-            <li class="nav-item" role="presentation">
-                <button class="nav-link" id="similar-tab" data-bs-toggle="tab" data-bs-target="#similar" type="button" role="tab">
-                    <i class="fas fa-film me-2"></i>Similar Movies
-                </button>
-            </li>
-        </ul>
-
-        <div class="tab-content" id="movieContentTabsContent">
-            <div class="tab-pane fade show active" id="cast" role="tabpanel">
-                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4">
-                    ${movie.cast.map(person => `
-                        <div class="col">
-                            <div class="card bg-dark text-light h-100 border-secondary shadow-sm cast-card">
-                                <img src="${person.image}" class="card-img-top" alt="${person.name}">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">${person.name}</h5>
-                                    <p class="card-text text-muted">${person.role}</p>
-                                </div>
-                            </div>
-                        </div>`).join('')}
-                </div>
-            </div>
-
-        <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-            <form id="review-form">
-                <div class="rating">
-                    <label for="stars">Rate this movie:</label>
-                    <div class="stars" id="stars">
-                        <span class="star" data-value="1">★</span>
-                        <span class="star" data-value="2">★</span>
-                        <span class="star" data-value="3">★</span>
-                        <span class="star" data-value="4">★</span>
-                        <span class="star" data-value="5">★</span>
-                    </div>
-                    <div class="rating-number">
-                        <span id="rating-number">0</span>/5.0
-                    </div>
-                </div>
-                <div class="form-group">
-                    <label for="comment">Leave a comment:</label>
-                    <textarea id="comment" class="form-control" rows="4" placeholder="Write your comment here..."></textarea>
-                </div>
-                <button type="submit" class="btn btn-primary mt-3" id="submit">Submit</button>
-            </form>
-
-            <div id="review-list"></div>
-        </div>
-
-
-            <div class="tab-pane fade" id="similar" role="tabpanel">
-                <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 g-4">
-                    ${movie.similar.map(similarMovie => `
-                        <div class="col">
-                            <div class="card bg-dark text-light h-100 shadow-sm border-secondary similar-movie-card" onclick="window.location.href='movie-description.html?id=${similarMovie.id}'">
-                                <img src="${similarMovie.image}" class="card-img-top" alt="${similarMovie.title}">
-                                <div class="card-body text-center">
-                                    <h5 class="card-title">${similarMovie.title}</h5>
-                                </div>
-                                <div class="card-footer bg-transparent border-0 text-center">
-                                    <button class="btn btn-sm btn-outline-light w-100" data-id="${similarMovie.id}">
-                                        <i class="fas fa-plus me-2"></i>Watchlist
-                                    </button>
-                                </div>
-                            </div>
-                        </div>`).join('')}
-                </div>
-            </div>
-        </div>
-    </div>`;
-
-    document.getElementById('movie-content').innerHTML = movieHTML;
-
+function setupBookmarkButton(movie) {
     const bookmarkBtn = document.getElementById('bookmarkBtn');
+    if (bookmarkBtn) {
+        if (isInWatchlist(movieId)) {
+            bookmarkBtn.classList.add('active');
+            bookmarkBtn.innerHTML = '<i class="fas fa-bookmark me-2"></i> Added';
+        }
 
-    if (isInWatchlist(movieId)) {
-        bookmarkBtn.classList.add('active');
-        bookmarkBtn.innerHTML = '<i class="fas fa-bookmark"></i> Added';
+        bookmarkBtn.addEventListener('click', () => {
+            toggleWatchlistForDetailPage(bookmarkBtn, movieId, {
+                id: movieId,
+                title: movie.title,
+                year: movie.release_date ? movie.release_date.split('-')[0] : 'N/A',
+                description: movie.overview || 'No description available',
+                image: movie.poster_path ? IMAGE_URL + movie.poster_path : '/images/default-poster.jpg',
+                rating: movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A',
+            });
+        });
     }
+}
 
-    bookmarkBtn.addEventListener('click', function () {
-        toggleWatchlistForDetailPage(this, movieId, movie);
-    });
-
+function setupSimilarMoviesButtons(similarMovies) {
     document.querySelectorAll('.similar-movie-card .btn').forEach(btn => {
         const similarId = btn.getAttribute('data-id');
-        const similarMovie = movieData[similarId];
+        const similarMovie = similarMovies.find(m => m.id.toString() === similarId);
+        
+        if (!similarMovie) return;
+
+        const movieEntry = {
+            id: similarMovie.id,
+            title: similarMovie.title,
+            image: similarMovie.poster_path ? IMAGE_URL + similarMovie.poster_path : '/images/default-poster.jpg',
+            rating: similarMovie.vote_average ? similarMovie.vote_average.toFixed(1) : 'N/A',
+            description: similarMovie.overview || 'No description available',
+            year: similarMovie.release_date ? similarMovie.release_date.split('-')[0] : 'N/A',
+        };
 
         btn.addEventListener('click', (e) => {
             e.stopPropagation();
-            toggleWatchlistForDetailPage(btn, similarId, similarMovie);
+            toggleWatchlistForDetailPage(btn, similarId, movieEntry);
         });
 
         if (isInWatchlist(similarId)) {
@@ -316,33 +239,24 @@ function loadMovieData() {
 
 function isInWatchlist(movieId) {
     const watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-    return watchlist.some(movie => movie.id === movieId);
-}
+    return watchlist.some(movie => movie.id.toString() === movieId.toString());
+  }  
 
 function toggleWatchlistForDetailPage(buttonElement, movieId, movie) {
     let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-
-    const movieEntry = {
-        id: movieId,
-        title: movie.title,
-        year: movie.year || "Unknown",
-        description: movie.description || "No description available.",
-        img: movie.image,
-        rating: movie.rating || "N/A",
-        watched: false
-    };
-
-    const movieIndex = watchlist.findIndex(m => m.id === movieId);
+    const movieIndex = watchlist.findIndex(m => m.id.toString() === movieId.toString());
 
     if (movieIndex === -1) {
-        watchlist.push(movieEntry);
+        watchlist.push(movie);
         buttonElement.classList.add('active');
-        buttonElement.innerHTML = '<i class="fas fa-bookmark"></i> Added';
+        buttonElement.innerHTML = '<i class="fas fa-bookmark me-2"></i> Added';
+        buttonElement.setAttribute('data-watchlisted', 'true');
         showToast('Added to Watchlist');
     } else {
         watchlist.splice(movieIndex, 1);
         buttonElement.classList.remove('active');
-        buttonElement.innerHTML = '<i class="far fa-bookmark"></i> Add to Watchlist';
+        buttonElement.innerHTML = '<i class="far fa-bookmark me-2"></i> Watchlist';
+        buttonElement.setAttribute('data-watchlisted', 'false');
         showToast('Removed from Watchlist');
     }
 
@@ -360,5 +274,5 @@ function showToast(message) {
     }, 3000);
 }
 
-document.addEventListener('DOMContentLoaded', loadMovieData);
+document.addEventListener('DOMContentLoaded', fetchMovieDetails);
 
