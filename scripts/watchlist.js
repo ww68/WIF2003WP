@@ -23,57 +23,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
 function renderWatchlist(filter = "all") {
     const container = document.getElementById("watchlistContainer");
-    const watchlist = JSON.parse(localStorage.getItem("watchlist")) || [
-    {
-        id: "john-wick",
-        title: "John Wick",
-        year: 2014,
-        description: "Ex-hitman John Wick comes out of retirement to track down the gangsters that took everything from him.",
-        img: "images/watchlist/watchlist-john-wick.avif",
-        rating: "7.5",
-        watched: false
-    },
-    {
-        id: "avengers-endgame",
-        title: "Avengers: Endgame",
-        year: 2019,
-        description: "After the devastating events of Infinity War, the universe is in ruins due to the efforts of the Mad Titan, Thanos.",
-        img: "images/watchlist/watchlist-avengers-endgame.avif",
-        rating: "8.4",
-        watched: false
-    },
-    {
-        id: "electric-state",
-        title: "The Electric State",
-        year: 2025,
-        description: "An orphaned teen hits the road with a mysterious robot to find her long-lost brother, teaming up with a smuggler and his wisecracking sidekick.",
-        img: "images/watchlist/watchlist-the-electric-state.avif",
-        rating: "6.9",
-        watched: false
-    },
-    {
-        id: "black-mirror",
-        title: "Black Mirror",
-        year: 2011,
-        description: "Featuring stand-alone dramas -- sharp, suspenseful, satirical tales that explore techno-paranoia -- \"Black Mirror\" is a contemporary reworking of \"The Twilight Zone\" with stories that tap into the collective unease about the modern world.",
-        img: "images/watchlist/watchlist-black-mirror.avif",
-        rating: "8.7",
-        watched: false
-    },
-    {
-        id: "conclave",
-        title: "Conclave",
-        year: 2025,
-        description: "When Cardinal Lawrence is tasked with leading one of the world's most secretive and ancient events, selecting a new Pope, he finds himself at the center of a web of conspiracies and intrigue that could shake the very foundation of the Catholic Church.",
-        img: "images/watchlist/watchlist-conclave.avif",
-        rating: "7.4",
-        watched: false
-    }];
-
-     // Save the default watchlist to localStorage if it doesn't exist
-     if (!localStorage.getItem("watchlist")) {
-        localStorage.setItem("watchlist", JSON.stringify(watchlist));
-    }
+    let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
 
     container.innerHTML = "";
 
@@ -89,7 +39,7 @@ function renderWatchlist(filter = "all") {
     console.log("Filtered watchlist:", filteredWatchlist);
 
     if (filteredWatchlist.length === 0) {
-        if (watchlist.length === 0) {
+        if (!watchlist || watchlist.length === 0) {
             container.innerHTML = `
                 <div class="d-flex justify-content-center align-items-center vh-100">
                 <div class="text-center px-3">
@@ -132,7 +82,7 @@ function renderWatchlist(filter = "all") {
         <div class="row g-0 h-100 d-flex align-items-stretch">
         <div class="col-5">
             <div class="img-wrapper h-100">
-            <img src="${movie.img}" class="img-fluid rounded-start" alt="${movie.title}">
+            <img src="${movie.img}" onerror="this.onerror=null; this.src='images/default-poster.jpg'" class="img-fluid rounded-start" alt="${movie.title}">
             </div>
         </div>
         <div class="col-7 card-body-side">
@@ -159,7 +109,7 @@ function renderWatchlist(filter = "all") {
             </div>
             <p class="card-text small text-muted mb-5 truncate-description">${movie.description}</p>
             <div class="d-flex">
-                <a href="#" class="btn btn-primary flex-grow-1">
+                <a href="movie.html?id=${movie.id}" class="btn btn-primary flex-grow-1">
                 <i class="fab fa-netflix me-2"></i>Watch now
                 </a>
             </div>
@@ -174,7 +124,7 @@ function renderWatchlist(filter = "all") {
 
 function removeFromWatchlist(id, icon) {
     let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
-    watchlist = watchlist.filter(movie => movie.id !== id);
+    watchlist = watchlist.filter(movie => movie.id !== String(id));
     localStorage.setItem("watchlist", JSON.stringify(watchlist));
 
     const card = icon.closest(".movie-card");
@@ -217,7 +167,7 @@ function removeFromWatchlist(id, icon) {
 }
 function toggleWatchedStatus(id) {
     let watchlist = JSON.parse(localStorage.getItem("watchlist")) || [];
-    const index = watchlist.findIndex(movie => movie.id === id);
+    const index = watchlist.findIndex(movie => movie.id === String(id));
     
     if (index !== -1) {
         // Toggle the watched status
