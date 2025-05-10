@@ -46,3 +46,7 @@
         display: none !important;
     }
 }
+
+body, .bg-dark, .navbar-dark, .navbar-dark .navbar-nav .nav-link {
+    background-color: #000 !important; /* Pure Black */
+}

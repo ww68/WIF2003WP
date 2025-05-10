@@ -6,8 +6,7 @@ const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 document.addEventListener('DOMContentLoaded', () => {
     fetchMovies('movie/popular', 'top-trending');
     fetchMovies('movie/upcoming', 'new-releases');
-    fetchMoviesByGenre(27, 'horror-movies'); // 27 = Horror
-    fetchMoviesByGenre(35, 'comedy-movies'); // 35 = Comedy
+    fetchAndDisplayAllGenres();
     // Load both carousels
     loadCarouselMovies('heroCarousel', 'carousel-content', 'movie/now_playing');
     loadCarouselMovies('heroCarousel1', 'carousel-content-1', 'trending/movie/week');
@@ -25,14 +24,51 @@ function fetchMovies(endpoint, containerId) {
 }
 
 // Movie Fetch by Genre
-function fetchMoviesByGenre(genreId, containerId) {
-    fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&language=en-US&sort_by=popularity.desc&with_genres=${genreId}&page=1`)
-        .then(res => res.json())
-        .then(data => {
-            displayMovies(data.results.slice(0, 10), containerId);
-        })
-        .catch(err => console.error('Genre fetch error:', err));
+async function fetchMoviesByGenre(genreId, containerId) {
+    let allMovies = [];
+    const maxPages = 5;
+
+    for (let page = 1; page <= maxPages; page++) {
+        const res = await fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&language=en-US&sort_by=popularity.desc&with_genres=${genreId}&page=${page}`);
+        const data = await res.json();
+        allMovies = allMovies.concat(data.results);
+    }
+
+    displayMovies(allMovies, containerId);
 }
+
+// Fetch all category
+async function fetchAndDisplayAllGenres() {
+    const genreResponse = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}&language=en-US`);
+    const genreData = await genreResponse.json();
+    const genres = genreData.genres;
+
+    for (const genre of genres) {
+        await fetchMoviesByGenre(genre.id, createGenreSection(genre.name, genre.id));
+    }
+}
+
+function createGenreSection(genreName, genreId) {
+    const container = document.createElement('div');
+    container.classList.add('page-black');
+
+    const genreIdSanitized = `genre-${genreId}`; // unique ID
+
+    container.innerHTML = `
+        <div class="movie-list-container">
+            <h1 class="movie-list-title">${genreName}</h1>
+            <div class="movie-list-wrapper">
+                <i class="fas fa-chevron-left arrow left-arrow"></i>
+                <div class="movie-list" id="${genreIdSanitized}"></div>
+                <i class="fas fa-chevron-right arrow right-arrow"></i>
+            </div>
+        </div>
+    `;
+
+    document.getElementById('genre-sections').appendChild(container);
+    return genreIdSanitized;
+}
+
 
 // Render movie cards
 function displayMovies(movies, containerId) {
@@ -54,7 +90,7 @@ function displayMovies(movies, containerId) {
             <img class="movie-list-item-img" src="${poster}" alt="${movie.title}">
             <span class="movie-list-item-title">${movie.title}</span>
             <p class="movie-list-item-desc">${movie.overview}</p>
-            <button class="movie-list-item-button" onclick="window.location.href='movie.html?id=${movie.id}'">Watch</button>
+            <button class="movie-list-item-button" onclick="watchMovie(${movie.id})">Watch</button>
         `;
         container.appendChild(movieItem);
     });
@@ -80,16 +116,26 @@ function loadCarouselMovies(carouselId, contentId, endpoint) {
                         <div class="carousel-caption text-start">
                             <h1 class="fw-bold">${movie.title}</h1>
                             <p>${movie.overview}</p>
-                            <a href="movie.html?id=${movie.id}" class="btn btn-primary btn-lg">
+                            <a href="#" onclick="event.preventDefault(); watchMovie(${movie.id})" class="btn btn-primary btn-lg watch-now-btn" data-movie-id="${movie.id}">
                                 <i class="fas fa-play me-2"></i>Watch Now
                             </a>
                         </div>
                     </div>
                 `;
             });
+
+            // Add event listeners to the "Watch Now" buttons
+            const watchNowButtons = document.querySelectorAll('.watch-now-btn');
+            watchNowButtons.forEach(button => {
+                button.addEventListener('click', function() {
+                    const movieId = button.getAttribute('data-movie-id');
+                    watchMovie(movieId);
+                });
+            });
         })
         .catch(err => console.error(`Error loading ${carouselId}:`, err));
 }
+
 
 // Watchlist toggle
 function toggleWatchlist(iconElement, movieId) {
@@ -138,7 +184,6 @@ function attachWatchlistListeners(container) {
     });
 }
 
-
 // Toast message
 function showToast(message) {
     const toast = document.getElementById('toast');
@@ -154,26 +199,39 @@ function showToast(message) {
 
 // Enable arrow scroll for movie sections
 function initializeScrolling() {
-    const arrows = document.querySelectorAll(".arrow");
-    const movieLists = document.querySelectorAll(".movie-list");
+    // For each movie-list wrapper, wire up its own left+right arrows
+    document.querySelectorAll('.movie-list-wrapper').forEach(wrapper => {
+        const movieList = wrapper.querySelector('.movie-list');
+        const items = movieList.querySelectorAll('.movie-list-item');
+        let offset = 0;
+        const cardWidth = 300; // or whatever your step is
 
-    arrows.forEach((arrow, i) => {
-        const movieList = movieLists[i];
-        const items = movieList.querySelectorAll(".movie-list-item");
-        let clickCounter = 0;
+        // right arrow
+        wrapper.querySelector('.right-arrow').addEventListener('click', () => {
+            const maxShift = Math.max(0, items.length * cardWidth - wrapper.clientWidth);
+            offset = Math.min(offset + cardWidth, maxShift);
+            movieList.style.transform = `translateX(-${offset}px)`;
+        });
 
-        arrow.addEventListener("click", () => {
-            const ratio = Math.floor(window.innerWidth / 270);
-            clickCounter++;
-
-            if (items.length - (4 + clickCounter) + (4 - ratio) >= 0) {
-                movieList.style.transform = `translateX(${
-                    movieList.computedStyleMap().get("transform")[0]?.x.value - 300 || 0
-                }px)`;
-            } else {
-                movieList.style.transform = "translateX(0)";
-                clickCounter = 0;
-            }
+        // left arrow
+            wrapper.querySelector('.left-arrow').addEventListener('click', () => {
+            offset = Math.max(offset - cardWidth, 0);
+            movieList.style.transform = `translateX(-${offset}px)`;
         });
     });
 }
+
+function watchMovie(movieId) {
+    // Save to watch history
+    let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
+    const entry = {
+      id: movieId,
+      timestamp: new Date().toISOString()
+    };
+    history.unshift(entry); // add to front (latest first)
+    localStorage.setItem('watchHistory', JSON.stringify(history));
+
+    // Redirect to movie detail page
+    window.location.href = `movie.html?id=${movieId}`;
+}
+

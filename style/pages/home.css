@@ -131,7 +131,7 @@
 
 .movie-list-item-title {
     padding: 0 10px;
-    font-size: 28px;
+    font-size: 20px;
     font-weight: bold;
     position: absolute;
     top: 10%;
@@ -173,7 +173,7 @@
     transition: all 0.5s ease-in-out;
 }
 
-.arrow {
+.right-arrow {
     font-size: 120px;
     position: absolute;
     top: 90px;
@@ -181,6 +181,18 @@
     color: lightgray;
     opacity: 0.5;
     cursor: pointer;
+    z-index: 10;
+}
+
+.left-arrow{
+    font-size: 120px;
+    position: absolute;
+    top: 90px;
+    left: 0;
+    color: lightgray;
+    opacity: 0.5;
+    cursor: pointer;
+    z-index: 10;
 }
 
 .container.active {
