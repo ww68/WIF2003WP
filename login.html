@@ -154,18 +154,43 @@
             text-decoration: underline;
         }
         
+        /* Media query for smaller screens */
         @media (max-width: 768px) {
             .container {
+                position: relative;
                 flex-direction: column;
             }
             
             .image-side {
-                display: none;
+                position: absolute;
+                width: 100%;
+                height: 100%;
+                display: block;
+                z-index: -1;
             }
             
             .form-side {
                 width: 100%;
                 height: 100%;
+                background-color: rgba(10, 10, 20, 0.7);
+                backdrop-filter: blur(3px);
+            }
+            
+            .form-box {
+                background-color: rgba(17, 17, 34, 0.8);
+                backdrop-filter: blur(10px);
+            }
+            
+            /* Bring caption to front on small screens */
+            .caption {
+                position: fixed;
+                bottom: 16px;
+                left: 16px;
+                z-index: 100;
+                background-color: rgba(0, 0, 0, 0.5);
+                padding: 6px 12px;
+                border-radius: 20px;
+                font-weight: 500;
             }
         }
     </style>
@@ -175,7 +200,7 @@
         <!-- Left side - Image -->
         <div class="image-side">
             <div class="image-overlay"></div>
-            <img src="images/signup.png" alt="Outdoor cinema" class="background-image">
+            <img src="images/login.png" alt="Outdoor cinema" class="background-image">
             <div class="caption">Not Just Watching - You're Part of It.</div>
         </div>
         
@@ -238,6 +263,3 @@
     </script>
 </body>
 </html>
-
-
-
