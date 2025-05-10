@@ -146,4 +146,8 @@
 .movie-card:hover .watch-toggle-container {
     opacity: 1;
 }
+
+.empty-movie-notification {
+    margin-top: 8rem;
+}
   

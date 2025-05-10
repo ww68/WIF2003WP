@@ -80,7 +80,7 @@ function displayMovies(movies, containerId) {
         const poster = movie.poster_path ? `${IMAGE_URL}${movie.poster_path}` : 'movie-website-master/img/placeholder.jpg';
         const movieItem = document.createElement('div');
         movieItem.classList.add('movie-list-item');
-        movieItem.setAttribute('movie-id', movie.id);
+        movieItem.setAttribute('movie-id', String(movie.id));
         movieItem.innerHTML = `
             <div class="bookmark-wrapper">
                 <div class="bookmark-circle d-flex align-items-center justify-content-center">
@@ -138,32 +138,43 @@ function loadCarouselMovies(carouselId, contentId, endpoint) {
 
 
 // Watchlist toggle
-function toggleWatchlist(iconElement, movieId) {
+async function toggleWatchlist(iconElement, movieId) {
     let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-    const movieItem = iconElement.closest('.movie-list-item');
-
-    const movieData = {
-        id: movieId,
-        title: movieItem.querySelector('.movie-list-item-title')?.textContent || 'Unknown Title',
-        year: 2025, // static placeholder
-        description: movieItem.querySelector('.movie-list-item-desc')?.textContent || '',
-        img: movieItem.querySelector('.movie-list-item-img')?.getAttribute('src') || '',
-        rating: "7.0", // static placeholder
-        watched: false
-    };
-
+    movieId = String(movieId);
     const index = watchlist.findIndex(movie => movie.id === movieId);
 
     if (index === -1) {
-        watchlist.push(movieData);
-        iconElement.classList.add('active');
-        showToast('Added to Watchlist');
+        // Add to watchlist
+        try {
+            const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&language=en-US`);
+            const data = await response.json();
+
+            const movieData = {
+                id: String(data.id),
+                title: data.title,
+                year: data.release_date ? parseInt(data.release_date.split('-')[0]) : 'Unknown',
+                description: data.overview || '',
+                img: data.poster_path ? `${IMAGE_URL}${data.poster_path}` : 'movie-website-master/img/placeholder.jpg',
+                rating: data.vote_average?.toFixed(1) || 'N/A',
+                watched: false
+            };
+
+            watchlist.push(movieData);
+            iconElement.classList.add('active');
+            showToast('Added to Watchlist');
+        } catch (error) {
+            console.error('Error fetching movie details:', error);
+            showToast('Failed to add movie. Try again.');
+            return;
+        }
     } else {
+        // Remove from watchlist
         watchlist.splice(index, 1);
         iconElement.classList.remove('active');
         showToast('Removed from Watchlist');
     }
 
+    // Always update after push/splice
     localStorage.setItem('watchlist', JSON.stringify(watchlist));
 }
 
@@ -176,11 +187,14 @@ function attachWatchlistListeners(container) {
         const movieId = item.getAttribute('movie-id');
         const icon = item.querySelector('.bookmark-icon');
 
-        if (watchlist.find(m => m.id == movieId)) {
+        if (watchlist.find(m => m.id === movieId)) {
             icon.classList.add('active');
         }
+        console.log('Current Watchlist:', watchlist);        
 
-        icon.addEventListener('click', () => toggleWatchlist(icon, movieId));
+        icon.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            toggleWatchlist(icon, movieId)});
     });
 }
 
@@ -225,7 +239,7 @@ function watchMovie(movieId) {
     // Save to watch history
     let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
     const entry = {
-      id: movieId,
+      id: String(movieId),
       timestamp: new Date().toISOString()
     };
     history.unshift(entry); // add to front (latest first)
