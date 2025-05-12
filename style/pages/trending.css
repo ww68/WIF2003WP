@@ -3,6 +3,7 @@
 }
 
 .container1 {
+    background-color: #0A071B;
     position: relative;
     display: flex;
     flex-direction: column;
@@ -15,6 +16,7 @@
 .container1 h2   {
     color: rgb(251, 251, 251);
     padding-top: 10px;
+    margin-top: 3.5rem;
 }
 
 #time{    
@@ -141,7 +143,7 @@
 }
 
 #chartModal{
-    background-color: #0A071B;
+    background-color: #000000;
     display:none;
     justify-content: center;
     align-items: center;
@@ -221,4 +223,33 @@
     border: none;
     border-radius: 10px;
   }
+.bookmark-icon:hover {
+    transform: scale(1.1);
+}
+  
+.bookmark-icon.active {
+    color: #ffc107;
+    cursor: pointer;
+}
+
+
+.toast-message {
+    position: fixed;
+    bottom: 30px;
+    left: 50%;
+    transform: translateX(-50%);
+    background-color: #333;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
+    opacity: 0;
+    z-index: 9999;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
+  }
+  .toast-message.show {
+    opacity: 1;
+  }
+  
   

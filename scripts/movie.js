@@ -4,6 +4,7 @@ const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const urlParams = new URLSearchParams(window.location.search);
 const movieId = urlParams.get("id");
+const avgRating = getAverageRating(movieId);
 
 async function fetchMovieDetails() {
     try {
@@ -90,7 +91,7 @@ async function fetchMovieDetails() {
                 <div class="movie-meta">
                     <span><i class="far fa-calendar-alt me-2"></i> ${movie.release_date.split('-')[0]}</span>
                     <span><i class="far fa-clock me-2"></i> ${movie.runtime} min</span>
-                    <span><i class="fas fa-star text-warning me-2"></i> ${movie.vote_average.toFixed(1)}/10</span>
+                    <span><i class="fas fa-star text-warning me-2"></i> ${avgRating.toFixed(1)}/5</span>
                     <span><i class="fas fa-user me-2"></i> Director: ${director}</span>
                 </div>
                 <div class="mb-3">${genres}</div>
@@ -139,29 +140,31 @@ async function fetchMovieDetails() {
                 </div>
 
             <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
-                <form id="review-form">
-                    <div class="rating">
-                        <label for="stars">Rate this movie:</label>
-                        <div class="stars" id="stars">
-                            <span class="star" data-value="1">★</span>
-                            <span class="star" data-value="2">★</span>
-                            <span class="star" data-value="3">★</span>
-                            <span class="star" data-value="4">★</span>
-                            <span class="star" data-value="5">★</span>
+                    <form id="review-form">
+                        <div class="rating">
+                            <label for="stars">Rate this movie:</label>
+                            <div class="stars" id="stars">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                            <div class="rating-number">
+                                <span id="rating-number">0</span>/5.0
+                            </div>
                         </div>
-                        <div class="rating-number">
-                            <span id="rating-number">0</span>/5.0
+                        <div class="form-group">
+                            <label for="comment">Leave a comment:</label>
+                            <textarea id="comment" class="form-control" rows="4" placeholder="Write your comment here..."></textarea>
                         </div>
-                    </div>
-                    <div class="form-group">
-                        <label for="comment">Leave a comment:</label>
-                        <textarea id="comment" class="form-control" rows="4" placeholder="Write your comment here..."></textarea>
-                    </div>
-                    <button type="submit" class="btn btn-primary mt-3" id="submit">Submit</button>
-                </form>
+                        <button type="submit" class="buttonPost btn mt-3" id="postButton">Submit</button>
+                    </form>
 
-                <div id="review-list"></div>
-            </div>
+                     <p id="comment-count" class="text-muted mt-3"></p>
+
+                    <div id="review-list"></div>
+                </div>
 
 
                 <div class="tab-pane fade" id="similar" role="tabpanel">
@@ -174,6 +177,97 @@ async function fetchMovieDetails() {
 
         setupBookmarkButton(movie);
         setupSimilarMoviesButtons(similar.results, movie);
+
+        
+        // Star ratings
+        let selectedRating = 0;
+        const ratingDisplay = document.getElementById('rating-number'); 
+
+        document.querySelectorAll('.star').forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.dataset.value);
+                document.querySelectorAll('.star').forEach(s => s.classList.remove('selected'));
+                for (let i = 0; i < selectedRating; i++) {
+                    document.querySelectorAll('.star')[i].classList.add('selected');
+                }
+                ratingDisplay.textContent = selectedRating.toFixed(1);
+            });
+        });
+
+        function updateRatingNumber(rating) {
+            ratingDisplay.textContent = rating.toFixed(1);
+        }
+
+        // Handle review submission
+        document.getElementById('review-form').addEventListener('submit', function (e) {
+            e.preventDefault();  
+
+            const text = document.getElementById('comment').value.trim();
+            if (selectedRating === 0 || text === '') {
+                alert('Please provide a rating and review text.');
+                return;
+            }
+
+            saveReview(movieId, selectedRating, text);
+            loadReviews(); 
+
+            // Reset the form and rating display
+            document.getElementById('review-form').reset();
+            selectedRating = 0;
+            document.querySelectorAll('.star').forEach(s => s.classList.remove('selected'));
+            updateRatingNumber(0); 
+        });
+
+        // Save review to localStorage with movieId
+        function saveReview(movieId, rating, reviewText) {
+            const reviews = JSON.parse(localStorage.getItem('movie-reviews')) || [];
+            const review = {
+                username: 'Alice123',
+                movieId, 
+                rating,
+                text: reviewText,
+                date: new Date().toLocaleString(), 
+            };
+            reviews.push(review);
+            localStorage.setItem('movie-reviews', JSON.stringify(reviews));
+        }
+
+        // Load reviews from localStorage 
+        function loadReviews() {
+            const reviews = JSON.parse(localStorage.getItem('movie-reviews')) || [];
+            const reviewList = document.getElementById('review-list');
+            const commentCount = document.getElementById('comment-count');
+            reviewList.innerHTML = ''; 
+
+            const movieReviews = reviews.filter(review => review.movieId === movieId);
+
+            movieReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+            if (movieReviews.length === 0) {
+                commentCount.textContent = 'No comments yet';
+            } else if (movieReviews.length === 1) {
+                commentCount.textContent = '1 comment has been posted';
+            } else {
+                commentCount.textContent = `${movieReviews.length} comments have been posted`;
+            }
+
+            movieReviews.forEach(review => {
+                const reviewHTML = `
+                    <div class="review">
+                        <div class="review-user"><strong>${review.username}</strong></div> <!-- Display username -->
+                        <div class="review-rating">
+                            ${'★'.repeat(review.rating).split('').map(() => '<span class="gold-star">★</span>').join('')}
+                            ${'☆'.repeat(5 - review.rating).split('').map(() => '<span class="empty-star">☆</span>').join('')}
+                        </div>
+                        <div class="review-text">${review.text}</div>
+                        <div class="review-date text-muted">${review.date}</div> <!-- This shows the date and time -->
+                    </div>
+                `;
+                reviewList.innerHTML += reviewHTML; 
+            });
+        }
+
+        loadReviews();
         
     } catch (error) {
         console.error("Failed to fetch movie details:", error);
@@ -187,6 +281,17 @@ async function fetchMovieDetails() {
             </div>`;
     }
 }
+
+function getAverageRating(movieId) {
+    const reviews = JSON.parse(localStorage.getItem('movie-reviews')) || [];
+    const movieReviews = reviews.filter(review => review.movieId === movieId);
+    
+    if (movieReviews.length === 0) return 0;
+
+    const total = movieReviews.reduce((sum, review) => sum + review.rating, 0);
+    return total / movieReviews.length;
+}
+
 
 function setupBookmarkButton(movie) {
     const bookmarkBtn = document.getElementById('bookmarkBtn');
