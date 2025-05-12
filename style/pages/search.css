@@ -245,3 +245,13 @@ body {
     opacity: 1;
 }
   
+
+.container {
+    background-color: #151515;
+    min-height: calc(100vh - 50px);
+    color: white;
+}
+
+.bookmark-icon.active {
+  color: #ffc107; /* Bootstrap warning color or any other */
+}
