@@ -58,7 +58,7 @@ async function fetchMovieDetails() {
 
         const similarHTML = similar.results.slice(0, 8).map(sim => `
             <div class="col">
-                <div class="card bg-dark text-light shadow-sm border-secondary border-1 similar-movie-card" onclick="window.location.href='movie-description.html?id=${sim.id}'">
+                <div class="card bg-dark text-light shadow-sm border-secondary border-1 similar-movie-card" onclick="window.location.href='movie.html?id=${sim.id}'">
                     <img 
                         src="${sim.poster_path ? IMAGE_URL + sim.poster_path : '/images/default-poster.jpg'}" 
                         class="card-img-top" 
