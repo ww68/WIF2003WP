@@ -40,7 +40,7 @@ function displayTopMovies(movies) {
     const genreNames = genre_ids.map(id => GENRE_MAP[id]).filter(Boolean).join(' | ');
 
     const movieHTML = `
-      <div class="movie-list-container">
+      <div class="movie-list-container" movie-id="${id}">
         <div class="movie-list-img">
           <img src="${IMAGE_URL}${poster_path}" alt="${title}">
         </div>
@@ -48,7 +48,7 @@ function displayTopMovies(movies) {
           <div class="movie-list-title">
             <h4>${title}</h4>
             <div style="display: flex; align-items: center; gap: 10px;">
-            <i class="fas fa-regular fa-heart"></i>
+            <i class="fas fa-bookmark bookmark-icon"></i>
             <div class="vote">${vote_average.toFixed(1)}</div>
             </div>
           </div>
@@ -74,15 +74,82 @@ function displayTopMovies(movies) {
       showTrailerModal(movieId);
     });
   });
-  
-//add to watchlist toggle heart
-document.querySelectorAll('.fa-heart').forEach(heart => {
-  heart.addEventListener('click', () => {
-    heart.style.color = heart.style.color === 'white' ? 'red' : 'white'; // Toggle color
-  });
-});
+  attachWatchlistListeners(container);
+
 }
 
+// Highlight saved watchlist icons
+function attachWatchlistListeners(container) {
+    const items = container.querySelectorAll('.movie-list-container');
+    const watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+
+    items.forEach(item => {
+        const movieId = item.getAttribute('movie-id');
+        const icon = item.querySelector('.bookmark-icon');
+        const image = item.querySelector('.movie-list-img');
+        const title = item.querySelector('.movie-list-title');
+
+        if (watchlist.find(m => String(m.id) === String(movieId))) {
+            icon.classList.add('active');
+        }else{
+          icon.classList.remove('active')
+        }
+        console.log('Current Watchlist:', watchlist);        
+
+        icon.addEventListener('click', (e) => {
+            e.stopPropagation(); 
+            toggleWatchlist(icon, movieId)});
+            
+        [image, title].forEach(element => {
+            element.addEventListener('click', () => watchMovie(movieId));
+        });
+    });
+    
+
+        
+    
+}
+
+// Watchlist toggle
+async function toggleWatchlist(iconElement, movieId) {
+    let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
+    movieId = String(movieId);
+    const index = watchlist.findIndex(movie => String(movie.id) === movieId);
+
+    if (index === -1) {
+        // Add to watchlist
+        try {
+            const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}&language=en-US`);
+            const data = await response.json();
+
+            const movieData = {
+                id: String(data.id),
+                title: data.title,
+                year: data.release_date ? parseInt(data.release_date.split('-')[0]) : 'Unknown',
+                description: data.overview || '',
+                img: data.poster_path ? `${IMAGE_URL}${data.poster_path}` : 'movie-website-master/img/placeholder.jpg',
+                rating: data.vote_average?.toFixed(1) || 'N/A',
+                watched: false
+            };
+
+            watchlist.push(movieData);
+            iconElement.classList.add('active');
+            showToast('Added to Watchlist');
+        } catch (error) {
+            console.error('Error fetching movie details:', error);
+            showToast('Failed to add movie. Try again.');
+            return;
+        }
+    } else {
+        // Remove from watchlist
+        watchlist.splice(index, 1);
+        iconElement.classList.remove('active');
+        showToast('Removed from Watchlist');
+    }
+
+    // Always update after push/splice
+    localStorage.setItem('watchlist', JSON.stringify(watchlist));
+}
 
 
 // Trailer Modal Functions
@@ -283,5 +350,41 @@ async function generateGenreChart() {
   });
 }
 
+// Event delegation to handle dynamically created bookmark icons
+/*container.addEventListener('click', (e) => {
+  if (e.target.classList.contains('bookmark-icon')) {
+    const isBookmarked = e.target.classList.contains('fas');
+    
+    e.target.classList.toggle('bookmarked');
+    if (isBookmarked) {
+      showToast('Removed from bookmarks');
+    } else {
+      showToast('Added to bookmarks');
+    }
+  }
+});
+*/
 
 
+function showToast(message) {
+  const toast = document.getElementById('toast');
+  toast.textContent = message;
+  toast.classList.add('show');
+  setTimeout(() => {
+    toast.classList.remove('show');
+  }, 2000);
+}
+
+function watchMovie(movieId) {
+    // Save to watch history
+    let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
+    const entry = {
+      id: String(movieId),
+      timestamp: new Date().toISOString()
+    };
+    history.unshift(entry); // add to front (latest first)
+    localStorage.setItem('watchHistory', JSON.stringify(history));
+
+    // Redirect to movie detail page
+    window.location.href = `movie.html?id=${movieId}`;
+}
