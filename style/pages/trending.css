@@ -1,6 +1,11 @@
 * {
     margin: 0;
 }
+body {
+    font-family: 'Inter', sans-serif;
+    color: white;
+}
+
 
 .container1 {
     background-color: #0A071B;

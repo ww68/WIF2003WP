@@ -1,7 +1,7 @@
+// Constants
 const TMDB_API_KEY = 'b5ca748da01c92488ef670a84e31c784';
 const API_BASE = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p/w200';
-
 
 let currentPage = 1;
 let currentQuery = '';
@@ -9,8 +9,7 @@ const genreMap = {};
 let availableGenres = [];
 let availableLanguages = [];
 
-
-// Fetch genres and languages, then initialize
+// Fetch genres and languages
 Promise.all([
   fetch(`${API_BASE}/genre/movie/list?api_key=${TMDB_API_KEY}`).then(res => res.json()),
   fetch(`${API_BASE}/configuration/languages?api_key=${TMDB_API_KEY}`).then(res => res.json())
@@ -19,13 +18,8 @@ Promise.all([
     genreMap[g.id] = g.name;
     availableGenres.push({ id: g.id, name: g.name });
   });
-
-
   availableLanguages = languageData;
-
-
   populateDropdowns();
-
 
   const urlParams = new URLSearchParams(window.location.search);
   const initialQuery = urlParams.get("query");
@@ -37,11 +31,9 @@ Promise.all([
   }
 });
 
-
 function populateDropdowns() {
   const genreSelect = document.getElementById('filterGenre');
   const langSelect = document.getElementById('filterLanguage');
-
 
   genreSelect.innerHTML = `<option value="">Any</option>`;
   availableGenres.forEach(g => {
@@ -50,7 +42,6 @@ function populateDropdowns() {
     option.textContent = g.name;
     genreSelect.appendChild(option);
   });
-
 
   langSelect.innerHTML = `<option value="">Any</option>`;
   availableLanguages.forEach(l => {
@@ -61,116 +52,83 @@ function populateDropdowns() {
   });
 }
 
-
-// Load trending movies
 function loadTrending() {
   fetch(`${API_BASE}/trending/movie/day?api_key=${TMDB_API_KEY}`)
     .then(res => res.json())
     .then(data => renderMovies(data.results));
 }
 
-
-// Render movie cards
 function renderMovies(movies) {
   const container = document.getElementById('resultsContainer');
   container.innerHTML = '';
-
-
   if (!movies || movies.length === 0) {
     container.innerHTML = `<p class="text-white">No results found.</p>`;
     return;
   }
-
-
   movies.forEach(movie => {
     const poster = movie.poster_path ? `${IMG_BASE}${movie.poster_path}` : 'https://via.placeholder.com/80x120';
     const title = movie.title || 'Untitled';
     const overview = movie.overview || 'No description available.';
     const rating = movie.vote_average || 'N/A';
-
+    const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown Year';
+    const genres = movie.genre_ids?.map(id => genreMap[id]).filter(Boolean).join(', ') || 'Unknown Genre';
 
     const movieCard = document.createElement('div');
     movieCard.className = 'col-12 col-sm-6 col-md-4 col-lg-3 movie-list-item';
     movieCard.setAttribute('movie-id', movie.id);
-const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown Year';
-const genres = movie.genre_ids?.map(id => genreMap[id]).filter(Boolean).join(', ') || 'Unknown Genre';
-
-
-movieCard.innerHTML = `
-  <div class="card movie-card bg-dark text-white shadow-sm mb-4">
-    <div class="img-wrapper">
-      <img src="${poster || 'placeholder.jpg'}" alt="${title || 'No Title'}" class="movie-list-item-img card-img-top">
-    </div>
-    <div class="card-body d-flex flex-column justify-content-between">
-      <div>
-        <h5 class="card-title movie-list-item-title mb-1">${title || 'Unknown Title'}</h5>
-        <p class="mb-1"><small class="text-muted">${releaseYear || 'Unknown Year'}</small></p>
-        <p class="mb-1"><small class="text-info">${genres || 'Unknown Genres'}</small></p>
-        <p class="truncate-description movie-list-item-desc">${overview || 'No description available.'}</p>
-      </div>
-      <div class="d-flex justify-content-between align-items-center mt-2">
-        <span class="rating-star"><i class="fas fa-star text-warning"></i> ${rating || 'N/A'}</span>
-        <div class="bookmark-wrapper">
-          <div class="bookmark-circle d-flex align-items-center justify-content-center">
-            <i class="fa-solid fa-bookmark bookmark-icon"></i>
+    movieCard.innerHTML = `
+      <div class="card movie-card bg-dark text-white shadow-sm mb-4">
+        <div class="img-wrapper">
+          <img src="${poster}" alt="${title}" class="movie-list-item-img card-img-top">
+        </div>
+        <div class="card-body d-flex flex-column justify-content-between">
+          <div>
+            <h5 class="card-title movie-list-item-title mb-1">${title}</h5>
+            <p class="mb-1"><small class="text-muted">${releaseYear}</small></p>
+            <p class="mb-1"><small class="text-info">${genres}</small></p>
+            <p class="truncate-description movie-list-item-desc">${overview}</p>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mt-2">
+            <span class="rating-star"><i class="fas fa-star text-warning"></i> ${rating}</span>
+            <div class="bookmark-wrapper">
+              <div class="bookmark-circle d-flex align-items-center justify-content-center">
+                <i class="fa-solid fa-bookmark bookmark-icon"></i>
+              </div>
+            </div>
+            <a href="movie.html?id=${movie.id}" class="btn btn-sm btn-primary">Watch ▶</a>
           </div>
         </div>
-        <a href="movie.html?id=${movie.id || '#'}" class="btn btn-sm btn-primary">Watch ▶</a>
       </div>
-    </div>
-  </div>
-`;
-
-
-
-
+    `;
     container.appendChild(movieCard);
   });
-
-
   attachWatchlistListeners(container);
 }
-
 
 function attachWatchlistListeners(container) {
   const items = container.querySelectorAll('.movie-list-item');
   const watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-
-
   items.forEach(item => {
     const movieId = item.getAttribute('movie-id');
     const icon = item.querySelector('.bookmark-icon');
-
-
-    if (watchlist.find(m => m.id == movieId)) {
-      icon.classList.add('active');
-    }
-
-
+    if (watchlist.find(m => m.id == movieId)) icon.classList.add('active');
     icon.addEventListener('click', () => toggleWatchlist(icon, movieId));
   });
 }
 
-
 function toggleWatchlist(iconElement, movieId) {
   let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
   const movieItem = iconElement.closest('.movie-list-item');
-
-
   const movieData = {
     id: movieId,
     title: movieItem.querySelector('.movie-list-item-title')?.textContent || 'Unknown Title',
-    year: 2025,
+    year: new Date().getFullYear(),
     description: movieItem.querySelector('.movie-list-item-desc')?.textContent || '',
     img: movieItem.querySelector('.movie-list-item-img')?.getAttribute('src') || '',
     rating: "7.0",
     watched: false
   };
-
-
   const index = watchlist.findIndex(movie => movie.id === movieId);
-
-
   if (index === -1) {
     watchlist.push(movieData);
     iconElement.classList.add('active');
@@ -180,22 +138,16 @@ function toggleWatchlist(iconElement, movieId) {
     iconElement.classList.remove('active');
     showToast('Removed from Watchlist');
   }
-
-
   localStorage.setItem('watchlist', JSON.stringify(watchlist));
 }
-
 
 function showToast(message) {
   const toast = document.getElementById('toast');
   if (!toast) return;
-
-
   toast.querySelector('.toast-body').textContent = message;
   const toastInstance = new bootstrap.Toast(toast);
   toastInstance.show();
 }
-
 
 function storeRecentSearch(query) {
   let searches = JSON.parse(localStorage.getItem('recentSearches')) || [];
@@ -207,74 +159,81 @@ function storeRecentSearch(query) {
   }
 }
 
-
 function searchMovies(query = currentQuery) {
-  currentQuery = query;
-  storeRecentSearch(query);
-  fetch(`${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${currentPage}`)
-    .then(res => res.json())
-    .then(data => renderMovies(data.results));
-}
-
-
-// Filter logic
-document.getElementById('applyFiltersBtn').addEventListener('click', () => {
+  currentQuery = query.trim();
   const genre = document.getElementById('filterGenre').value;
   const year = document.getElementById('filterYear').value;
   const actor = document.getElementById('filterActor').value;
   const minDuration = document.getElementById('filterMinDuration').value;
   const maxDuration = document.getElementById('filterMaxDuration').value;
   const language = document.getElementById('filterLanguage').value;
+  storeRecentSearch(currentQuery);
 
+  const baseUrl = `${API_BASE}/discover/movie?`;
+  let urlParams = `api_key=${TMDB_API_KEY}&page=${currentPage}`;
 
-  let url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}&page=${currentPage}`;
+  if (genre) urlParams += `&with_genres=${genre}`;
+  if (year) urlParams += `&primary_release_year=${year}`;
+  if (language) urlParams += `&with_original_language=${language}`;
+  if (minDuration) urlParams += `&with_runtime.gte=${minDuration}`;
+  if (maxDuration) urlParams += `&with_runtime.lte=${maxDuration}`;
 
+  if (currentQuery) urlParams += `&query=${encodeURIComponent(currentQuery)}`;
 
-  if (genre) url += `&with_genres=${genre}`;
-  if (year) url += `&primary_release_year=${year}`;
-  if (language) url += `&with_original_language=${language}`;
-  if (minDuration) url += `&with_runtime.gte=${minDuration}`;
-  if (maxDuration) url += `&with_runtime.lte=${maxDuration}`;
+  const searchUrl = currentQuery
+    ? `${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`
+    : `${baseUrl}${urlParams}`;
 
+  fetch(searchUrl)
+    .then(res => res.json())
+    .then(data => {
+      let results = data.results || [];
+      if (genre || year || language || minDuration || maxDuration) {
+        results = results.filter(m => {
+          return (!genre || m.genre_ids.includes(parseInt(genre))) &&
+                 (!year || (m.release_date && m.release_date.startsWith(year))) &&
+                 (!language || m.original_language === language);
+        });
+      }
+      renderMovies(results);
+    });
+}
 
-  if (actor) {
-    fetch(`${API_BASE}/search/person?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(actor)}`)
-      .then(res => res.json())
-      .then(data => {
-        if (data.results.length > 0) {
-          const actorId = data.results[0].id;
-          url += `&with_cast=${actorId}`;
-        }
-        fetch(url)
-          .then(res => res.json())
-          .then(data => renderMovies(data.results));
-      });
-  } else {
-    fetch(url)
-      .then(res => res.json())
-      .then(data => renderMovies(data.results));
-  }
+// Filter modal
+const applyBtn = document.getElementById('applyFiltersBtn');
+const resetBtn = document.createElement('button');
+resetBtn.className = 'btn btn-secondary ms-2';
+resetBtn.textContent = 'Reset';
+resetBtn.onclick = () => {
+  document.getElementById('filterGenre').value = '';
+  document.getElementById('filterYear').value = '';
+  document.getElementById('filterActor').value = '';
+  document.getElementById('filterMinDuration').value = '';
+  document.getElementById('filterMaxDuration').value = '';
+  document.getElementById('filterLanguage').value = '';
+};
+applyBtn.parentNode.insertBefore(resetBtn, applyBtn.nextSibling);
 
-
+applyBtn.addEventListener('click', () => {
+  const query = document.getElementById("searchInput").value;
+  currentPage = 1;
+  searchMovies(query);
   const modal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
   modal.hide();
 });
 
-
 // Pagination
-document.getElementById('prevPage').addEventListener('click', e => {
-  e.preventDefault();
-  if (currentPage > 1) {
-    currentPage--;
+['prevPage', 'nextPage'].forEach(btnId => {
+  document.getElementById(btnId).addEventListener('click', e => {
+    e.preventDefault();
+    if (btnId === 'prevPage' && currentPage > 1) currentPage--;
+    if (btnId === 'nextPage') currentPage++;
     searchMovies();
-  }
-});
-document.getElementById('nextPage').addEventListener('click', e => {
-  e.preventDefault();
-  currentPage++;
-  searchMovies();
+  });
 });
 
+// DOM Ready
+// ... voice recognition & suggestions code remains unchanged
 
 // DOM Ready
 document.addEventListener('DOMContentLoaded', () => {
@@ -283,7 +242,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   searchForms.forEach(form => {
     const input = form.querySelector('input[type="search"]');
-    const voiceBtn = form.querySelector('.voiceBtn');
+    const voiceBtn = form.querySelector('#voiceBtn');
 
 
     const dropdown = document.createElement("ul");
@@ -318,16 +277,21 @@ document.addEventListener('DOMContentLoaded', () => {
         };
 
 
+        
+
         const deleteBtn = document.createElement("button");
-        deleteBtn.innerHTML = "&times;";
-        deleteBtn.className = "btn btn-sm btn-danger ms-2";
-        deleteBtn.onclick = (e) => {
-          e.stopPropagation();
-          let recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-          recent = recent.filter(q => q !== item);
-          localStorage.setItem("recentSearches", JSON.stringify(recent));
-          loadSuggestions();
-        };
+deleteBtn.innerHTML = `<i class="fas fa-trash-alt text-white"></i>`;
+deleteBtn.className = "btn deleteBtn p-1";
+deleteBtn.onmousedown = (e) => e.preventDefault(); // Prevent background on click
+deleteBtn.onfocus = (e) => e.target.style.background = "transparent"; // Ensure focus doesn't change background
+deleteBtn.onclick = (e) => {
+  e.stopPropagation();
+  let recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
+  recent = recent.filter(q => q !== item);
+  localStorage.setItem("recentSearches", JSON.stringify(recent));
+  loadSuggestions();
+};
+
 
 
         li.appendChild(text);

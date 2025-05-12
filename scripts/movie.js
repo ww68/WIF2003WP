@@ -58,7 +58,7 @@ async function fetchMovieDetails() {
 
         const similarHTML = similar.results.slice(0, 8).map(sim => `
             <div class="col">
-                <div class="card bg-dark text-light shadow-sm border-secondary similar-movie-card" onclick="window.location.href='movie-description.html?id=${sim.id}'">
+                <div class="card bg-dark text-light shadow-sm border-secondary border-1 similar-movie-card" onclick="window.location.href='movie.html?id=${sim.id}'">
                     <img 
                         src="${sim.poster_path ? IMAGE_URL + sim.poster_path : '/images/default-poster.jpg'}" 
                         class="card-img-top" 
@@ -303,12 +303,13 @@ function setupBookmarkButton(movie) {
 
         bookmarkBtn.addEventListener('click', () => {
             toggleWatchlistForDetailPage(bookmarkBtn, movieId, {
-                id: movieId,
+                id: String(movieId),
                 title: movie.title,
                 year: movie.release_date ? movie.release_date.split('-')[0] : 'N/A',
                 description: movie.overview || 'No description available',
-                image: movie.poster_path ? IMAGE_URL + movie.poster_path : '/images/default-poster.jpg',
+                img: movie.poster_path ? IMAGE_URL + movie.poster_path : '/images/default-poster.jpg',
                 rating: movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A',
+                watched: false
             });
         });
     }
@@ -317,17 +318,18 @@ function setupBookmarkButton(movie) {
 function setupSimilarMoviesButtons(similarMovies) {
     document.querySelectorAll('.similar-movie-card .btn').forEach(btn => {
         const similarId = btn.getAttribute('data-id');
-        const similarMovie = similarMovies.find(m => m.id.toString() === similarId);
+        const similarMovie = similarMovies.find(m => String(m.id) === similarId);
         
         if (!similarMovie) return;
 
         const movieEntry = {
-            id: similarMovie.id,
+            id: String(similarMovie.id),
             title: similarMovie.title,
-            image: similarMovie.poster_path ? IMAGE_URL + similarMovie.poster_path : '/images/default-poster.jpg',
+            img: similarMovie.poster_path ? IMAGE_URL + similarMovie.poster_path : '/images/default-poster.jpg',
             rating: similarMovie.vote_average ? similarMovie.vote_average.toFixed(1) : 'N/A',
             description: similarMovie.overview || 'No description available',
             year: similarMovie.release_date ? similarMovie.release_date.split('-')[0] : 'N/A',
+            watched: false
         };
 
         btn.addEventListener('click', (e) => {
@@ -344,12 +346,12 @@ function setupSimilarMoviesButtons(similarMovies) {
 
 function isInWatchlist(movieId) {
     const watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-    return watchlist.some(movie => movie.id.toString() === movieId.toString());
-  }  
+    return watchlist.some(movie => movie.id === movieId);
+}  
 
 function toggleWatchlistForDetailPage(buttonElement, movieId, movie) {
     let watchlist = JSON.parse(localStorage.getItem('watchlist')) || [];
-    const movieIndex = watchlist.findIndex(m => m.id.toString() === movieId.toString());
+    const movieIndex = watchlist.findIndex(m => m.id === movieId);
 
     if (movieIndex === -1) {
         watchlist.push(movie);
