@@ -5,12 +5,13 @@ body {
 
 .movie-banner {
     position: relative;
-    height: 500px;
+    height: 90vh;
     background-size: cover;
     background-position: center;
     display: flex;
     align-items: flex-end;
     color: white;
+    margin-top: 40px;
     padding-bottom: 0;
     border-radius: 0 0 20px 20px;
     box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
@@ -231,21 +232,22 @@ body {
 
 .toast-message {
     position: fixed;
-    bottom: 20px;
+    bottom: 30px;
     left: 50%;
     transform: translateX(-50%);
-    background: rgba(0,0,0,0.85);
-    color: white;
-    padding: 10px 20px;
-    border-radius: 20px;
+    background-color: #333;
+    color: #fff;
+    padding: 12px 20px;
+    border-radius: 8px;
+    font-size: 14px;
     opacity: 0;
-    transition: opacity 0.3s ease, transform 0.3s ease;
-    z-index: 1055;
+    z-index: 9999;
+    pointer-events: none;
+    transition: opacity 0.3s ease-in-out;
 }
 
 .toast-message.show {
-    opacity: 1;
-    transform: translateX(-50%) scale(1.05);
+opacity: 1;
 }
 
 .watchlisted-card {
