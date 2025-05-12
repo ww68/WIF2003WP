@@ -14,6 +14,7 @@ select.addEventListener('change', () => {
   selectedValue = select.value;
   currentPage = 1;
   fetchAndDisplayMovies(currentPage);
+  generateGenreChart()
 });
 
 function getTopRatedUrl(page) {
@@ -75,7 +76,7 @@ function displayTopMovies(movies) {
     });
   });
   attachWatchlistListeners(container);
-
+  
 }
 
 // Highlight saved watchlist icons
@@ -388,3 +389,7 @@ function watchMovie(movieId) {
     // Redirect to movie detail page
     window.location.href = `movie.html?id=${movieId}`;
 }
+window.addEventListener('DOMContentLoaded', () => {
+  modal.classList.add('show'); // Show chart modal
+  generateGenreChart();        // Generate the chart
+});
