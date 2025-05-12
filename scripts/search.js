@@ -283,7 +283,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   searchForms.forEach(form => {
     const input = form.querySelector('input[type="search"]');
-    const voiceBtn = form.querySelector('.voiceBtn');
+    const voiceBtn = form.querySelector('#voiceBtn');
 
 
     const dropdown = document.createElement("ul");
