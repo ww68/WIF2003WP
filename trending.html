@@ -10,6 +10,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" 
     rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" 
     crossorigin="anonymous"/>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
     
     <link rel="stylesheet" href="style/shared/navBar.css">
     <link rel="stylesheet" href="style/pages/trending.css">
@@ -19,7 +21,7 @@
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 fixed-top" style="padding-top: 0;">
         <div class="container-fluid">
-            <a class="navbar-brand" href="#">Name</a>
+            <a class="navbar-brand" href="#">MovieStream</a>
         
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
                 <span class="navbar-toggler-icon"></span>
@@ -67,10 +69,9 @@
         </div>
     </nav>
     <main>
-
-    <div class="container1">
-        <h2>Top Entertainment Chart🔥</h2>
-        <div>
+<div class="container pt-5 mt-5 mb-4">
+            <h2 class="fw-bold text-white">Top Entertainment Chart</h2>
+        </div> 
          
         <div class="chart-container">
             <div id="genreChartContainer">
@@ -118,10 +119,15 @@
               <div id="trailer-container" class="trailer-container"></div>
             </div>
           </div>
-        <select id="time">
-            <option value="day">Daily</option>
-            <option value="week">Weekly</option>
-        </select>  
+
+          <div class="container pt-5 mb-4 d-flex justify-content-between align-items-center">
+  <h2 class="fw-bold text-white mb-0">Trending Movies</h2>
+  <select id="time" class="form-select w-auto bg-dark text-white border-secondary">
+    <option value="day">Daily</option>
+    <option value="week">Weekly</option>
+  </select>
+</div>
+
         <div class="movie-container">
         <!-- <div>
             <div class="movie-list-container" >
@@ -151,8 +157,7 @@
         <div class="current" id="current">1</div>
         <div class="page" id="next">Next Page</div>
     </div>
-    </div>
-    </main>
+</main>
     <div id="toast" class="toast-message"></div>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 

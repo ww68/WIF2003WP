@@ -3,24 +3,18 @@
     top: 0;
 }
 body {
-    font-family: 'Inter', sans-serif;
-    color: white;
-    justify-content: center;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  background-color: #0A071B;
 }
-body {
-    font-family: 'Inter', sans-serif;
-    color: white;
-}
-
 
 .container1 {
-    background-color: #0A071B;
-    position: relative;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin: 0%;
+  width: 100%;
+  min-height: calc(100vh - 56px); /* Full height minus navbar */
+  padding: 20px;
+  box-sizing: border-box;
+  overflow-y: auto;
 }
     
 
