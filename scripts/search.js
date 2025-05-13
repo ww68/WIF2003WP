@@ -66,10 +66,10 @@ function renderMovies(movies) {
     return;
   }
   movies.forEach(movie => {
-    const poster = movie.poster_path ? `${IMG_BASE}${movie.poster_path}` : 'https://via.placeholder.com/80x120';
+    const poster = movie.poster_path ? `${IMG_BASE}${movie.poster_path}` : 'https://via.placeholder.com/80x120' || images/fallback.png;
     const title = movie.title || 'Untitled';
     const overview = movie.overview || 'No description available.';
-    const rating = movie.vote_average || 'N/A';
+    const rating = movie.vote_average ? movie.vote_average.toFixed(1) : 'N/A';
     const releaseYear = movie.release_date ? new Date(movie.release_date).getFullYear() : 'Unknown Year';
     const genres = movie.genre_ids?.map(id => genreMap[id]).filter(Boolean).join(', ') || 'Unknown Genre';
 
@@ -79,7 +79,12 @@ function renderMovies(movies) {
     movieCard.innerHTML = `
       <div class="card movie-card bg-dark text-white shadow-sm mb-4">
         <div class="img-wrapper">
-          <img src="${poster}" alt="${title}" class="movie-list-item-img card-img-top">
+          <img 
+            src="${movie.poster_path ? `${IMG_BASE}${movie.poster_path}` : 'images/fallback.png'}" 
+            alt="${title}" 
+            class="movie-list-item-img card-img-top"
+            onerror="this.onerror=null;this.src='images/fallback.png';"
+          >
         </div>
         <div class="card-body d-flex flex-column justify-content-between">
           <div>
@@ -95,11 +100,12 @@ function renderMovies(movies) {
                 <i class="fa-solid fa-bookmark bookmark-icon"></i>
               </div>
             </div>
-            <a href="movie.html?id=${movie.id}" class="btn btn-sm btn-primary">Watch ▶</a>
+            <a href="movie.html?id=${movie.id}" class="btn btn-sm btn-primary">Watch</a>
           </div>
         </div>
       </div>
     `;
+
     container.appendChild(movieCard);
   });
   attachWatchlistListeners(container);
@@ -168,6 +174,14 @@ function searchMovies(query = currentQuery) {
   const maxDuration = document.getElementById('filterMaxDuration').value;
   const language = document.getElementById('filterLanguage').value;
   storeRecentSearch(currentQuery);
+
+  const header = document.getElementById("searchHeader");
+  if (header) {
+    header.textContent = currentQuery 
+      ? `Search results for "${currentQuery}"`
+      : "Trending Movies";
+  }
+
 
   const baseUrl = `${API_BASE}/discover/movie?`;
   let urlParams = `api_key=${TMDB_API_KEY}&page=${currentPage}`;
