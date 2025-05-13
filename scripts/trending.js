@@ -228,7 +228,7 @@ const GENRE_MAP = {
   9648: "Mystery", 10749: "Romance", 878: "Science Fiction",
   10770: "TV Movie", 53: "Thriller", 10752: "War", 37: "Western"
 };
-
+/*
 showChartBtn.addEventListener('click', () => {
   modal.classList.add('show');
   generateGenreChart();
@@ -238,17 +238,19 @@ closeBtn.addEventListener('click', () => {
   modal.classList.remove('show');
 });
 
+
 window.addEventListener('click', (event) => {
   if (event.target === modal) {
     modal.classList.remove('show');
   }
 });
+*/
 
 async function fetchAllTrendingMovies(time) {
   let page = 1;
   let allMovies = [];
 
-  while (page <= 30) {
+  while (page <= 5) {
     const res = await fetch(`${BASE_URL}/trending/movie/${time}?api_key=${API_KEY}&language=en-US&page=${page}`);
     const data = await res.json();
     allMovies = allMovies.concat(data.results);
@@ -275,10 +277,13 @@ async function generateGenreChart() {
     });
   });
 
-  const totalGenres = Object.values(genreCounts).reduce((sum, count) => sum + count, 0);
+  const sortedGenres = Object.entries(genreCounts)
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 8);
 
-  const labels = Object.keys(genreCounts);
-  const values = Object.values(genreCounts);
+  const labels = sortedGenres.map(([name]) => name);
+  const values = sortedGenres.map(([, count]) => count);
+  const totalGenres = values.reduce((sum, count) => sum + count, 0);
   const percentages = values.map(v => ((v / totalGenres) * 100).toFixed(2));
 
   if (genreChart) genreChart.destroy();
@@ -298,15 +303,15 @@ async function generateGenreChart() {
       }]
     },
     options: {
+      maintainAspectRatio: false,
       responsive: true,
-      indexAxis: 'y',
       plugins: {
         legend: {
           display: false
         },
         tooltip: {
           callbacks: {
-            label: (context) => `${context.parsed.x}%`
+            label: (context) => `${context.parsed.y}%`
           }
         },
         title: {
@@ -321,6 +326,19 @@ async function generateGenreChart() {
       scales: {
         x: {
           ticks: {
+            color: '#FFFFFF'
+          },
+          title: {
+            display: true,
+            text: 'Genres',
+            color: '#FFFFFF',
+            font: {
+              size: 16
+            }
+          }
+        },
+        y: {
+          ticks: {
             callback: (val) => `${val}%`,
             color: '#FFFFFF'
           },
@@ -332,24 +350,12 @@ async function generateGenreChart() {
               size: 16
             }
           }
-        },
-        y: {
-          ticks: {
-            color: '#FFFFFF'
-          },
-          title: {
-            display: true,
-            text: 'Genres',
-            color: '#FFFFFF',
-            font: {
-              size: 16
-            }
-          }
         }
       }
     }
   });
 }
+
 
 // Event delegation to handle dynamically created bookmark icons
 /*container.addEventListener('click', (e) => {
@@ -389,7 +395,239 @@ function watchMovie(movieId) {
     // Redirect to movie detail page
     window.location.href = `movie.html?id=${movieId}`;
 }
+/*
 window.addEventListener('DOMContentLoaded', () => {
   modal.classList.add('show'); // Show chart modal
   generateGenreChart();        // Generate the chart
 });
+*/
+generateGenreChart();
+
+async function fetchTop5Movies() {
+            try {
+                const response = await fetch(`https://api.themoviedb.org/3/movie/popular?api_key=${API_KEY}&language=en-US&page=1`);
+                const data = await response.json();
+
+                // Get top 5 movies based on popularity
+                return data.results.slice(0, 5).map(movie => ({
+                    title: movie.title,
+                    popularity: movie.popularity,  // Popularity is used as a measure of views
+                    posterUrl: `https://image.tmdb.org/t/p/w200${movie.poster_path}`  // Fetching poster image
+                }));
+            } catch (error) {
+                console.error("Error fetching data from TMDb:", error);
+                return [];
+            }
+        }
+
+        // Function to create the Line chart
+        async function createChart() {
+            // Fetch the top 5 movies data
+            const moviesData = await fetchTop5Movies();
+
+            if (moviesData.length === 0) {
+                alert('No data available');
+                return;
+            }
+
+            // Extract the movie titles and popularity for the Line chart
+            const movieTitles = moviesData.map(movie => movie.title);
+            const moviePopularity = moviesData.map(movie => movie.popularity);
+
+            // Create Line Chart
+            const ctx = document.getElementById('top5LineChart').getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: movieTitles, // Movie titles on the X-axis
+                    datasets: [{
+                        label: 'Movie Popularity',
+                        data: moviePopularity, // Popularity data on the Y-axis
+                        borderColor: '#ff6347', // Line color (tomato red)
+                        backgroundColor: 'rgba(255, 99, 132, 0.4)', // Soft fill color
+                        borderWidth: 3, // Thicker border for more impact
+                        pointBackgroundColor: '#ff6347', // Point color (tomato red)
+                        pointBorderColor: '#fff', // White border around points
+                        pointBorderWidth: 2, // Border width of points
+                        pointRadius: 6, // Larger points for better visibility
+                        fill: true,  // Fill the area under the line
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                stepSize: 10, // Set the step size for Y-axis
+                                color: '#fff', // Y-axis ticks in white for better contrast
+                                font: {
+                                    size: 14, // Larger font size for better readability
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.3)', // Light grid lines for better contrast
+                                lineWidth: 0.5, // Thin grid lines
+                            },
+                            title: {
+                                display: true,
+                                text: 'Popularity',
+                                color: '#fff', // Title color in white
+                                font: {
+                                    size: 16, // Font size for Y-axis title
+                                    weight: 'bold',
+                                },
+                                padding: {
+                                    top: 10
+                                }
+                            }
+                        },
+                        x: {
+                            ticks: {
+                                color: '#fff', // X-axis ticks in white for better contrast
+                                font: {
+                                    size: 14, // Larger font size for better readability
+                                }
+                            },
+                            grid: {
+                                color: 'rgba(255, 255, 255, 0.3)', // Light grid lines for better contrast
+                                lineWidth: 0.5, // Thin grid lines
+                            },
+                            title: {
+                                display: true,
+                                text: 'Movies',
+                                color: '#fff', // Title color in white
+                                font: {
+                                    size: 16, // Font size for X-axis title
+                                    weight: 'bold',
+                                },
+                                padding: {
+                                    top: 10
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Top 5 Popular Movies',
+                            color: '#fff', // Title color
+                            font: {
+                                size: 20,
+                                weight: 'bold'
+                            },
+                            padding: {
+                                bottom: 10,
+                                top:20
+                            }
+                        },
+                        legend: {
+                            display: true,  // Show the legend
+                            labels: {
+                                color: '#fff', // Legend text in white
+                                font: {
+                                    size: 14, // Larger legend text for readability
+                                }
+                            }
+                        },
+                        tooltip: {
+                            backgroundColor: 'rgba(0, 0, 0, 0.7)', // Tooltip background color with transparency
+                            titleColor: '#fff', // Title in the tooltip in white
+                            bodyColor: '#fff', // Body text in the tooltip in white
+                            callbacks: {
+                                label: function(tooltipItem) {
+                                    return tooltipItem.label + ': ' + tooltipItem.raw.toFixed(2) + ' popularity';
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+
+        // Initialize chart creation
+        createChart();
+
+         async function fetchUpcomingMovies() {
+            try {
+                const response = await fetch(`https://api.themoviedb.org/3/movie/upcoming?api_key=${API_KEY}&language=en-US&page=1`);
+                const data = await response.json();
+                const movies = data.results.filter(movie => {
+                    const releaseDate = new Date(movie.release_date);
+                    return releaseDate > new Date(); // Ensure movie release date is in the future
+                }).slice(0, 5); // Get the top 5 upcoming movies
+
+                const moviesList = document.getElementById('movies-list');
+                moviesList.innerHTML = ''; // Clear the existing list if any
+
+                // Loop through the movies and create HTML elements for each
+                movies.forEach((movie, index) => {
+                    const listItem = document.createElement('li');
+                    listItem.classList.add('table-row');
+
+                    // Create numbered div
+                    const movieNumber = document.createElement('div');
+                    movieNumber.classList.add('number');
+                    movieNumber.textContent = index + 1;
+
+                    // Create movie title div
+                    const movieName = document.createElement('div');
+                    movieName.classList.add('movie-name');
+                    movieName.textContent = movie.title;
+
+                    // Create movie genre div
+                    const movieGenre = document.createElement('div');
+                    movieGenre.classList.add('movie-genre');
+                    movieGenre.textContent = getGenres(movie.genre_ids);
+
+                    // Create movie release date div
+                    const movieReleaseDate = document.createElement('div');
+                    movieReleaseDate.classList.add('movie-release-date');
+                    movieReleaseDate.textContent = movie.release_date;
+
+                    
+
+                    // Append movie poster to the list item
+                    listItem.appendChild(movieNumber);
+                    listItem.appendChild(movieName);
+                    listItem.appendChild(movieGenre);
+                    listItem.appendChild(movieReleaseDate);
+
+                    // Append list item to the list
+                    moviesList.appendChild(listItem);
+                });
+            } catch (error) {
+                console.error('Error fetching movies:', error);
+            }
+        }
+
+        // Get the first genre from genre IDs
+        function getGenres(genreIds) {
+            const genreMap = {
+                28: 'Action',
+                12: 'Adventure',
+                16: 'Animation',
+                35: 'Comedy',
+                80: 'Crime',
+                99: 'Documentary',
+                18: 'Drama',
+                10751: 'Family',
+                14: 'Fantasy',
+                36: 'History',
+                27: 'Horror',
+                10402: 'Music',
+                9648: 'Mystery',
+                10749: 'Romance',
+                878: 'Science Fiction',
+                10770: 'TV Movie',
+                53: 'Thriller',
+                10752: 'War',
+                37: 'Western',
+            };
+
+            // Return the first genre found, or "Unknown" if no genre is found
+            return genreIds.length > 0 ? genreMap[genreIds[0]] : 'Unknown';
+        }
+
+        // Fetch and display movies when the page loads
+        window.onload = fetchUpcomingMovies;
