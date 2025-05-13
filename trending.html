@@ -17,7 +17,7 @@
     <title>Movie</title>
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 fixed-top">
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 fixed-top" style="padding-top: 0;">
         <div class="container-fluid">
             <a class="navbar-brand" href="#">Name</a>
         
@@ -69,12 +69,39 @@
     <main>
 
     <div class="container1">
-        <h2>Trending Movie🔥</h2>
+        <h2>Top Entertainment Chart🔥</h2>
         <div>
-        <select id="time">
-            <option value="day">Daily</option>
-            <option value="week">Weekly</option>
-        </select>
+         
+        <div class="chart-container">
+            <div id="genreChartContainer">
+                <canvas id="genreChart"></canvas>
+            </div>
+            <div id="left-side">
+                <div id="line-chart">
+                    <canvas id="top5LineChart"></canvas>
+                </div>
+                <div class="movies-list-container1">
+        <h5>Top 5 Upcoming Movies</h5>
+        <div class="table">
+            <!-- Table Header -->
+            <div class="table-header">
+                <div class="number">#</div>
+                <div class="movie-name">Movie Title</div>
+                <div class="movie-genre">Genre</div>
+                <div class="movie-release-date">Release Date</div>
+            </div>
+
+            <!-- Movies List -->
+            <ul id="movies-list">
+                <!-- Movies will be dynamically inserted here -->
+            </ul>
+        </div>
+    </div>
+                
+            </div>     
+        </div>
+        
+        <!--
         <button id="showChartBtn">Show Genre Distribution</button>
         </div>
         <div id="chartModal">
@@ -83,13 +110,18 @@
               <canvas id="genreChart"></canvas>
             </div>
           </div>
+-->
+          
           <div id="trailer-modal" class="modal">
             <div class="modal-content">
               <span id="close-trailer-modal" class="closeBtn">&times;</span>
               <div id="trailer-container" class="trailer-container"></div>
             </div>
           </div>
-          
+        <select id="time">
+            <option value="day">Daily</option>
+            <option value="week">Weekly</option>
+        </select>  
         <div class="movie-container">
         <!-- <div>
             <div class="movie-list-container" >
