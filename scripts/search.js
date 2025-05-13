@@ -23,12 +23,12 @@ Promise.all([
 
   const urlParams = new URLSearchParams(window.location.search);
   const initialQuery = urlParams.get("query");
-  if (initialQuery) {
-    document.getElementById("searchInput").value = initialQuery;
-    searchMovies(initialQuery);
-  } else {
-    loadTrending();
-  }
+document.getElementById("searchQuery").value = initialQuery || '';
+if (initialQuery) {
+  searchMovies(initialQuery);
+} else {
+  loadTrending();
+}
 });
 
 function populateDropdowns() {
@@ -147,6 +147,7 @@ function toggleWatchlist(iconElement, movieId) {
   localStorage.setItem('watchlist', JSON.stringify(watchlist));
 }
 
+
 function showToast(message) {
   const toast = document.getElementById('toast');
   if (!toast) return;
@@ -164,17 +165,16 @@ function storeRecentSearch(query) {
     localStorage.setItem('recentSearches', JSON.stringify(searches));
   }
 }
-
-function searchMovies(query = currentQuery) {
-  currentQuery = query.trim();
+function searchMovies(query) {
+  currentQuery = query || document.getElementById("searchQuery").value.trim();
   const genre = document.getElementById('filterGenre').value;
   const year = document.getElementById('filterYear').value;
-  const actor = document.getElementById('filterActor').value;
   const minDuration = document.getElementById('filterMinDuration').value;
   const maxDuration = document.getElementById('filterMaxDuration').value;
   const language = document.getElementById('filterLanguage').value;
   storeRecentSearch(currentQuery);
 
+  // Update header text
   const header = document.getElementById("searchHeader");
   if (header) {
     header.textContent = currentQuery 
@@ -182,34 +182,34 @@ function searchMovies(query = currentQuery) {
       : "Trending Movies";
   }
 
+  let url;
+  if (currentQuery) {
+    // Use search endpoint for text queries
+    url = `${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
+    
+    // Add filters to search endpoint if needed
+    if (year) url += `&year=${year}`;
+    if (language) url += `&language=${language}`;
+  } else {
+    // Use discover endpoint for filtered browsing
+    url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}&page=${currentPage}`;
+    if (genre) url += `&with_genres=${genre}`;
+    if (year) url += `&primary_release_year=${year}`;
+    if (language) url += `&with_original_language=${language}`;
+    if (minDuration) url += `&with_runtime.gte=${minDuration}`;
+    if (maxDuration) url += `&with_runtime.lte=${maxDuration}`;
+  }
 
-  const baseUrl = `${API_BASE}/discover/movie?`;
-  let urlParams = `api_key=${TMDB_API_KEY}&page=${currentPage}`;
-
-  if (genre) urlParams += `&with_genres=${genre}`;
-  if (year) urlParams += `&primary_release_year=${year}`;
-  if (language) urlParams += `&with_original_language=${language}`;
-  if (minDuration) urlParams += `&with_runtime.gte=${minDuration}`;
-  if (maxDuration) urlParams += `&with_runtime.lte=${maxDuration}`;
-
-  if (currentQuery) urlParams += `&query=${encodeURIComponent(currentQuery)}`;
-
-  const searchUrl = currentQuery
-    ? `${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`
-    : `${baseUrl}${urlParams}`;
-
-  fetch(searchUrl)
+  fetch(url)
     .then(res => res.json())
     .then(data => {
-      let results = data.results || [];
-      if (genre || year || language || minDuration || maxDuration) {
-        results = results.filter(m => {
-          return (!genre || m.genre_ids.includes(parseInt(genre))) &&
-                 (!year || (m.release_date && m.release_date.startsWith(year))) &&
-                 (!language || m.original_language === language);
-        });
-      }
-      renderMovies(results);
+      renderMovies(data.results || []);
+    })
+    .catch(error => {
+      console.error('Error fetching movies:', error);
+      document.getElementById('resultsContainer').innerHTML = `
+        <p class="text-white">Error loading results. Please try again.</p>
+      `;
     });
 }
 
@@ -229,7 +229,7 @@ resetBtn.onclick = () => {
 applyBtn.parentNode.insertBefore(resetBtn, applyBtn.nextSibling);
 
 applyBtn.addEventListener('click', () => {
-  const query = document.getElementById("searchInput").value;
+  const query = document.getElementById("searchQuery").value;
   currentPage = 1;
   searchMovies(query);
   const modal = bootstrap.Modal.getInstance(document.getElementById('filterModal'));
@@ -246,129 +246,3 @@ applyBtn.addEventListener('click', () => {
   });
 });
 
-// DOM Ready
-// ... voice recognition & suggestions code remains unchanged
-
-// DOM Ready
-document.addEventListener('DOMContentLoaded', () => {
-  const searchForms = document.querySelectorAll('form[role="search"]');
-
-
-  searchForms.forEach(form => {
-    const input = form.querySelector('input[type="search"]');
-    const voiceBtn = form.querySelector('#voiceBtn');
-
-
-    const dropdown = document.createElement("ul");
-    dropdown.className = "list-group w-100 shadow";
-    dropdown.style.position = "absolute";
-    dropdown.style.top = "100%";
-    dropdown.style.left = "0";
-    dropdown.style.zIndex = 1050;
-    dropdown.style.display = "none";
-    form.style.position = "relative";
-    form.appendChild(dropdown);
-
-
-    const loadSuggestions = () => {
-      dropdown.innerHTML = "";
-      const recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-      if (recent.length === 0) return;
-
-
-      recent.slice(0, 5).forEach(item => {
-        const li = document.createElement("li");
-        li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white";
-
-
-        const text = document.createElement("span");
-        text.textContent = item;
-        text.className = "flex-grow-1";
-        text.style.cursor = "pointer";
-        text.onclick = () => {
-          input.value = item;
-          form.requestSubmit();
-        };
-
-
-        
-
-        const deleteBtn = document.createElement("button");
-deleteBtn.innerHTML = `<i class="fas fa-trash-alt text-white"></i>`;
-deleteBtn.className = "btn deleteBtn p-1";
-deleteBtn.onmousedown = (e) => e.preventDefault(); // Prevent background on click
-deleteBtn.onfocus = (e) => e.target.style.background = "transparent"; // Ensure focus doesn't change background
-deleteBtn.onclick = (e) => {
-  e.stopPropagation();
-  let recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-  recent = recent.filter(q => q !== item);
-  localStorage.setItem("recentSearches", JSON.stringify(recent));
-  loadSuggestions();
-};
-
-
-
-        li.appendChild(text);
-        li.appendChild(deleteBtn);
-        dropdown.appendChild(li);
-      });
-
-
-      dropdown.style.display = "block";
-    };
-
-
-    input.addEventListener("focus", loadSuggestions);
-    input.addEventListener("input", () => {
-      if (input.value.trim() === "") {
-        loadSuggestions();
-      } else {
-        dropdown.style.display = "none";
-      }
-    });
-
-
-    document.addEventListener("click", e => {
-      if (!form.contains(e.target)) {
-        dropdown.style.display = "none";
-      }
-    });
-
-
-    form.addEventListener("submit", e => {
-      e.preventDefault();
-      const query = input.value.trim();
-      if (query) {
-        currentPage = 1;
-        storeRecentSearch(query);
-        searchMovies(query);
-      }
-    });
-
-
-    if (voiceBtn && (window.SpeechRecognition || window.webkitSpeechRecognition)) {
-      const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
-      recognition.lang = 'en-US';
-      recognition.interimResults = false;
-
-
-      voiceBtn.addEventListener('click', () => recognition.start());
-
-
-      recognition.onresult = event => {
-        const transcript = event.results[0][0].transcript;
-        input.value = transcript;
-        storeRecentSearch(transcript);
-        searchMovies(transcript);
-      };
-
-
-      recognition.onerror = event => {
-        alert(`Voice recognition error: ${event.error}`);
-      };
-    } else if (voiceBtn) {
-      voiceBtn.disabled = true;
-      voiceBtn.title = "Voice recognition not supported";
-    }
-  });
-});
