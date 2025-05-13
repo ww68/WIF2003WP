@@ -47,8 +47,13 @@ async function fetchMovieDetails() {
         const castHTML = credits.cast.slice(0, 10).map(actor => `
             <div class="col">
                 <div class="card bg-dark text-light border-secondary shadow-sm cast-card">
-                    <img src="${actor.profile_path ? IMAGE_URL + actor.profile_path : 'https://via.placeholder.com/150'}" class="card-img-top" alt="${actor.name}">
                     <div class="card-body text-center">
+                        <img 
+                            src="${actor.profile_path ? IMAGE_URL + actor.profile_path : '/images/default-profile.jpg'}" 
+                            class="card-img-top" 
+                            alt="${actor.name}" 
+                            onerror="this.onerror=null; this.src='/images/default-profile.jpg';"
+                        />
                         <h5 class="card-title">${actor.name}</h5>
                         <p class="card-text text-muted">${actor.character}</p>
                     </div>
