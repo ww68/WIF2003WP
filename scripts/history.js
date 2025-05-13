@@ -7,9 +7,10 @@ const emptyState = document.getElementById('empty-state');
 const historyIds = JSON.parse(localStorage.getItem('watchHistory')) || [];
 
 async function getMovieDetails(movieId) {
-  const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`);
-  return response.json();
+    const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`);
+    return response.json();
 }
+
 function createHistorySection(label, movieIds) {
     const section = document.createElement('div');
     section.classList.add('page-black');
@@ -99,6 +100,7 @@ async function loadHistory() {
 
 function saveToHistory(movieId) {
     let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
+    if (history.length > 0 && history[0].id === movieId) return; // avoid duplicate immediate entry
     const entry = {
         id: movieId,
         timestamp: new Date().toISOString()
@@ -133,43 +135,36 @@ function getDateLabel(dateStr) {
 }
 
 function removeFromHistory(movieId) {
-  let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
-  history = history.filter(entry => entry.id !== movieId);
-  localStorage.setItem('watchHistory', JSON.stringify(history));
+    let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
+    history = history.filter(entry => entry.id !== movieId);
+    localStorage.setItem('watchHistory', JSON.stringify(history));
+    checkEmptyState();
 }
 
 function checkEmptyState() {
-  const cardsLeft = document.querySelectorAll('#history-container .col-md-3');
-  if (cardsLeft.length === 0) {
-    emptyState.classList.remove('d-none');
-  }
+    const cardsLeft = document.querySelectorAll('.history-movie-item');
+    if (cardsLeft.length === 0) {
+        emptyState.classList.remove('d-none');
+    } else {
+        emptyState.classList.add('d-none');
+    }
 }
 
 document.getElementById('clear-history').addEventListener('click', () => {
-  if (confirm('Are you sure you want to delete all watch history?')) {
-    localStorage.removeItem('watchHistory');
-    historyContainer.innerHTML = '';
-    emptyState.classList.remove('d-none');
-  }
+    if (confirm('Are you sure you want to delete all watch history?')) {
+        localStorage.removeItem('watchHistory');
+        historyContainer.innerHTML = '';
+        checkEmptyState();
+    }
 });
 
 // Add this to handle the watch functionality
 function watchMovie(movieId) {
-    saveToHistory(movieId);
     window.location.href = `movie.html?id=${movieId}`;
 }
 
 // Initialize the page
 loadHistory();
-
-// Clear history button
-document.getElementById('clear-history').addEventListener('click', () => {
-    if (confirm('Are you sure you want to delete all watch history?')) {
-        localStorage.removeItem('watchHistory');
-        historyContainer.innerHTML = '';
-        emptyState.classList.remove('d-none');
-    }
-});
 
   
 
