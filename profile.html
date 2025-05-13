@@ -16,20 +16,33 @@
     <link rel="stylesheet" href="style/shared/navBar.css">
 
     <style>
-        .list-group-item.no-border {
-            border: none !important;
-            padding: 0.75rem 1rem;
-            font-size: 1.1rem;
-        }
-
-        .list-group .list-group-item + .list-group-item {
-            margin-top: 0.5rem;
-        }
 
         #historyContainer > div {
             min-width: 180px;
+            height: 190px;
             scroll-snap-align: start;
         }
+
+        .setting-item {
+            background-color: #1e1e1e; /* Dark gray */
+            border-radius: 8px;
+            margin-bottom: 10px;
+            transition: background-color 0.3s ease;
+        }
+
+        .setting-item:hover {
+            background-color: #2c2c2c;
+            cursor: pointer;
+        }
+
+        .card.bg-dark.text-white {
+            border: 1px solid #cccccc64; /* Light grey border */
+        }
+
+        .card.bg-dark.text-white:hover {
+            border-color: white; /* Optional: on hover, change to white */
+        }
+
       </style>
 </head>
 <body>
@@ -88,39 +101,70 @@
         <section id="profile" class="pt-5">
             <div class="container my-5 ">
 
-                <div class="list-group-item bg-dark text-white no-border d-flex align-items-center mb-4">
-                    <img src="images/defaultAvatarProfile.jpg" alt="Profile Image" class="rounded-circle me-3" width="80" height="80">
-                    <div>
-                        <h2 class="mb-0">User Name</h2>
-                        <small class="text-muted">username@gmail.com</small>
+                <div class="card mb-4 text-white" style="background: linear-gradient(to right, #0052D4, #4364F7, #6FB1FC); border: none;">
+                    <div class="card-body d-flex align-items-center">
+                        <img src="images/defaultAvatarProfile.jpg" alt="Profile" class="rounded-circle me-4" width="80" height="80">
+                        <div>
+                        <h4 class="mb-1">User Name</h4>
+                        <p class="mb-2">username@gmail.com</p>
+                        </div>
                     </div>
-                </div>
-            
-                <div class="list-group">
-                    <a href="editprofile.html" class="list-group-item list-group-item-action bg-dark text-white no-border">Edit Profile</a>
-                    <a href="#" class="list-group-item list-group-item-action bg-dark text-white no-border" data-bs-toggle="modal" data-bs-target="#changePasswordModal">Change Password</a>
                 </div>
 
-                <div class="list-group">
-                    <div class="list-group-item bg-dark text-white no-border">
-                        <div class="d-flex justify-content-between align-items-center mb-3">
-                            <span class="mb-0 fw-normal">History</span>
-                            <a href="history.html" class="btn btn-sm btn-outline-light">View all</a>
+                <div class="row">
+                    <div class="col-md-8">
+                        <div class="card bg-dark text-white mb-4">
+                            <div class="card-body">
+                                <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0">
+                                    <i class="fas fa-history me-2 m-3"></i>Watch History
+                                </h5>
+                                <a href="history.html" class="btn btn-outline-light btn-sm">View all</a>
+                                </div>
+                                <div class="d-flex overflow-auto gap-3" id="historyContainer" style="scroll-snap-type: x mandatory;"></div>
+                            </div>
                         </div>
-                
-                        <div class="d-flex overflow-auto gap-3" id="historyContainer" style="scroll-snap-type: x mandatory;">
-                            <!-- Movie items will be appended here -->
+                    </div>
+                     <div class="col-md-4"> 
+                        <div class="card bg-dark text-white">
+                            <div class="card-body">
+                                <h5 class="mb-3">
+                                    <i class="fas fa-cog me-2 m-3"></i>Account Settings
+                                </h5>
+
+                                <ul class="list-unstyled">
+                                    <li class="d-flex justify-content-between align-items-center py-2 px-3 setting-item">
+                                        <a href="editprofile.html" class="text-white text-decoration-none d-flex align-items-center w-100">
+                                        <i class="fas fa-user-edit me-2"></i>Edit Profile
+                                        <i class="fas fa-chevron-right ms-auto text-secondary"></i>
+                                        </a>
+                                    </li>
+                                    <li class="d-flex justify-content-between align-items-center py-2 px-3 setting-item" data-bs-toggle="modal" data-bs-target="#changePasswordModal" style="cursor: pointer;">
+                                        <div class="d-flex align-items-center w-100 text-white">
+                                        <i class="fas fa-key me-2"></i>Change Password
+                                        <i class="fas fa-chevron-right ms-auto text-secondary"></i>
+                                        </div>
+                                    </li>
+                                    <li class="d-flex justify-content-between align-items-center py-2 px-3 setting-item">
+                                        <a href="login.html" class="text-white text-decoration-none d-flex align-items-center w-100">
+                                        <i class="fas fa-sign-out-alt me-2"></i>Log Out
+                                        <i class="fas fa-chevron-right ms-auto text-secondary"></i>
+                                        </a>
+                                    </li>
+                                    <li class="d-flex justify-content-between align-items-center py-2 px-3 setting-item">
+                                        <div class="d-flex align-items-center w-100 text-danger">
+                                        <i class="fas fa-trash-alt me-2"></i>Delete Account Permanently
+                                        <i class="fas fa-chevron-right ms-auto text-danger"></i>
+                                        </div>
+                                    </li>
+                                </ul>
+
+                            </div>
                         </div>
                     </div>
                 </div>
-                
-                <div class="list-group">
-                    <a href="login.html" class="list-group-item list-group-item-action bg-dark text-white no-border">Log Out</a>
-                    <a href="#" class="list-group-item list-group-item-action bg-dark text-danger no-border">Delete account permanently</a>
-                </div>
-    
             </div>
-    
+
             <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
                 <div class="modal-dialog">
                     <div class="modal-content">
