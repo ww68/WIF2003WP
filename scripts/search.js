@@ -147,6 +147,7 @@ function toggleWatchlist(iconElement, movieId) {
   localStorage.setItem('watchlist', JSON.stringify(watchlist));
 }
 
+
 function showToast(message) {
   const toast = document.getElementById('toast');
   if (!toast) return;
