@@ -55,3 +55,25 @@ async function loadHistory() {
 }
 
 loadHistory();
+
+document.addEventListener("DOMContentLoaded", () => {
+    const savedGenres = JSON.parse(localStorage.getItem("genrePreferences")) || [];
+
+    savedGenres.forEach(genre => {
+        const checkbox = document.querySelector(`input[value="${genre}"]`);
+        if (checkbox) checkbox.checked = true;
+    });
+});
+
+document.getElementById("genreForm").addEventListener("submit", function(e) {
+    e.preventDefault();
+    
+    const selectedGenres = Array.from(document.querySelectorAll('#genreForm input[type="checkbox"]:checked'))
+    .map(input => input.value);
+
+    const userConfirmed = confirm("Are you sure you want to save your genre preferences?");
+        if (userConfirmed) {
+            localStorage.setItem("genrePreferences", JSON.stringify(selectedGenres));
+            alert("Preferences saved!");
+        }
+});
