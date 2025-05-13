@@ -112,8 +112,8 @@
                 </div>
 
                 <div class="row">
-                    <div class="col-md-8">
-                        <div class="card bg-dark text-white mb-4">
+                    <div class="col-md-8 mb-4">
+                        <div class="card bg-dark text-white h-100">
                             <div class="card-body">
                                 <div class="d-flex justify-content-between align-items-center mb-3">
                                 <h5 class="mb-0">
@@ -125,8 +125,9 @@
                             </div>
                         </div>
                     </div>
-                     <div class="col-md-4"> 
-                        <div class="card bg-dark text-white">
+                    
+                    <div class="col-md-4"> 
+                        <div class="card bg-dark text-white mb-4">
                             <div class="card-body">
                                 <h5 class="mb-3">
                                     <i class="fas fa-cog me-2 m-3"></i>Account Settings
@@ -161,6 +162,84 @@
 
                             </div>
                         </div>
+                    </div>
+                </div>
+
+                <div class="card bg-dark text-white mb-4">
+                    <div class="card-body m-3">
+                        <h5 class="mb-3"><i class="fas fa-film me-2"></i>Genre Preferences</h5>
+
+                        <form id="genreForm" class="mb-4">
+                            <div class="d-flex flex-wrap gap-2 justify-content-start">                                
+                                <label class="form-label">Select Your Preferred Genres:</label>
+
+                                <div class="d-flex flex-column gap-2 w-100">
+
+                                <div class="w-100 d-flex flex-wrap gap-2 justify-content-between">
+                                    <input type="checkbox" class="btn-check" id="genre-action" value="Action" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-action">Action</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-adventure" value="Adventure" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-adventure">Adventure</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-animation" value="Animation" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-animation">Animation</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-comedy" value="Comedy" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-comedy">Comedy</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-crime" value="Crime" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-crime">Crime</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-documentary" value="Documentary" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-documentary">Documentary</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-drama" value="Drama" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-drama">Drama</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-family" value="Family" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-family">Family</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-fantasy" value="Fantasy" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-fantasy">Fantasy</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-history" value="History" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-history">History</label>
+                                </div>
+
+                                
+                                <div class="w-100 d-flex flex-wrap gap-2 justify-content-between mt-2 mb-3">
+                                    <input type="checkbox" class="btn-check" id="genre-horror" value="Horror" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-horror">Horror</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-music" value="Music" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-music">Music</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-mystery" value="Mystery" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-mystery">Mystery</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-romance" value="Romance" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-romance">Romance</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-scifi" value="Science Fiction" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-scifi">Science Fiction</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-tvmovie" value="TV Movie" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-tvmovie">TV Movie</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-thriller" value="Thriller" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-thriller">Thriller</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-war" value="War" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-war">War</label>
+
+                                    <input type="checkbox" class="btn-check" id="genre-western" value="Western" autocomplete="off">
+                                    <label class="btn btn-outline-primary rounded-pill flex-fill m-1 text-center" for="genre-western">Western</label>
+                                </div>
+                            </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary ">Save Preferences</button>
+                        </form>
                     </div>
                 </div>
             </div>
