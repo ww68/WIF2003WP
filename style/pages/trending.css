@@ -305,77 +305,99 @@ body {
     width: 600px !important;
 }
 .movies-list-container1 {
-            margin: 10px;
-            margin-right: 30px;
-            border-radius: 10px;
-            background-color: rgba(247, 247, 247, 0.3) !important;
-        }
+    margin: 10px;
+    margin-right: 30px;
+    border-radius: 10px;
+    background-color: rgba(247, 247, 247, 0.3) !important;
+}
 
-        h5 {
-            text-align: center;
-           font-weight: bold;
-           margin-top: 10px;
-        }
+h5 {
+    text-align: center;
+    font-weight: bold;
+    margin-top: 10px;
+}
 
-        .table {
-            display: flex;
-            flex-direction: column;
-            border-collapse: collapse;
-            width: 100%;
-            margin-top: 20px;
-            flex: 1;
-            --bs-table-bg: none !important;
-        }
+.table {
+    display: flex;
+    flex-direction: column;
+    border-collapse: collapse;
+    width: 100%;
+    margin-top: 20px;
+    flex: 1;
+    --bs-table-bg: none !important;
+}
 
-        .table-header, .table-row {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 5px;
-            border-radius: 5px;
-            margin-bottom: 5px;
-            
-        }
+.table-header, .table-row {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    border-radius: 5px;
+    margin-bottom: 5px;
+    
+}
 
-        .table-header {
-            font-weight: bold;
-             
-        }
+.table-header {
+    font-weight: bold;
+        
+}
 
 
-        .table-row {
-            background-color: rgba(247, 247, 247, 0.3) !important;
-            color: white;
-            padding: 0 !important  ;
-        }
+.table-row {
+    background-color: rgba(247, 247, 247, 0.3) !important;
+    color: white;
+    padding: 0 !important  ;
+}
 
-        .number {
-            font-weight: bold;
-            color: #FFD700;
-            width: 5%;
-        }
+.number {
+    font-weight: bold;
+    color: #FFD700;
+    width: 5%;
+}
 
-        .movie-name {
-            width: 45%;
-            text-align: left;
-            padding-left: 0 !important;
-        }
+.movie-name {
+    width: 45%;
+    text-align: left;
+    padding-left: 0 !important;
+}
 
-        .movie-genre {
-            width: 25%;
-            text-align: center;
-        }
+.movie-genre {
+    width: 25%;
+    text-align: center;
+}
 
-        .movie-release-date {
-            width: 25%;
-            text-align: center;
-        }
+.movie-release-date {
+    width: 25%;
+    text-align: center;
+}
 
-        li {
-            list-style-type: none;
-        }
+li {
+    list-style-type: none;
+}
 
-        ul{
-            margin: 0 !important;
-            padding: 10px !important;
-        }
+ul{
+    margin: 0 !important;
+    padding: 10px !important;
+}
+
+/* Movie Rank Number */
+.movie-rank {
+  width: 35px;
+  height: 35px;
+  background-color: #ffd700;
+  color: #0A071B;
+  font-weight: bold;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  z-index: 10;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+}
+
+.movie-list-container {
+  position: relative;
+}
