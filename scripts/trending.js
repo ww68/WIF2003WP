@@ -34,14 +34,19 @@ function fetchAndDisplayMovies(page = 1) {
     .catch(err => console.error('Error fetching top rated movies:', err));
 }
 
+
 function displayTopMovies(movies) {
-  movies.forEach(movie => {
+  movies.forEach((movie, index) => {
     const { id, title, vote_average, release_date, overview, poster_path, genre_ids } = movie;
-    const year = new Date(release_date).getFullYear() + '-' + new Date(release_date).getMonth() + '-' + new Date(release_date).getDate();
+    const year = new Date(release_date).getFullYear() + '-' + (new Date(release_date).getMonth() + 1) + '-' + new Date(release_date).getDate();
     const genreNames = genre_ids.map(id => GENRE_MAP[id]).filter(Boolean).join(' | ');
+
+    // Calculate the global index for ranking (based on current page)
+    const globalIndex = (currentPage - 1) * 20 + (index + 1);
 
     const movieHTML = `
       <div class="movie-list-container" movie-id="${id}">
+        <div class="movie-rank">${globalIndex}</div>
         <div class="movie-list-img">
           <img src="${IMAGE_URL}${poster_path}" alt="${title}">
         </div>
