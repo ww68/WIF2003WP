@@ -213,7 +213,7 @@
                 </div>
                 
                 <div class="form-box">
-                    <form id="login-form">
+                    <form id="login-form" action="/login" method="POST">
                         <div class="form-group">
                             <label for="email">Email</label>
                             <input 
@@ -248,17 +248,44 @@
     </div>
 
     <script>
-        const saveBtn = document.querySelector(".btn-primary");
-        document.querySelector("form").addEventListener("submit", (e) => {
-            e.preventDefault();
+        const loginBtn = document.querySelector(".btn-primary");
 
-            saveBtn.disabled = true;
-            saveBtn.textContent = "Login...";
+        document.querySelector("form").addEventListener("submit", async (e) => {
+            e.preventDefault(); // Prevent default form submission
 
-            setTimeout(() => {
-                alert("You have log in successfully!");
-                window.location.href = "index.html";
-            }, 1000);
+            loginBtn.disabled = true;
+            loginBtn.textContent = "Logging in...";
+
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch("/login", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    setTimeout(() => {
+                        alert("You have logged in successfully!");
+                        window.location.href = "index.html";
+                    }, 500);
+                } else {
+                    alert(result.message || "Login failed.");
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = "Login";
+                }
+
+            } catch (error) {
+                alert("An error occurred. Please try again.");
+                loginBtn.disabled = false;
+                loginBtn.textContent = "Login";
+            }
         });
     </script>
 </body>
