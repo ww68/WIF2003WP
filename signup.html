@@ -213,7 +213,7 @@
                 </div>
                 
                 <div class="form-box">
-                    <form id="signup-form">
+                    <form id="signup-form" action="/signup" method="POST">
                         <div class="form-group">
                             <label for="username">Username</label>
                             <input 
@@ -261,17 +261,47 @@
 
     <script>
         const saveBtn = document.querySelector(".btn-primary");
-        document.querySelector("form").addEventListener("submit", (e) => {
+
+        document.querySelector("form").addEventListener("submit", async (e) => {
             e.preventDefault();
 
             saveBtn.disabled = true;
-            saveBtn.textContent = "Saving...";
+            saveBtn.textContent = "Signing up...";
 
-            setTimeout(() => {
-                alert("You have sign up successfully!");
-                window.location.href = "login.html";
-            }, 1000);
+            // Get form data
+            const username = document.getElementById("username").value;
+            const email = document.getElementById("email").value;
+            const password = document.getElementById("password").value;
+
+            try {
+                const response = await fetch("/signup", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({ username, email, password })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    setTimeout(() => {
+                        alert("Signup successful!");
+                        window.location.href = "login.html";
+                    }, 1000);
+                } else {
+                    alert(result.message || "Signup failed.");
+                    saveBtn.disabled = false;
+                    saveBtn.textContent = "Sign Up";
+                }
+
+            } catch (error) {
+                alert("An error occurred. Please try again.");
+                saveBtn.disabled = false;
+                saveBtn.textContent = "Sign Up";
+            }
         });
     </script>
+
 </body>
 </html>
