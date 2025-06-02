@@ -2,6 +2,7 @@
   "dependencies": {
     "bcryptjs": "^3.0.2",
     "body-parse": "^0.1.0",
+    "ejs": "^3.1.10",
     "express": "^5.1.0",
     "express-session": "^1.18.1",
     "mongoose": "^8.15.1",
@@ -13,7 +14,6 @@
   "version": "1.0.0",
   "description": "The Entertainment Recommendation System is a web-based application focused on delivering personalized movie discovery and engagement. It offers a full suite of features to enhance the user's experience, starting with account creation and secure login/logout functionality, alongside session management to maintain user identity across the platform. Users can view and update their profiles, manage genre preferences, change their passwords, or deactivate/delete their accounts when needed.",
   "main": "server.js",
-  "devDependencies": {},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "node server.js"

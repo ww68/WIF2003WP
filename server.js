@@ -9,27 +9,46 @@ const User = require('./models/user');
 const app = express();
 const port = 3019;
 
+// Set up EJS as the view engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
+
 // Connect to MongoDB
 mongoose.connect('mongodb://127.0.0.1:27017/movie_explorer', {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+}).then(() => console.log('MongoDB connected'))
+  .catch(err => console.error('MongoDB connection error:', err));
 
 app.use(session({
     secret: 'yourSecretKey',
     resave: false,
     saveUninitialized: true,
+    cookie: { 
+        secure: false, 
+        maxAge: 24 * 60 * 60 * 1000 
+    }
 }));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'welcome.html'));
 });
 
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(express.static(__dirname)); 
 app.use(express.json()); 
+app.use(express.static('public'));
+
+// Import routes
+const watchlistRouter = require('./routes/watchlistRoutes');
+
+// Use routes
+app.use('/watchlist', watchlistRouter);
 
 app.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;
@@ -94,8 +113,20 @@ app.get('/logout', (req, res) => {
     });
 });
 
+app.use((req, res) => {
+    res.status(404).render('404', { title: 'Page Not Found' });
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).render('error', { 
+        title: 'Server Error',
+        error: err.message 
+    });
+});
+
 // Start server
 app.listen(port, () => {
-    console.log(`✅ Server running at http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });
 
