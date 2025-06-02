@@ -450,9 +450,26 @@ function renderEmptyState(filter, isCompletelyEmpty) {
             <div class="text-center p-3 empty-movie-notification">
                 <h4 class="fw-bold mb-2">No ${filterName} movies</h4>
                 <p class="text-muted mb-4">You don't have any ${filterName} movies in your watchlist.</p>
-                <button class="btn btn-outline-primary" onclick="renderWatchlist('all')">
+                <button class="btn btn-outline-primary" onclick="resetToAllView()">
                     View all movies
                 </button>
             </div>`;
     }
+}
+
+function setActiveFilterButton(filter) {
+    const filterButtons = document.querySelectorAll("#watchlistFilter .nav-link");
+    filterButtons.forEach(btn => {
+        const btnFilter = btn.getAttribute("data-filter");
+        if (btnFilter === filter) {
+            btn.classList.add("active");
+        } else {
+            btn.classList.remove("active");
+        }
+    });
+}
+
+function resetToAllView() {
+    renderWatchlist('all');
+    setActiveFilterButton('all');
 }
