@@ -18,17 +18,24 @@ mongoose.connect('mongodb://127.0.0.1:27017/movie_explorer', {
     useNewUrlParser: true,
     useUnifiedTopology: true
 }).then(() => console.log('MongoDB connected'))
-  .catch(err => console.error('MongoDB connection error:', err));
+    .catch(err => console.error('MongoDB connection error:', err));
 
 app.use(session({
     secret: 'yourSecretKey',
     resave: false,
-    saveUninitialized: true,
-    cookie: { 
-        secure: false, 
-        maxAge: 24 * 60 * 60 * 1000 
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000
     }
 }));
+
+function requireAuth(req, res, next) {
+  if (!req.session.userId) {
+    return res.redirect('/login.html');
+  }
+  next();
+}
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'welcome.html'));
@@ -40,8 +47,8 @@ app.get('/index', (req, res) => {
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(__dirname)); 
-app.use(express.json()); 
+app.use(express.static(__dirname));
+app.use(express.json());
 app.use(express.static('public'));
 
 // Import routes
@@ -91,7 +98,13 @@ app.post("/login", async (req, res) => {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
-        // Optional: Set session or token logic here
+        // Store user ID in session for watchlist access
+        req.session.userId = user._id;
+        req.session.user = {
+            id: user._id,
+            username: user.username,
+            email: user.email
+        };
 
         res.status(200).json({ message: "Login successful" });
     } catch (err) {
@@ -100,12 +113,12 @@ app.post("/login", async (req, res) => {
     }
 });
 
-app.get('/index.html', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/login.html');
-    }
-    res.redirect('/index');
-});
+// app.get('/index.html', (req, res) => {
+//     if (!req.session.user) {
+//         return res.redirect('/login.html');
+//     }
+//     res.redirect('/index');
+// });
 
 app.get('/logout', (req, res) => {
     req.session.destroy(() => {
@@ -119,9 +132,9 @@ app.use((req, res) => {
 
 app.use((err, req, res, next) => {
     console.error(err.stack);
-    res.status(500).render('error', { 
+    res.status(500).render('error', {
         title: 'Server Error',
-        error: err.message 
+        error: err.message
     });
 });
 

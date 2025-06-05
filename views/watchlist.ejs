@@ -56,7 +56,7 @@
                     </li>
             
                     <li class="nav-item"><a class="nav-link" href="index.html">Home</a></li>
-                    <li class="nav-item"><a class="nav-link active" href="watchlist.html">WatchList</a></li>
+                    <li class="nav-item"><a class="nav-link active" href="/watchlist">WatchList</a></li>
                     <li class="nav-item"><a class="nav-link" href="trending.html">Trending</a></li>
             
                     <li class="nav-item d-lg-none"><a class="nav-link profile-mobile" href="profile.html">Profile</a></li>
@@ -115,7 +115,14 @@
                                     <div class="bookmark-circle d-flex align-items-center justify-content-center">
                                         <i class="fa-solid fa-bookmark text-warning fs-6 bookmark-icon"
                                         onclick="removeFromWatchlist('<%= movie.id %>')">
-                                        title="Remove from Watchlist"></i> 
+                                        </i> 
+                                    </div>
+                                </div>
+                                <div class="position-absolute top-0 end-0 m-2">
+                                    <div class="watch-toggle-circle d-flex align-items-center justify-content-center">
+                                        <i class="fas <%= movie.watched ? 'fa-xmark text-white' : 'fa-check text-white' %> fs-6"
+                                        title="<%= movie.watched ? 'Mark as unwatched' : 'Mark as watched' %>"
+                                        onclick="toggleWatchedStatus('<%= movie.id %>')"></i>
                                     </div>
                                 </div>
                                 <div class="row g-0 d-flex align-items-stretch">

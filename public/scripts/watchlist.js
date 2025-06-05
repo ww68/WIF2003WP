@@ -111,7 +111,7 @@ function updateMovieCard(movieId, watched) {
     // Update toggle button icon
     const toggleIcon = card.querySelector('.watch-toggle-circle .fas');
     if (toggleIcon) {
-        if (movieData.watched) {
+        if (watched) {
             toggleIcon.className = 'fas fa-times text-white fs-6';
             toggleIcon.title = 'Mark as unwatched';
         } else {
