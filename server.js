@@ -5,31 +5,53 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const User = require('./models/user');
+const requireAuth = require('./middleware/requireAuth');
 
 const app = express();
 const port = 3019;
+
+// Set up EJS as the view engine
+app.set('view engine', 'ejs');
+app.set('views', path.join(__dirname, 'views'));
 
 // Connect to MongoDB
 mongoose.connect('mongodb://127.0.0.1:27017/movie_explorer', {
     useNewUrlParser: true,
     useUnifiedTopology: true
-}).then(() => console.log('✅ MongoDB connected'))
-  .catch(err => console.error('❌ MongoDB connection error:', err));
+}).then(() => console.log('MongoDB connected'))
+    .catch(err => console.error('MongoDB connection error:', err));
 
 app.use(session({
     secret: 'yourSecretKey',
     resave: false,
-    saveUninitialized: true,
+    saveUninitialized: false,
+    cookie: {
+        secure: false,
+        maxAge: 24 * 60 * 60 * 1000
+    }
 }));
 
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'welcome.html'));
 });
 
+app.get('/index', (req, res) => {
+    res.sendFile(path.join(__dirname, 'index.html'));
+});
+
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(express.static(__dirname)); 
-app.use(express.json()); 
+app.use(express.static(__dirname));
+app.use(express.json());
+app.use(express.static('public'));
+
+// Import routes
+const watchlistRouter = require('./routes/watchlistRoutes');
+const movieRouter = require('./routes/movieRoutes');
+
+// Use routes
+app.use('/watchlist', requireAuth, watchlistRouter);
+app.use('/movie', movieRouter);
 
 app.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;
@@ -72,7 +94,13 @@ app.post("/login", async (req, res) => {
             return res.status(400).json({ message: "Invalid email or password" });
         }
 
-        // Optional: Set session or token logic here
+        // Store user ID in session for watchlist access
+        req.session.userId = user._id;
+        req.session.user = {
+            id: user._id,
+            username: user.username,
+            email: user.email
+        };
 
         res.status(200).json({ message: "Login successful" });
     } catch (err) {
@@ -81,12 +109,12 @@ app.post("/login", async (req, res) => {
     }
 });
 
-app.get('/index.html', (req, res) => {
-    if (!req.session.user) {
-        return res.redirect('/login.html');
-    }
-    res.redirect('/index');
-});
+// app.get('/index.html', (req, res) => {
+//     if (!req.session.user) {
+//         return res.redirect('/login.html');
+//     }
+//     res.redirect('/index');
+// });
 
 app.get('/logout', (req, res) => {
     req.session.destroy(() => {
@@ -94,8 +122,20 @@ app.get('/logout', (req, res) => {
     });
 });
 
+app.use((req, res) => {
+    res.status(404).render('404', { title: 'Page Not Found' });
+});
+
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).render('error', {
+        title: 'Server Error',
+        error: err.message
+    });
+});
+
 // Start server
 app.listen(port, () => {
-    console.log(`✅ Server running at http://localhost:${port}`);
+    console.log(`Server running at http://localhost:${port}`);
 });
 
