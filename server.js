@@ -5,6 +5,7 @@ const bodyParser = require('body-parser');
 const bcrypt = require('bcryptjs');
 const session = require('express-session');
 const User = require('./models/user');
+const requireAuth = require('./middleware/requireAuth');
 
 const app = express();
 const port = 3019;
@@ -30,13 +31,6 @@ app.use(session({
     }
 }));
 
-function requireAuth(req, res, next) {
-  if (!req.session.userId) {
-    return res.redirect('/login.html');
-  }
-  next();
-}
-
 app.get('/', (req, res) => {
     res.sendFile(path.join(__dirname, 'welcome.html'));
 });
@@ -53,9 +47,11 @@ app.use(express.static('public'));
 
 // Import routes
 const watchlistRouter = require('./routes/watchlistRoutes');
+const movieRouter = require('./routes/movieRoutes');
 
 // Use routes
-app.use('/watchlist', watchlistRouter);
+app.use('/watchlist', requireAuth, watchlistRouter);
+app.use('/movie', movieRouter);
 
 app.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;

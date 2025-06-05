@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= movie.title %> - Movie Details</title>
+
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" 
+    rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" 
+    crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" 
+    rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    <link rel="stylesheet" href="/style/shared/navBar.css">
+    <link rel="stylesheet" href="/style/pages/movie.css">
+    <link rel="stylesheet" href="/style/pages/reviews.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark px-3 fixed-top">
+        <div class="container-fluid">
+            <img src="/images/logo.png" alt="Logo" width="250" class="d-inline-block align-text-top">
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarContent">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+        
+            <div class="collapse navbar-collapse justify-content-between" id="navbarContent">
+        
+                <div class="mx-auto d-none d-lg-block w-50">
+                    <form class="d-flex" role="search">
+                        <input class="form-control me-2" type="search" placeholder="Search movies" aria-label="Search">
+                        <button class="btn btn-outline-light voiceBtn ms-2" type="button">
+                            <i class="bi bi-mic-fill"></i>
+                        </button>
+                        <button class="btn btn-outline-light searchBtn" type="submit">
+                            <i class="fas fa-search"></i>
+                        </button>
+                    </form>
+                </div>
+        
+                <ul class="navbar-nav ms-auto align-items-lg-center">
+                    <li class="nav-item w-100 mobile-search d-lg-none mb-2 mt-3">
+                        <form class="d-flex" role="search">
+                            <input class="form-control me-2" type="search" placeholder="Search movies" aria-label="Search">
+                            
+                            <button class="btn btn-outline-light voiceBtn me-2" type="button">
+                                <i class="bi bi-mic-fill"></i>
+                            </button>
+
+                            <button class="btn btn-outline-light searchBtn" type="submit">
+                                <i class="fas fa-search"></i>
+                            </button>
+                        </form>
+                    </li>
+                    <li class="nav-item"><a class="nav-link" href="/">Home</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/watchlist">WatchList</a></li>
+                    <li class="nav-item"><a class="nav-link" href="/trending">Trending</a></li>
+            
+                    <li class="nav-item d-lg-none"><a class="nav-link profile-mobile" href="/profile">Profile</a></li>
+                </ul>
+        
+                <a href="/profile" class="ms-3 d-none d-lg-block profile-desktop">
+                <img src="/images/defaultAvatarProfile.jpg" alt="Profile" class="navbar-profile-img">
+                </a>
+            </div>
+        </div>
+    </nav>
+    
+    <main>
+        <div class="movie-banner" style="background-image: url('<%= movie.backdrop_path ? `https://image.tmdb.org/t/p/original${movie.backdrop_path}` : '/images/default-backdrop.jpg' %>');">
+            <div class="container movie-info">
+                <h1 class="display-4 fw-bold"><%= movie.title %></h1>
+                <div class="movie-meta">
+                    <span><i class="far fa-calendar-alt me-2"></i> <%= movie.release_date ? movie.release_date.split('-')[0] : 'N/A' %></span>
+                    <span><i class="far fa-clock me-2"></i> <%= movie.runtime || 'N/A' %> min</span>
+                    <span><i class="fas fa-star text-warning me-2"></i> <%= avgRating.toFixed(1) %>/5</span>
+                    <span><i class="fas fa-user me-2"></i> Director: <%= director %></span>
+                </div>
+                <div class="mb-3">
+                    <% movie.genres.forEach(genre => { %>
+                        <span class="genre-badge"><%= genre.name %></span>
+                    <% }); %>
+                </div>
+                <div class="action-buttons mt-4">
+                    <button class="btn btn-primary"><i class="fas fa-play me-2"></i>Watch Now</button>
+                    <button id="bookmarkBtn" data-movie-id="<%= movie.id %>" class="btn btn-outline-light <%= inWatchlist ? 'active' : '' %>">
+                        <i class="<%= inWatchlist ? 'fas' : 'far' %> fa-bookmark me-2"></i>
+                        <%= inWatchlist ? ' Added' : ' Watchlist' %>
+                    </button>
+                    <button class="btn btn-outline-light"><i class="fas fa-share-alt me-2"></i>Share</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="container mt-5">
+            <div class="mb-5">
+                <h3 class="section-header text-uppercase">Synopsis</h3>
+                <p class="lead"><%= movie.overview || 'No synopsis available.' %></p>
+            </div>
+
+            <div class="mb-5">
+                <h3 class="section-header text-uppercase">Trailer</h3>
+                <div class="trailer-container">
+                    <% if (trailer) { %>
+                        <iframe width="100%" height="400" src="https://www.youtube.com/embed/<%= trailer.key %>" frameborder="0" allowfullscreen></iframe>
+                    <% } else { %>
+                        <p>No trailer available.</p>
+                    <% } %>
+                </div>
+            </div>
+
+            <ul class="nav nav-tabs mb-4" id="movieContentTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="cast-tab" data-bs-toggle="tab" data-bs-target="#cast" type="button" role="tab" aria-controls="cast" aria-selected="true">
+                        <i class="fas fa-users me-2"></i>Cast & Crew
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="reviews-tab" data-bs-toggle="tab" data-bs-target="#reviews" type="button" role="tab">
+                        <i class="fas fa-star me-2"></i>Reviews
+                    </button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="similar-tab" data-bs-toggle="tab" data-bs-target="#similar" type="button" role="tab">
+                        <i class="fas fa-film me-2"></i>Similar Movies
+                    </button>
+                </li>
+            </ul>
+
+            <div class="tab-content" id="movieContentTabsContent">
+                <div class="tab-pane fade show active" id="cast" role="tabpanel">
+                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-5 g-4">
+                        <% cast.slice(0, 10).forEach(actor => { %>
+                            <div class="col">
+                                <div class="card bg-dark text-light border-secondary shadow-sm cast-card">
+                                    <div class="card-body text-center">
+                                        <img 
+                                            src="<%= actor.profile_path ? `https://image.tmdb.org/t/p/w500${actor.profile_path}` : '/images/default-profile.jpg' %>" 
+                                            class="card-img-top" 
+                                            alt="<%= actor.name %>" 
+                                            onerror="this.onerror=null; this.src='/images/default-profile.jpg';"
+                                        />
+                                        <h5 class="card-title"><%= actor.name %></h5>
+                                        <p class="card-text text-muted"><%= actor.character %></p>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="reviews" role="tabpanel" aria-labelledby="reviews-tab">
+                    <form id="review-form">
+                        <input type="hidden" id="movie-id" value="<%= movie.id %>">
+                        <div class="rating">
+                            <label for="stars">Rate this movie:</label>
+                            <div class="stars" id="stars">
+                                <span class="star" data-value="1">★</span>
+                                <span class="star" data-value="2">★</span>
+                                <span class="star" data-value="3">★</span>
+                                <span class="star" data-value="4">★</span>
+                                <span class="star" data-value="5">★</span>
+                            </div>
+                            <div class="rating-number">
+                                <span id="rating-number">0</span>/5.0
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="comment">Leave a comment:</label>
+                            <textarea id="comment" class="form-control" rows="4" placeholder="Write your comment here..."></textarea>
+                        </div>
+                        <button type="submit" class="buttonPost btn mt-3" id="postButton">Submit</button>
+                    </form>
+
+                    <p id="comment-count" class="text-muted mt-3">
+                        <% if (reviews.length === 0) { %>
+                            No comments yet
+                        <% } else if (reviews.length === 1) { %>
+                            1 comment has been posted
+                        <% } else { %>
+                            <%= reviews.length %> comments have been posted
+                        <% } %>
+                    </p>
+
+                    <div id="review-list">
+                        <% reviews.forEach(review => { %>
+                            <div class="review">
+                                <div class="review-user"><strong><%= review.username %></strong></div>
+                                <div class="review-rating">
+                                    <% for(let i = 0; i < review.rating; i++) { %>
+                                        <span class="gold-star">★</span>
+                                    <% } %>
+                                    <% for(let i = review.rating; i < 5; i++) { %>
+                                        <span class="empty-star">☆</span>
+                                    <% } %>
+                                </div>
+                                <div class="review-text"><%= review.text %></div>
+                                <div class="review-date text-muted"><%= review.date %></div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+
+                <div class="tab-pane fade" id="similar" role="tabpanel">
+                    <div class="row row-cols-2 row-cols-md-3 row-cols-lg-4 row-cols-xl-5 row-cols-xxl-6 g-4">
+                        <% similar.slice(0, 8).forEach(sim => { %>
+                            <div class="col">
+                                <div class="card bg-dark text-light shadow-sm border-secondary border-1 similar-movie-card" onclick="window.location.href='/movie/<%= sim.id %>'">
+                                    <img 
+                                        src="<%= sim.poster_path ? `https://image.tmdb.org/t/p/w500${sim.poster_path}` : '/images/default-poster.jpg' %>" 
+                                        class="card-img-top" 
+                                        alt="<%= sim.title %>" 
+                                        onerror="this.onerror=null; this.src='/images/default-poster.jpg';"
+                                    />
+                                    <div class="card-body d-flex flex-column justify-content-between p-3">
+                                        <h6 class="card-title text-center text-wrap">
+                                            <%= sim.title %>
+                                        </h6>
+                                        <div class="">
+                                            <button class="btn btn-sm btn-outline-light w-100" data-id="<%= sim.id %>">
+                                                <i class="far fa-bookmark me-2"></i>Watchlist
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        <% }); %>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <div id="toast" class="toast-message"></div>
+
+    <!-- Pass server data to client-side JavaScript -->
+    <script>
+        window.movieData = {
+            id: '<%= movie.id %>',
+            title: '<%= movie.title %>',
+            poster_path: '<%= movie.poster_path %>',
+            overview: '<%= movie.overview %>',
+            release_date: '<%= movie.release_date %>',
+            vote_average: <%= movie.vote_average || 0 %>
+        };
+        window.similarMovies = <%- JSON.stringify(similar) %>;
+    </script>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
+    crossorigin="anonymous"></script>
+
+    <script src="/scripts/movie.js"></script>
+    <script src="/scripts/searchBarNav.js"></script>
+
+</body>
+</html>
