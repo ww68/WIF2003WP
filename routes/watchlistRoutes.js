@@ -42,7 +42,8 @@ router.get('/', requireAuth, async (req, res) => {
             watchlist: watchlist,
             filteredWatchlist: filteredWatchlist,
             filter: filter,
-            title: 'Your Watchlist'
+            title: 'Your Watchlist',
+            currentPage: 'watchlist'
         });
         
     } catch (error) {
