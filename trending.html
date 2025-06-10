@@ -13,8 +13,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
 
     
-    <link rel="stylesheet" href="style/shared/navBar.css">
-    <link rel="stylesheet" href="style/pages/trending.css">
+    <link rel="stylesheet" href="/public/style/shared/navBar.css">
+    <link rel="stylesheet" href="/public/style/pages/trending.css">
     
     <title>Movie</title>
 </head>
@@ -70,7 +70,7 @@
     </nav>
     <main>
 <div class="container pt-5 mt-5 mb-4">
-            <h2 class="fw-bold text-white">Top Entertainment Chart</h2>
+            <h2 class="fw-bold text-white text-center">Top Entertainment Chart</h2>
         </div> 
          
         <div class="chart-container">
@@ -123,48 +123,27 @@
           <div class="container pt-5 mb-4 d-flex justify-content-between align-items-center">
   <h2 class="fw-bold text-white mb-0">Trending Movies</h2>
   <select id="time" class="form-select w-auto bg-dark text-white border-secondary">
-    <option value="day">Daily</option>
-    <option value="week">Weekly</option>
+    <option value="day" style="background: #343a40; color: white;">Daily</option>
+  <option value="week" style="background: #343a40; color: white;">Weekly</option>
   </select>
 </div>
 
         <div class="movie-container">
-        <!-- <div>
-            <div class="movie-list-container" >
-                <div class="movie-list-img">
-                    <img src="/Top_Entertainment_Chart/images.jpeg">
-                </div>
-                <div>
-                    <div class="movie-list-title">
-                        <h4>Movie tittle</h4>
-
-                        <span>9.4</span>
-                    </div>
-                    <div class="movie-details">
-                        <p>2019</p>
-                    </div>  
-                    <div class="movie-list-overview">
-                        <p>Lorem ipsum dolor sit amet, consectetur adipisicing elit. Recusandae odio inventore a eius, sit voluptatibus nam sunt saepe vitae quaerat fugiat rem nulla, debitis quibusdam repudiandae reiciendis accusantium facere minima.</p>
-                    </div> 
-
-                </div>
-            </div>
-                
-        </div> -->
     </div>
     <div class="pagination" style="bottom: 0;">
         <div class="page" id="prev">Previous Page</div>
         <div class="current" id="current">1</div>
         <div class="page" id="next">Next Page</div>
     </div>
+    
 </main>
-    <div id="toast" class="toast-message"></div>
+    
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
     integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
     crossorigin="anonymous"></script>
     
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="/scripts/trending.js"></script>
+    <script src="/public/scripts/trending.js"></script>
     <script src="scripts/searchBarNav.js"></script>
 
      
