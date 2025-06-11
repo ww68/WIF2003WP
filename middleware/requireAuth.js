@@ -1,4 +1,5 @@
 function requireAuth(req, res, next) {
+  console.log("Session:", req.session); // Log session to debug
   if (req.session && req.session.userId) {
     return next();           
   }
@@ -14,5 +15,6 @@ function requireAuth(req, res, next) {
 
   return res.redirect('/login.html');
 }
+
 
 module.exports = requireAuth;

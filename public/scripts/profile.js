@@ -3,7 +3,6 @@ const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
 const historyContainer = document.getElementById("historyContainer");
-const historyIds = JSON.parse(localStorage.getItem('watchHistory')) || [];
 
 async function getMovieDetails(movieId) {
     const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`);
@@ -29,19 +28,22 @@ function createMovieCard(movie) {
 }
 
 async function loadHistory() {
-    if (historyIds.length === 0) {
+    const response = await fetch(`/watchHistory/getHistory`);
+    const history = await response.json();
+
+    if (history.length === 0) {
         const noHistoryMessage = document.createElement('p');
         noHistoryMessage.textContent = "No watch history available.";
         historyContainer.appendChild(noHistoryMessage);
         return;
     }
 
+    // Fetch movie details and create movie cards
     let lastId = null;
+    for (const entry of history) {
+        const movieId = entry.movieId;
 
-    for (const entry of historyIds) {
-        const movieId = entry.id;
-
-        if (movieId === lastId) continue; // skip consecutive duplicate
+        if (movieId === lastId) continue;  // skip consecutive duplicates
         lastId = movieId;
 
         try {
@@ -72,8 +74,80 @@ document.getElementById("genreForm").addEventListener("submit", function(e) {
     .map(input => input.value);
 
     const userConfirmed = confirm("Are you sure you want to save your genre preferences?");
-        if (userConfirmed) {
-            localStorage.setItem("genrePreferences", JSON.stringify(selectedGenres));
-            alert("Preferences saved!");
+    if (userConfirmed) {
+        // Send selected genres to the backend to save
+        fetch('/profile/updateGenres', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ selectedGenres })
+        })
+        .then(response => response.json())
+        .then(data => {
+            alert('Preferences saved!');
+        })
+        .catch(error => {
+            console.error('Error saving genre preferences:', error);
+        });
+    }
+});
+
+// Function to toggle password visibility
+function togglePasswordVisibility(inputId, iconId) {
+    const passwordInput = document.getElementById(inputId);
+    const icon = document.getElementById(iconId);
+
+    if (passwordInput.type === "password") {
+        passwordInput.type = "text";
+        icon.classList.remove("bi-eye-slash");
+        icon.classList.add("bi-eye");
+    } else {
+        passwordInput.type = "password";
+        icon.classList.remove("bi-eye");
+        icon.classList.add("bi-eye-slash");
+    }
+}
+
+document.getElementById("toggleNewPassword").addEventListener("click", function() {
+    togglePasswordVisibility("newPassword", "toggleNewPassword");
+});
+
+document.getElementById("toggleConfirmPassword").addEventListener("click", function() {
+    togglePasswordVisibility("confirmNewPassword", "toggleConfirmPassword");
+});
+
+document.getElementById("submitNewPassword").addEventListener("click", function() {
+    const currentPassword = document.getElementById("currentPassword").value;
+    const newPassword = document.getElementById("newPassword").value;
+    const confirmNewPassword = document.getElementById("confirmNewPassword").value;
+
+    if (!currentPassword || !newPassword || !confirmNewPassword) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    if (newPassword !== confirmNewPassword) {
+        alert("New password and confirmation do not match.");
+        return;
+    }
+
+    fetch('/profile/changePassword', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ currentPassword, newPassword, confirmNewPassword })
+    })
+    .then(res => res.json())
+    .then(data => {
+        if (data.message === "Password updated successfully") {
+            alert(data.message);
+            // Reset fields and close modal if using one
+        } else {
+            alert(data.message);
         }
+    })
+    .catch(err => {
+        console.error("Error:", err);
+        alert("Server error occurred");
+    });
 });

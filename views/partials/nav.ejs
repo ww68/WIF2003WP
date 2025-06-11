@@ -40,11 +40,11 @@
                 <li class="nav-item"><a class="nav-link <%= currentPage === 'watchlist' ? 'active' : '' %>" href="/watchlist">WatchList</a></li>
                 <li class="nav-item"><a class="nav-link <%= currentPage === 'trending' ? 'active' : '' %>" href="/trending">Trending</a></li>
         
-                <li class="nav-item d-lg-none"><a class="nav-link profile-mobile" href="profile.html">Profile</a></li>
+                <li class="nav-item d-lg-none"><a class="nav-link profile-mobile <%= currentPage === 'profile' ? 'active' : '' %>" href="/profile">Profile</a></li>
             </ul>
     
-            <a href="profile.html" class="ms-3 d-none d-lg-block profile-desktop">
-            <img src="/images/defaultAvatarProfile.jpg" alt="Profile" class="navbar-profile-img">
+            <a href="/profile" class="ms-3 d-none d-lg-block profile-desktop">
+                <img src="<%= user.profilePicture || '/images/defaultAvatarProfile.jpg' %>" alt="Profile" class="navbar-profile-img">
             </a>
     
         </div>
