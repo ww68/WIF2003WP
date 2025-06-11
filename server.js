@@ -27,7 +27,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         secure: false,
-        maxAge: 24 * 60 * 60 * 1000
+        maxAge: 24 * 60 * 60 * 1000 // 1 day expiration
     }
 }));
 
@@ -53,10 +53,14 @@ app.use(express.static('public'));
 // Import routes
 const watchlistRouter = require('./routes/watchlistRoutes');
 const movieRouter = require('./routes/movieRoutes');
+const profileRoutes = require('./routes/profileRoutes'); 
+const watchHistoryRouter = require('./routes/historyRoutes');
 
 // Use routes
 app.use('/watchlist', requireAuth, watchlistRouter);
 app.use('/movie', movieRouter);
+app.use('/profile', profileRoutes);
+app.use('/watchHistory', watchHistoryRouter); 
 
 app.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;
@@ -114,11 +118,11 @@ app.post("/login", async (req, res) => {
     }
 });
 
-// app.get('/index.html', (req, res) => {
-//     if (!req.session.user) {
-//         return res.redirect('/login.html');
-//     }
-//     res.redirect('/index');
+// // Route for Home
+// app.get('/index', requireAuth, (req, res) => {
+//     const user = req.session.user; // Get the user object from session
+//     const currentPage = 'home'; // Set current page as 'home'
+//     res.render('home', { user, currentPage }); // Pass data to the home.ejs template
 // });
 
 app.get('/logout', (req, res) => {

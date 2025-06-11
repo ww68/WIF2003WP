@@ -16,7 +16,25 @@ const userSchema = new mongoose.Schema({
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     watchlist: [movieSchema],
-    // createdAt: { type: Date, default: Date.now }
+    firstName: { type: String, required: false },
+    lastName: { type: String, required: false },
+    phoneNum: { type: String, required: false },
+    gender: { type: String, required: false },
+    dob: { type: Date, required:false },
+    country: { type: String, required: false },
+    city: { type: String, required: false },
+    profilePicture: { 
+        type: String, 
+        default: 'images/defaultAvatarProfile.jpg' // Default profile picture path
+    },
+    genres: { type: [String], default: [] },
+    watchHistory: [
+        {
+            movieId: String,
+            title: String,
+            timestamp: { type: Date, default: Date.now }
+        }
+    ]
 });
 
 module.exports = mongoose.model('user', userSchema);

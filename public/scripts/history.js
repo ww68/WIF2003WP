@@ -4,8 +4,6 @@ const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 const historyContainer = document.getElementById('history-sections');
 const emptyState = document.getElementById('empty-state');
 
-const historyIds = JSON.parse(localStorage.getItem('watchHistory')) || [];
-
 async function getMovieDetails(movieId) {
     const response = await fetch(`${BASE_URL}/movie/${movieId}?api_key=${API_KEY}`);
     return response.json();
@@ -61,54 +59,59 @@ function createHistoryMovieCard(movie) {
 }
 
 async function loadHistory() {
-    const history = JSON.parse(localStorage.getItem('watchHistory')) || [];
+    const response = await fetch(`/watchHistory/getHistory`);
+    const history = await response.json();
 
     if (history.length === 0) {
         emptyState.classList.remove('d-none');
         return;
     }
 
+    // Group by date
     const grouped = {};
-    let lastId = null;
+    history.forEach(entry => {
+        const dateLabel = getDateLabel(entry.timestamp);
+        if (!grouped[dateLabel]) grouped[dateLabel] = [];
+        grouped[dateLabel].push(entry);
+    });
 
-    // Group by date and remove duplicates
-    for (const entry of history) {
-        if (entry.id === lastId) continue;
-        lastId = entry.id;
-
-        const label = getDateLabel(entry.timestamp);
-        if (!grouped[label]) grouped[label] = [];
-        grouped[label].push(entry.id);
-    }
-
-    // Create sections and movie cards
-    for (const [label, movieIds] of Object.entries(grouped)) {
-        const sectionId = createHistorySection(label, movieIds);
+    // Display grouped history
+    Object.keys(grouped).forEach(label => {
+        const sectionId = createHistorySection(label, grouped[label]);
         const container = document.getElementById(sectionId);
-        
-        for (const id of movieIds) {
-            try {
-                const movie = await getMovieDetails(id);
-                const card = createHistoryMovieCard(movie);
-                container.appendChild(card);
-            } catch (err) {
-                console.error(`Failed to fetch movie ${id}`, err);
-            }
+
+        grouped[label].forEach(movie => {
+            getMovieDetails(movie.movieId).then(movieData => {
+                const movieCard = createHistoryMovieCard(movieData);
+                container.appendChild(movieCard);
+            });
+        });
+    });
+}
+
+async function saveToHistory(movieId) {
+    const movieTitle = document.querySelector(`.movie-list-item[movie-id="${movieId}"] .movie-list-item-title`).textContent;
+
+    try {
+        const response = await fetch('/watchHistory/add', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ movieId: movieId, title: movieTitle }),
+        });
+
+        const data = await response.json();
+
+        if (data.message === 'Movie added to watch history') {
+            console.log('Movie successfully added to history');
+        } else {
+            console.log('Error adding movie to history');
         }
+    } catch (error) {
+        console.error('Error adding movie to history:', error);
     }
 }
-
-function saveToHistory(movieId) {
-    let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
-    if (history.length > 0 && history[0].id === movieId) return; // avoid duplicate immediate entry
-    const entry = {
-        id: movieId,
-        timestamp: new Date().toISOString()
-    };
-    history.unshift(entry); // Add to front
-    localStorage.setItem('watchHistory', JSON.stringify(history));
-}
-
   
 function getDateLabel(dateStr) {
     const watchDate = new Date(dateStr);
@@ -134,11 +137,26 @@ function getDateLabel(dateStr) {
     return watchDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }); // e.g., "2 May"
 }
 
-function removeFromHistory(movieId) {
-    let history = JSON.parse(localStorage.getItem('watchHistory')) || [];
-    history = history.filter(entry => entry.id !== movieId);
-    localStorage.setItem('watchHistory', JSON.stringify(history));
-    checkEmptyState();
+async function removeFromHistory(movieId) {
+    try {
+        const response = await fetch('/watchHistory/remove', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ movieId: movieId }),
+        });
+
+        const data = await response.json();
+
+        if (data.message === 'Movie removed from history') {
+            console.log('Movie successfully removed from history');
+        } else {
+            console.log('Error removing movie from history');
+        }
+    } catch (error) {
+        console.error('Error removing movie from history:', error);
+    }
 }
 
 function checkEmptyState() {
@@ -152,15 +170,41 @@ function checkEmptyState() {
 
 document.getElementById('clear-history').addEventListener('click', () => {
     if (confirm('Are you sure you want to delete all watch history?')) {
-        localStorage.removeItem('watchHistory');
-        historyContainer.innerHTML = '';
-        checkEmptyState();
+        fetch('/watchHistory/clear', { method: 'POST' })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message === 'History cleared') {
+                    historyContainer.innerHTML = '';
+                    checkEmptyState();
+                }
+            });
     }
 });
 
-// Add this to handle the watch functionality
-function watchMovie(movieId) {
-    window.location.href = `movie.html?id=${movieId}`;
+async function watchMovie(movieId) {
+    const movieTitle = document.querySelector(`.movie-list-item[movie-id="${movieId}"] .movie-list-item-title`).textContent;
+
+    // Send request to add to watch history
+    fetch('/watchHistory/add', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ movieId: movieId, title: movieTitle }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.message === 'Movie added to watch history') {
+            // Redirect to the movie detail page after adding to history
+            window.location.href = `/movie/${movieId}`;
+        } else {
+            alert('Error adding movie to history');
+        }
+    })
+    .catch(error => {
+        console.error('Error adding to watch history:', error);
+        alert('Error adding to history');
+    });
 }
 
 // Initialize the page

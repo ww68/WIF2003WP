@@ -1,0 +1,41 @@
+.profile-pic-container {
+    position: relative;
+    width: 150px;
+    height: 150px;
+    margin-bottom: 20px;
+}
+
+.profile-pic {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 50%;
+    border: 2px solid #666;
+}
+
+.edit-icon {
+    color: black;
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    background: #fff;
+    border-radius: 50%;
+    padding: 8px;
+    border: 1px solid #555;
+    cursor: pointer;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    pointer-events: none;
+}
+
+#countrySuggestions, #citySuggestions {
+    max-height: 200px;
+    overflow-y: auto;
+    width: 100%;
+    top: 100%;
+    z-index: 1000;
+}
