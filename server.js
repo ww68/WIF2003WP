@@ -41,7 +41,7 @@ app.get('/', (req, res) => {
 });
 
 app.get('/index', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    res.sendFile(path.join(__dirname, '/index'));
 });
 
 // Middleware
@@ -53,13 +53,13 @@ app.use(express.static('public'));
 // Import routes
 const watchlistRouter = require('./routes/watchlistRoutes');
 const movieRouter = require('./routes/movieRoutes');
-const profileRoutes = require('./routes/profileRoutes'); 
+const profileRouter = require('./routes/profileRoutes'); 
 const watchHistoryRouter = require('./routes/historyRoutes');
 
 // Use routes
 app.use('/watchlist', requireAuth, watchlistRouter);
 app.use('/movie', movieRouter);
-app.use('/profile', profileRoutes);
+app.use('/profile', profileRouter);
 app.use('/watchHistory', watchHistoryRouter); 
 
 app.post("/signup", async (req, res) => {
