@@ -19,7 +19,6 @@ const storage = multer.diskStorage({
 // Set up Multer upload
 const upload = multer({ storage: storage });
 
-// Route to update profile picture
 router.post('/updateProfilePicture', requireAuth, upload.single('profilePicture'), async (req, res) => {
     const { userId } = req.session; // Assume user ID is stored in the session
     const profilePictureUrl = req.file ? `/uploads/profile-pictures/${req.file.filename}` : null;
@@ -27,11 +26,11 @@ router.post('/updateProfilePicture', requireAuth, upload.single('profilePicture'
     try {
         // Update the user's profile picture URL in the database
         const updatedUser = await User.findByIdAndUpdate(userId, {
-            profilePicture: profilePictureUrl || 'path/to/default/profile-pic.jpg'
+            profilePicture: profilePictureUrl || 'images/deafultAvatarProfile.jpg'
         }, { new: true });
 
         req.session.user = updatedUser; // Update session data
-        res.redirect('/profile'); // Redirect to the profile page after updating
+        res.redirect('/'); // Redirect to the profile page after updating
     } catch (err) {
         console.error(err);
         res.status(500).send('Error updating profile picture');
@@ -50,39 +49,6 @@ router.get('/', requireAuth, async (req, res) => {
     } catch (err) {
         console.error(err);
         res.status(500).send('Error retrieving profile data');
-    }
-});
-
-// Route to edit the profile
-router.get('/editprofile', requireAuth, async (req, res) => {
-    try {
-        const user = await User.findById(req.session.userId); // Fetch user by ID stored in session
-        res.render('editprofile', { title: 'Edit Profile', user }); // Render editprofile.ejs with user data
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error retrieving user data for editing');
-    }
-});
-
-// Route to update user profile
-router.post('/updateProfile', requireAuth, async (req, res) => {
-    const { firstName, lastName, phoneNum, gender, dob, country, city } = req.body;
-    try {
-        const updatedUser = await User.findByIdAndUpdate(req.session.userId, {
-            firstName,
-            lastName,
-            phoneNum,
-            gender,
-            dob,
-            country,
-            city
-        }, { new: true });
-
-        req.session.user = updatedUser; // Update session data
-        res.redirect('/profile');
-    } catch (err) {
-        console.error(err);
-        res.status(500).send('Error updating profile');
     }
 });
 
@@ -107,7 +73,8 @@ router.post('/updateGenres', requireAuth, async (req, res) => {
         }, { new: true });
 
         req.session.user = updatedUser; // Update session data
-        res.redirect('/profile');
+        res.redirect('/');
+        res.json({ message: 'Preferences saved successfully' }); // Send success message
     } catch (err) {
         console.error(err);
         res.status(500).send('Error updating genres');
@@ -139,5 +106,38 @@ router.post('/changePassword', requireAuth, async (req, res) => {
         res.status(500).json({ message: 'Server error' });
     }
 });
+
+router.get('/logout', (req, res) => {
+    req.session.destroy((err) => {
+        if (err) {
+            return res.status(500).send('Failed to logout');
+        }
+        res.clearCookie('connect.sid'); // Clear the session cookie
+        res.redirect('/login'); // Redirect to login page
+    });
+});
+
+router.post('/deleteAccount', requireAuth, async (req, res) => {
+    const userId = req.session.userId;
+
+    try {
+        // Delete the user's account from the database
+        await User.findByIdAndDelete(userId);
+        
+        // Destroy the session and clear the session cookie
+        req.session.destroy((err) => {
+            if (err) {
+                return res.status(500).send('Failed to log out after deletion');
+            }
+            res.clearCookie('connect.sid'); // Clear the session cookie
+            res.redirect('/login'); // Redirect to login page after deletion
+        });
+    } catch (err) {
+        console.error('Error deleting account:', err);
+        res.status(500).send('Error deleting account');
+    }
+});
+
+
 
 module.exports = router;
