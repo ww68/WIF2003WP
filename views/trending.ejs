@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/css/bootstrap.min.css" 
+    rel="stylesheet" integrity="sha384-SgOJa3DmI69IUzQ2PVdRZhwQ+dy64/BUtbMJw1MZ8t5HZApcHrRKUc4W0kG879m7" 
+    crossorigin="anonymous">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" 
+    rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css" rel="stylesheet">
+
+    
+    <link rel="stylesheet" href="/style/shared/navBar.css">
+    <link rel="stylesheet" href="/style/pages/trending.css">
+    
+    <title>Movie</title>
+</head>
+<body>
+    <%- include('partials/nav', { 
+     currentPage: '',   
+    }) %>
+    <main>
+        <div class="container pt-5 mt-5 mb-4">
+    <h2 class="fw-bold text-white text-center">Top Entertainment Chart</h2>
+</div> 
+         
+<div class="chart-container">
+    <div id="genreChartContainer">
+        <canvas id="genreChart"></canvas>
+    </div>
+    <div id="left-side">
+        <div id="line-chart">
+            <canvas id="top5LineChart"></canvas>
+        </div>
+        <div class="movies-list-container1">
+            <h6>Top 5 Upcoming Movies</h6>
+            <div class="table">
+                <div class="table-header">
+                    <div class="number">#</div>
+                    <div class="movie-name">Movie Title</div>
+                    <div class="movie-genre">Genre</div>
+                    <div class="movie-release-date">Release Date</div>
+                </div>
+
+                <ul id="movies-list">
+                    <% upcomingMovies.forEach((movie, index) => { %>
+                        <li class="table-row">
+                            <div class="number"><%= index + 1 %></div>
+                            <div class="movie-name"><%= movie.title %></div>
+                            <div class="movie-genre">
+                                <% if (movie.genre_ids && movie.genre_ids.length > 0) { %>
+                                    <%= GENRE_MAP[movie.genre_ids[0]] || 'Unknown' %>
+                                <% } else { %>
+                                    Unknown
+                                <% } %>
+                            </div>
+                            <div class="movie-release-date"><%= movie.release_date %></div>
+                        </li>
+                    <% }); %>
+                </ul>
+            </div>
+        </div>                
+    </div>     
+</div>
+
+<div class="container pt-5 mb-4 d-flex justify-content-center align-items-center">
+    <h2 class="fw-bold text-white mb-0">Trending Movies</h2>
+    <select id="time" class="form-select w-auto bg-dark text-white border-secondary ms-3">
+        <option value="day" <%= timeWindow === 'day' ? 'selected' : '' %>>Daily</option>
+        <option value="week" <%= timeWindow === 'week' ? 'selected' : '' %>>Weekly</option>
+
+    </select>
+</div>
+
+<div class="movie-container">
+    <% movies.forEach((movie, index) => { 
+        const globalIndex = (currentPage - 1) * 20 + (index + 1);
+        const genreNames = movie.genre_ids.map(id => GENRE_MAP[id]).filter(Boolean).join(' | ');
+    %>
+        <div class="movie-list-container" movie-id="<%= movie.id %>">
+            <div class="movie-rank"><%= globalIndex %></div>
+            <div class="movie-list-img">
+                <img src="<%= IMAGE_URL %><%= movie.poster_path %>" alt="<%= movie.title %>">
+            </div>
+            <div class="movie-list-content">
+                <div class="movie-list-title">
+                    <h4><%= movie.title %></h4>
+                    <div style="display: flex; align-items: center; gap: 10px;">
+                        <i class="fas fa-bookmark bookmark-icon"></i>
+                        <div class="vote"><%= movie.vote_average.toFixed(1) %></div>
+                    </div>
+                </div>
+                <div class="movie-details">
+                    <% if (movie.release_date) { %>
+                        <p><%= new Date(movie.release_date).getFullYear() %> |</p>
+                    <% } %>
+                    <p>&nbsp;<%= genreNames %></p>
+                </div>
+                <div class="movie-list-overview">
+                    <p><%= movie.overview %></p>  
+                    <button class="movie-trailer" data-id="<%= movie.id %>">
+                        <i class="fas fa-solid fa-play"></i> Trailer
+                    </button>
+                </div>
+            </div>
+        </div>
+    <% }); %>
+</div>
+
+<div class="pagination" style="bottom: 0;">
+    <div class="page" id="prev">Previous Page</div>
+    <div class="current" id="current"><%= currentPage %></div>
+    <div class="page" id="next">Next Page</div>
+</div>
+
+    </main>
+    <div id="toast" class="toast-message"></div>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
+    crossorigin="anonymous"></script>
+    
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="/scripts/trending.js"></script>
+    <script src="scripts/searchBarNav.js"></script>
+
+</body>
+</html>
