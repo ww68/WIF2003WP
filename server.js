@@ -58,10 +58,8 @@ const profileRouter = require('./routes/profileRoutes');
 const trendingRouter = require('./routes/trendingRoutes');
 const historyRouter = require('./routes/historyRoutes');
 const editProfileRouter = require('./routes/editProfileRoutes');
-=========
-const watchHistoryRouter = require('./routes/historyRoutes');
-const trendingRouter = require('./routes/trendingRoutes');
->>>>>>>>> Temporary merge branch 2
+
+
 
 // Use routes
 app.use('/watchlist', requireAuth, watchlistRouter);
