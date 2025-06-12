@@ -8,7 +8,7 @@ router.get('/', requireAuth, async (req, res) => {
     try {
         const user = await User.findById(req.session.userId);
         if (!user) return res.status(404).send('User not found');
-        res.render('history', { user });  // Make sure you have 'views/history.ejs'
+        res.render('history', { user });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error rendering history page');

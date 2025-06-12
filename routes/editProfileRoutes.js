@@ -9,7 +9,11 @@ router.get('/', requireAuth, async (req, res) => {
 
         // Format the date of birth to yyyy-mm-dd
         const formattedDOB = user.dob ? user.dob.toISOString().split('T')[0] : ''; // Ensure valid format 
-        res.render('editprofile', { title: 'Edit Profile', user: { ...user, dob: formattedDOB } });
+
+        res.render('editprofile', {    
+            title: 'Edit Profile',
+            user: { ...user.toObject(), dob: formattedDOB }
+         });
     } catch (err) {
         console.error(err);
         res.status(500).send('Error retrieving user data for editing');
@@ -41,3 +45,5 @@ router.post('/updateProfile', requireAuth, async (req, res) => {
         res.status(500).send('Error updating profile');
     }
 });
+
+module.exports = router;
