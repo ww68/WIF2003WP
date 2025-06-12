@@ -59,7 +59,7 @@ function createHistoryMovieCard(movie) {
 }
 
 async function loadHistory() {
-    const response = await fetch(`/watchHistory/getHistory`);
+    const response = await fetch(`/history/getHistory`);
     const history = await response.json();
 
     if (history.length === 0) {
@@ -93,7 +93,7 @@ async function saveToHistory(movieId) {
     const movieTitle = document.querySelector(`.movie-list-item[movie-id="${movieId}"] .movie-list-item-title`).textContent;
 
     try {
-        const response = await fetch('/watchHistory/add', {
+        const response = await fetch('/history/add', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -139,7 +139,7 @@ function getDateLabel(dateStr) {
 
 async function removeFromHistory(movieId) {
     try {
-        const response = await fetch('/watchHistory/remove', {
+        const response = await fetch('/history/remove', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -170,7 +170,7 @@ function checkEmptyState() {
 
 document.getElementById('clear-history').addEventListener('click', () => {
     if (confirm('Are you sure you want to delete all watch history?')) {
-        fetch('/watchHistory/clear', { method: 'POST' })
+        fetch('/history/clear', { method: 'POST' })
             .then(response => response.json())
             .then(data => {
                 if (data.message === 'History cleared') {
@@ -185,7 +185,7 @@ async function watchMovie(movieId) {
     const movieTitle = document.querySelector(`.movie-list-item[movie-id="${movieId}"] .movie-list-item-title`).textContent;
 
     // Send request to add to watch history
-    fetch('/watchHistory/add', {
+    fetch('/history/add', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',

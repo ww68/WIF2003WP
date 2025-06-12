@@ -3,6 +3,18 @@ const router = express.Router();
 const User = require('../models/user');
 const requireAuth = require('../middleware/requireAuth'); // Ensure the user is logged in
 
+
+router.get('/', requireAuth, async (req, res) => {
+    try {
+        const user = await User.findById(req.session.userId);
+        if (!user) return res.status(404).send('User not found');
+        res.render('history', { user });  // Make sure you have 'views/history.ejs'
+    } catch (err) {
+        console.error(err);
+        res.status(500).send('Error rendering history page');
+    }
+});
+
 // Save movie to watch history
 router.post('/add', requireAuth, async (req, res) => {
     const { movieId, title } = req.body;  // Expecting movie data from frontend
