@@ -12,7 +12,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css"
     rel="stylesheet"/>
 
-    <link rel="stylesheet" href="style/shared/navBar.css">
+    <link rel="stylesheet" href="/style/shared/navBar.css">
     <link rel="stylesheet" href="style/pages/editprofile.css">
 
 </head>
@@ -23,10 +23,10 @@
                 <h2 class="mb-4">Edit Profile</h2>
                 <p class="mb-4">Update your information.</p>
 
-                <form action="/profile/updateProfilePicture" method="POST" enctype="multipart/form-data">
+                <form action="/editprofile/updateProfilePicture" method="POST" enctype="multipart/form-data">
                     <div class="d-flex justify-content-center">
                         <div class="profile-pic-container">
-                            <img src="<%= user.profilePicture || 'path/to/default/profile-pic.jpg' %>" 
+                            <img src="<%= user.profilePicture ? user.profilePicture : 'images/defaultAvatarProfile.jpg' %>" 
                                 alt="Profile Picture" class="profile-pic" id="profileImage" />
                             <label for="photo">
                                 <i class="bi bi-pencil-fill edit-icon"></i>
@@ -36,7 +36,7 @@
                     </div>
                 </form>
                 
-            <form action="/updateProfile" method="POST">
+            <form action="/editprofile/updateProfile" method="POST">
                 <div class="mb-3">
                     <label for="firstName" class="form-label">First Name</label>
                     <input type="text" class="form-control" id="firstName" name="firstName" value="<%= user.firstName %>" required>
@@ -71,11 +71,6 @@
                     <input type="date" class="form-control" id="dob" name="dob" value="<%= user.dob %>">
                 </div>
 
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-secondary w-50">Cancel</button>
-                    <button type="submit" class="btn btn-primary w-50">Save</button>
-                </div> 
-
                 <div class="row">
                     <div class="mb-3 col-md-6 position-relative">
                         <label for="country" class="form-label">Country</label>
@@ -90,9 +85,19 @@
                     </div>
                 </div>
 
+                <div class="d-flex gap-2">
+                    <button type="button" class="btn btn-secondary w-50">Cancel</button>
+                    <button type="submit" class="btn btn-primary w-50">Save</button>
+                </div> 
             </form>
         </div>
         </div>
     </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.5/dist/js/bootstrap.bundle.min.js" 
+    integrity="sha384-k6d4wzSIapyDyv1kpU366/PK5hCdSbCRGRCMv+eplOQJWyd1fbcAu9OCUj5zNLiq" 
+    crossorigin="anonymous"></script>
+
+    <script src="/scripts/editprofile.js"></script>
 </body>
 </html>
