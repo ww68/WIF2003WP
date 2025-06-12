@@ -41,7 +41,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/index', (req, res) => {
-    res.sendFile(path.join(__dirname, '/index'));
+    const user = req.session.user || {};
+    res.render('index', { user, currentPage: 'home' });
 });
 
 // Middleware
@@ -117,13 +118,6 @@ app.post("/login", async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
-
-// // Route for Home
-// app.get('/index', requireAuth, (req, res) => {
-//     const user = req.session.user; // Get the user object from session
-//     const currentPage = 'home'; // Set current page as 'home'
-//     res.render('home', { user, currentPage }); // Pass data to the home.ejs template
-// });
 
 app.get('/logout', (req, res) => {
     req.session.destroy(() => {

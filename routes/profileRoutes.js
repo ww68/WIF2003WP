@@ -39,7 +39,7 @@ router.post('/updateProfilePicture', requireAuth, upload.single('profilePicture'
 });
 
 // Route to view the profile
-router.get('/profile', requireAuth, async (req, res) => {
+router.get('/', requireAuth, async (req, res) => {
     console.log("User ID from session:", req.session.userId); // Log userId from session
     try {
         const user = await User.findById(req.session.userId); // Fetch user by ID stored in session
