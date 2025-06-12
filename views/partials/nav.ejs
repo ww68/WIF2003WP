@@ -44,7 +44,7 @@
             </ul>
     
             <a href="/profile" class="ms-3 d-none d-lg-block profile-desktop">
-                <img src="<%= user.profilePicture || '/images/defaultAvatarProfile.jpg' %>" alt="Profile" class="navbar-profile-img">
+                <img src="<%= (locals.user.profilePicture) ? locals.user.profilePicture : '/images/defaultAvatarProfile.jpg' %>" alt="Profile" class="navbar-profile-img">
             </a>
     
         </div>

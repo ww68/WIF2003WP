@@ -2,6 +2,95 @@ const API_KEY = '9a56291f8d522c5f874ed7812f062758';
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
+class OptimisticWatchlist {
+    constructor() {
+        this.pendingOperations = new Map(); // movieId -> {type, promise, timestamp}
+    }
+    
+    async toggleWatchlist(movieData, iconElement) {
+        const movieId = movieData.id;
+        
+        // Prevent multiple operations on same movie
+        if (this.pendingOperations.has(movieId)) {
+            console.log('Operation already in progress for movie:', movieId);
+            return;
+        }
+        
+        const isCurrentlyInWatchlist = iconElement.classList.contains('fa-solid');
+        const isAdd = !isCurrentlyInWatchlist;
+        
+        // Update UI immediately (optimistic)
+        this.updateUI(iconElement, isAdd);
+        
+        // Create and track operation
+        const operation = this.performServerOperation(movieData, isAdd);
+        this.pendingOperations.set(movieId, {
+            type: isAdd ? 'add' : 'remove',
+            promise: operation,
+            timestamp: Date.now()
+        });
+        
+        try {
+            const result = await operation;
+            
+            if (!result || !result.success) {
+                // Server operation failed, revert UI
+                this.updateUI(iconElement, !isAdd);
+                this.showError(isAdd ? 'Failed to add to watchlist' : 'Failed to remove from watchlist');
+            }
+            
+            return result;
+        } catch (error) {
+            // Network error, revert UI
+            this.updateUI(iconElement, !isAdd);
+            this.showError('Network error. Please try again.');
+            console.error('Watchlist operation error:', error);
+        } finally {
+            // Clean up pending operation
+            this.pendingOperations.delete(movieId);
+        }
+    }
+    
+    updateUI(iconElement, isAdd) {
+        if (isAdd) {
+            iconElement.classList.replace('fa-regular', 'fa-solid');
+            iconElement.classList.add('active');
+        } else {
+            iconElement.classList.replace('fa-solid', 'fa-regular');
+            iconElement.classList.remove('active');
+        }
+    }
+    
+    async performServerOperation(movieData, isAdd) {
+        const url = isAdd ? '/watchlist/add' : '/watchlist/remove';
+        const body = isAdd ? movieData : { movieId: movieData.id };
+        
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(body)
+        });
+        
+        if (response.status === 401) {
+            location.href = '/login.html';
+            return null;
+        }
+        
+        return response.json();
+    }
+    
+    showError(message) {
+        if (typeof showToast === 'function') {
+            showToast(message);
+        } else {
+            console.error(message);
+        }
+    }
+}
+
+// Create global instance
+const watchlistManager = new OptimisticWatchlist();
+
 // Load movies when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
     fetchMovies('movie/popular', 'top-trending');
@@ -77,25 +166,59 @@ function displayMovies(movies, containerId) {
     container.innerHTML = '';
 
     movies.forEach(movie => {
-        const poster = movie.poster_path ? `${IMAGE_URL}${movie.poster_path}` : 'movie-website-master/img/placeholder.jpg';
+        const movieData = {
+            id: String(movie.id),
+            title: movie.title,
+            year: (movie.release_date || '').split('-')[0],
+            rating: movie.vote_average?.toFixed(1) || 'N/A',
+            description: movie.overview,
+            img: movie.poster_path ? `${IMAGE_URL}${movie.poster_path}` : '/images/fallback.png',
+            watched: false
+        };
+
         const movieItem = document.createElement('div');
-        movieItem.classList.add('movie-list-item');
-        movieItem.setAttribute('movie-id', String(movie.id));
+        movieItem.className = 'movie-list-item';
+        movieItem.dataset.id = movieData.id;
         movieItem.innerHTML = `
-            <div class="bookmark-wrapper">
-                <div class="bookmark-circle d-flex align-items-center justify-content-center">
-                    <i class="fa-solid fa-bookmark bookmark-icon"></i>
-                </div>
+        <div class="bookmark-wrapper">
+            <div class="bookmark-circle d-flex align-items-center justify-content-center">
+                <i class="fa-regular fa-bookmark bookmark-icon"></i>
             </div>
-            <img class="movie-list-item-img" src="${poster}" alt="${movie.title}">
-            <span class="movie-list-item-title">${movie.title}</span>
-            <p class="movie-list-item-desc">${movie.overview}</p>
-            <button class="movie-list-item-button" onclick="watchMovie(${movie.id})">Watch</button>
+        </div>
+        <img class="movie-list-item-img" src="${movieData.img}" alt="${movieData.title}">
+        <span class="movie-list-item-title">${movieData.title}</span>
+        <p class="movie-list-item-desc">${movieData.description}</p>
+        <button class="movie-list-item-button" data-movie-id="${movieData.id}">Watch</button>
         `;
         container.appendChild(movieItem);
+
+        const circle = movieItem.querySelector('.bookmark-circle');   
+        const icon = circle.querySelector('.bookmark-icon');
+
+        // Check initial state from server
+        fetch(`/watchlist/check/${movieData.id}`)
+            .then(r => r.status === 401 ? null : r.json())
+            .then(data => {
+                if (data?.inWatchlist) {
+                    icon.classList.replace('fa-regular', 'fa-solid');
+                    icon.classList.add('active');
+                }
+            })
+            .catch(() => {
+                // Ignore errors for initial state check
+            });
+
+        // SIMPLIFIED click handler - just call the manager
+        circle.addEventListener('click', async () => {
+            await watchlistManager.toggleWatchlist(movieData, icon);
+        });
+
+        const watchButton = movieItem.querySelector('.movie-list-item-button');
+        watchButton.addEventListener('click', () => {
+            watchMovie(movieData.id, movieData.title);   
+        });
     });
 
-    attachWatchlistListeners(container);
     initializeScrolling();
 }
 
@@ -136,69 +259,6 @@ function loadCarouselMovies(carouselId, contentId, endpoint) {
         .catch(err => console.error(`Error loading ${carouselId}:`, err));
 }
 
-
-// Function to toggle the watchlist status
-async function toggleWatchlist(iconElement, movieId, movieData) {
-    try {
-        // Check if user is logged in
-        if (!isLoggedIn) {
-            alert('Please log in to add to watchlist');
-            return;
-        }
-
-        const response = await fetch(`/watchlist/check/${movieId}`);
-        const data = await response.json();
-        const movieInWatchlist = data.inWatchlist;
-
-        if (movieInWatchlist) {
-            // Remove from watchlist
-            const removeResponse = await fetch('/watchlist/remove', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ movieId })
-            });
-
-            if (removeResponse.ok) {
-                iconElement.classList.remove('active');
-                iconElement.innerHTML = '<i class="far fa-bookmark me-2"></i> Watchlist';
-                showToast('Removed from Watchlist');
-            }
-        } else {
-            // Add to watchlist
-            const addResponse = await fetch('/watchlist/add', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ movieData })
-            });
-
-            if (addResponse.ok) {
-                iconElement.classList.add('active');
-                iconElement.innerHTML = '<i class="fas fa-bookmark me-2"></i> Added';
-                showToast('Added to Watchlist');
-            }
-        }
-    } catch (error) {
-        console.error('Error toggling watchlist:', error);
-        showToast('Error toggling watchlist');
-    }
-}
-
-async function updateWatchlistButtons() {
-    // Check for watchlist status and update button state
-    const movieId = document.getElementById('bookmarkBtn').getAttribute('data-movie-id');
-    const response = await fetch(`/watchlist/check/${movieId}`);
-    const data = await response.json();
-
-    if (data.inWatchlist) {
-        document.getElementById('bookmarkBtn').classList.add('active');
-        document.getElementById('bookmarkBtn').innerHTML = '<i class="fas fa-bookmark me-2"></i> Added';
-    }
-}
-
 // Toast message
 function showToast(message) {
     const toast = document.getElementById('toast');
@@ -236,8 +296,15 @@ function initializeScrolling() {
     });
 }
 
-async function watchMovie(movieId) {
-    const movieTitle = document.querySelector(`.movie-list-item[movie-id="${movieId}"] .movie-list-item-title`).textContent;
+async function watchMovie(movieId, movieTitle = null) {
+    window.location.href = `/movie/${movieId}`;
+    
+    if (!movieTitle) {
+        const titleEl = document.querySelector(
+            `.movie-list-item[data-id="${movieId}"] .movie-list-item-title`
+        );
+        movieTitle = titleEl ? titleEl.textContent : '';
+    }
 
     // Send request to add to watch history
     fetch('/watchHistory/add', {
