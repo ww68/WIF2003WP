@@ -23,74 +23,72 @@
                 <h2 class="mb-4">Edit Profile</h2>
                 <p class="mb-4">Update your information.</p>
 
-                <form action="/editprofile/updateProfilePicture" method="POST" enctype="multipart/form-data">
+                <form action="/editprofile/updateProfile" method="POST" enctype="multipart/form-data">
                     <div class="d-flex justify-content-center">
                         <div class="profile-pic-container">
                             <img src="<%= user.profilePicture ? user.profilePicture : 'images/defaultAvatarProfile.jpg' %>" 
                                 alt="Profile Picture" class="profile-pic" id="profileImage" />
-                            <label for="photo">
+                            <label for="photo" class="position-absolute bottom-0 end-0 p-2 bg-dark rounded-circle" style="cursor: pointer;">
                                 <i class="bi bi-pencil-fill edit-icon"></i>
                             </label>
                             <input type="file" name="profilePicture" id="photo" accept="image/*" style="display: none;" onchange="previewImage(event)">
                         </div>
                     </div>
+
+                    <div class="mb-3">
+                        <label for="firstName" class="form-label">First Name</label>
+                        <input type="text" class="form-control" id="firstName" name="firstName" value="<%= user.firstName %>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="lastName" class="form-label">Last Name</label>
+                        <input type="text" class="form-control" id="lastName" name="lastName" value="<%= user.lastName %>" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="phoneNum" class="form-label">Phone Number</label>
+                        <input type="text" class="form-control" id="phoneNum" name="phoneNum" value="<%= user.phoneNum %>">
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="gender" class="form-label">Gender</label>
+                        <select class="form-select" id="gender" name="gender">
+                            <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
+                            <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
+                            <option value="Prefer not to say" <%= user.gender === 'Prefer not to say' ? 'selected' : '' %>>Prefer not to say</option>
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="dob" class="form-label">Date of Birth</label>
+                        <input type="date" class="form-control" id="dob" name="dob" value="<%= user.dob %>">
+                    </div>
+
+                    <div class="row">
+                        <div class="mb-3 col-md-6 position-relative">
+                            <label for="country" class="form-label">Country</label>
+                            <input type="text" id="country" name="country" class="form-control" value="<%= user.country %>" autocomplete="on" required/>
+                            <ul id="countrySuggestions" class="list-group position-absolute z-1"></ul>
+                        </div>
+
+                        <div class="mb-3 col-md-6 position-relative">
+                            <label for="city" class="form-label">City</label>
+                            <input type="text" id="city" name="city" class="form-control" value="<%= user.city %>" autocomplete="on" readonly required />
+                            <ul id="citySuggestions" class="list-group position-absolute z-1"></ul>
+                        </div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button type="button" class="btn btn-secondary w-50">Cancel</button>
+                        <button type="submit" class="btn btn-primary w-50">Save</button>
+                    </div> 
                 </form>
-                
-            <form action="/editprofile/updateProfile" method="POST">
-                <div class="mb-3">
-                    <label for="firstName" class="form-label">First Name</label>
-                    <input type="text" class="form-control" id="firstName" name="firstName" value="<%= user.firstName %>" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="lastName" class="form-label">Last Name</label>
-                    <input type="text" class="form-control" id="lastName" name="lastName" value="<%= user.lastName %>" required>
-                </div>
-
-                <div class="mb-3">
-                    <label for="email" class="form-label">Email</label>
-                    <input type="email" class="form-control" id="email" name="email" value="<%= user.email %>" readonly>
-                </div>
-
-                <div class="mb-3">
-                    <label for="phoneNum" class="form-label">Phone Number</label>
-                    <input type="text" class="form-control" id="phoneNum" name="phoneNum" value="<%= user.phoneNum %>">
-                </div>
-
-                <div class="mb-3">
-                    <label for="gender" class="form-label">Gender</label>
-                    <select class="form-select" id="gender" name="gender">
-                        <option value="Male" <%= user.gender === 'Male' ? 'selected' : '' %>>Male</option>
-                        <option value="Female" <%= user.gender === 'Female' ? 'selected' : '' %>>Female</option>
-                        <option value="Prefer not to say" <%= user.gender === 'Prefer not to say' ? 'selected' : '' %>>Prefer not to say</option>
-                    </select>
-                </div>
-
-                <div class="mb-3">
-                    <label for="dob" class="form-label">Date of Birth</label>
-                    <input type="date" class="form-control" id="dob" name="dob" value="<%= user.dob %>">
-                </div>
-
-                <div class="row">
-                    <div class="mb-3 col-md-6 position-relative">
-                        <label for="country" class="form-label">Country</label>
-                        <input type="text" id="country" name="country" class="form-control" value="<%= user.country %>" autocomplete="on" required/>
-                        <ul id="countrySuggestions" class="list-group position-absolute z-1"></ul>
-                    </div>
-
-                    <div class="mb-3 col-md-6 position-relative">
-                        <label for="city" class="form-label">City</label>
-                        <input type="text" id="city" name="city" class="form-control" value="<%= user.city %>" autocomplete="on" disabled required />
-                        <ul id="citySuggestions" class="list-group position-absolute z-1"></ul>
-                    </div>
-                </div>
-
-                <div class="d-flex gap-2">
-                    <button type="button" class="btn btn-secondary w-50">Cancel</button>
-                    <button type="submit" class="btn btn-primary w-50">Save</button>
-                </div> 
-            </form>
-        </div>
+            </div>
         </div>
     </main>
 

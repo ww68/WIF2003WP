@@ -9,7 +9,7 @@ async function getMovieDetails(movieId) {
     return response.json();
 }
 
-function createHistorySection(label, movieIds) {
+function createHistorySection(label) {
     const section = document.createElement('div');
     section.classList.add('page-black');
     const sectionId = `history-${label.replace(/\s+/g, '-').toLowerCase()}`;
@@ -25,10 +25,11 @@ function createHistorySection(label, movieIds) {
     return sectionId;
 }
 
-function createHistoryMovieCard(movie) {
+function createHistoryMovieCard(movie, timestamp) {
     const movieItem = document.createElement('div');
     movieItem.classList.add('history-movie-item');
     movieItem.setAttribute('movie-id', movie.id);
+    movieItem.setAttribute('data-timestamp', timestamp);
     
     movieItem.innerHTML = `
         <div class="history-poster-wrapper">
@@ -50,7 +51,7 @@ function createHistoryMovieCard(movie) {
     const deleteBtn = movieItem.querySelector('.history-delete-icon');
     deleteBtn.addEventListener('click', (e) => {
         e.stopPropagation();
-        removeFromHistory(movie.id);
+        removeFromHistory(movie.id, timestamp);
         movieItem.remove();
         checkEmptyState();
     });
@@ -69,28 +70,34 @@ async function loadHistory() {
 
     // Group by date
     const grouped = {};
+    let lastMovieId = null;
     history.forEach(entry => {
+        if (entry.movieId === lastMovieId) return; // skip consecutive duplicates
+        lastMovieId = entry.movieId;
+
         const dateLabel = getDateLabel(entry.timestamp);
         if (!grouped[dateLabel]) grouped[dateLabel] = [];
         grouped[dateLabel].push(entry);
     });
 
     // Display grouped history
-    Object.keys(grouped).forEach(label => {
+    Object.keys(grouped).forEach(label => { 
         const sectionId = createHistorySection(label, grouped[label]);
         const container = document.getElementById(sectionId);
 
-        grouped[label].forEach(movie => {
-            getMovieDetails(movie.movieId).then(movieData => {
-                const movieCard = createHistoryMovieCard(movieData);
+        grouped[label].forEach(entry => {
+            getMovieDetails(entry.movieId).then(movieData => {
+                const movieCard = createHistoryMovieCard(movieData, entry.timestamp);
                 container.appendChild(movieCard);
             });
         });
     });
+
 }
 
 async function saveToHistory(movieId) {
     const movieTitle = document.querySelector(`.movie-list-item[movie-id="${movieId}"] .movie-list-item-title`).textContent;
+    const timestamp = new Date().toISOString();
 
     try {
         const response = await fetch('/history/add', {
@@ -98,7 +105,7 @@ async function saveToHistory(movieId) {
             headers: {
                 'Content-Type': 'application/json',
             },
-            body: JSON.stringify({ movieId: movieId, title: movieTitle }),
+            body: JSON.stringify({ movieId: movieId, title: movieTitle, timestamp }),
         });
 
         const data = await response.json();
@@ -137,14 +144,12 @@ function getDateLabel(dateStr) {
     return watchDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }); // e.g., "2 May"
 }
 
-async function removeFromHistory(movieId) {
+async function removeFromHistory(movieId, timestamp) {
     try {
         const response = await fetch('/history/remove', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ movieId: movieId }),
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ movieId, timestamp }),
         });
 
         const data = await response.json();
@@ -158,6 +163,7 @@ async function removeFromHistory(movieId) {
         console.error('Error removing movie from history:', error);
     }
 }
+
 
 function checkEmptyState() {
     const cardsLeft = document.querySelectorAll('.history-movie-item');
@@ -181,36 +187,9 @@ document.getElementById('clear-history').addEventListener('click', () => {
     }
 });
 
-async function watchMovie(movieId) {
-    const movieTitle = document.querySelector(`.movie-list-item[movie-id="${movieId}"] .movie-list-item-title`).textContent;
-
-    // Send request to add to watch history
-    fetch('/history/add', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ movieId: movieId, title: movieTitle }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message === 'Movie added to watch history') {
-            // Redirect to the movie detail page after adding to history
-            window.location.href = `/movie/${movieId}`;
-        } else {
-            alert('Error adding movie to history');
-        }
-    })
-    .catch(error => {
-        console.error('Error adding to watch history:', error);
-        alert('Error adding to history');
-    });
+function watchMovie(movieId) {
+    window.location.href = `/movie/${movieId}`;
 }
 
 // Initialize the page
 loadHistory();
-
-  
-
-
-  

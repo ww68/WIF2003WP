@@ -47,9 +47,11 @@ app.get('/index', (req, res) => {
 
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(express.static(__dirname));
 app.use(express.json());
 app.use(express.static('public'));
+app.use('/uploads', express.static('uploads'));
 
 // Import routes
 const watchlistRouter = require('./routes/watchlistRoutes');

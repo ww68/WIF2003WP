@@ -5,6 +5,7 @@ function previewImage(event) {
         img.src = reader.result;
     };
     reader.readAsDataURL(event.target.files[0]);
+    document.getElementById("fileName").textContent = event.target.files[0].name;
 }
 
 const apiHeaders = {
@@ -112,13 +113,11 @@ document.querySelector(".btn-secondary").addEventListener("click", () => {
 
 const saveBtn = document.querySelector(".btn-primary");
 document.querySelector("form").addEventListener("submit", (e) => {
-    e.preventDefault(); // prevent actual form submission
-
     saveBtn.disabled = true;
     saveBtn.textContent = "Saving...";
 
-    setTimeout(() => {
-        alert("Your profile has been updated successfully!");
-        window.location.href = "profile.html";
-    }, 1000); // simulate 1s delay
+    // setTimeout(() => {
+    //     alert("Your profile has been updated successfully!");
+    //     window.location.href = "profile";
+    // }, 1000); // simulate 1s delay
 });

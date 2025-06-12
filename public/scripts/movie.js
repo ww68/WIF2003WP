@@ -678,6 +678,29 @@ function showToast(message) {
 }
 
 // Load reviews for current movie on page load
+// Add to history when movie detail page is loaded
 if (window.movieData && window.movieData.id) {
+    addToHistory(window.movieData.id, window.movieData.title);
     loadReviews(window.movieData.id);
+}
+
+async function addToHistory(movieId, title) {
+    try {
+        const response = await fetch('/history/add', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                movieId: String(movieId),
+                title: title,
+                timestamp: new Date().toISOString()
+            })
+        });
+
+        const data = await response.json();
+        if (data.message !== 'Movie added to watch history' && data.message !== 'Movie already in history') {
+            console.warn('Unexpected response:', data);
+        }
+    } catch (error) {
+        console.error('Error adding movie to history:', error);
+    }
 }

@@ -215,7 +215,7 @@ function displayMovies(movies, containerId) {
 
         const watchButton = movieItem.querySelector('.movie-list-item-button');
         watchButton.addEventListener('click', () => {
-            watchMovie(movieData.id, movieData.title);   
+            watchMovie(movieData.id);   
         });
     });
 
@@ -296,36 +296,40 @@ function initializeScrolling() {
     });
 }
 
-async function watchMovie(movieId, movieTitle = null) {
+function watchMovie(movieId) {
     window.location.href = `/movie/${movieId}`;
-    
-    if (!movieTitle) {
-        const titleEl = document.querySelector(
-            `.movie-list-item[data-id="${movieId}"] .movie-list-item-title`
-        );
-        movieTitle = titleEl ? titleEl.textContent : '';
-    }
-
-    // Send request to add to watch history
-    fetch('/watchHistory/add', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ movieId: movieId, title: movieTitle }),
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.message === 'Movie added to watch history') {
-            // Redirect to the movie detail page after adding to history
-            window.location.href = `/movie/${movieId}`;
-        } else {
-            alert('Error adding movie to history');
-        }
-    })
-    .catch(error => {
-        console.error('Error adding to watch history:', error);
-        alert('Error adding to history');
-    });
 }
+
+
+// async function watchMovie(movieId, movieTitle = null) {
+//     if (!movieTitle) {
+//         const titleEl = document.querySelector(
+//             `.movie-list-item[data-id="${movieId}"] .movie-list-item-title`
+//         );
+//         movieTitle = titleEl ? titleEl.textContent : '';
+//     }
+
+//     try {
+//         const response = await fetch('/history/add', {
+//             method: 'POST',
+//             headers: {
+//                 'Content-Type': 'application/json',
+//             },
+//             body: JSON.stringify({ movieId: movieId, title: movieTitle }),
+//         });
+
+//         const data = await response.json();
+
+//         if (data.message === 'Movie added to watch history') {
+//             window.location.href = `/movie/${movieId}`;
+//         } else {
+//             console.warn('Watch history response:', data);
+//             alert('Error adding movie to history');
+//         }
+//     } catch (error) {
+//         console.error('Error adding to watch history:', error);
+//         alert('Error adding to history');
+//     }
+// }
+
 

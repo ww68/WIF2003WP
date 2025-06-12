@@ -40,7 +40,7 @@ async function loadHistory() {
 
     // Fetch movie details and create movie cards
     let lastId = null;
-    for (const entry of history) {
+    for (const entry of history.slice().reverse()) {
         const movieId = entry.movieId;
 
         if (movieId === lastId) continue;  // skip consecutive duplicates
