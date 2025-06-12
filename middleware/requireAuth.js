@@ -15,4 +15,5 @@ function requireAuth(req, res, next) {
   return res.redirect('/login.html');
 }
 
+
 module.exports = requireAuth;

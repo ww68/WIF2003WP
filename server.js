@@ -27,7 +27,7 @@ app.use(session({
     saveUninitialized: false,
     cookie: {
         secure: false,
-        maxAge: 24 * 60 * 60 * 1000
+        maxAge: 24 * 60 * 60 * 1000 // 1 day expiration
     }
 }));
 
@@ -41,7 +41,8 @@ app.get('/', (req, res) => {
 });
 
 app.get('/index', (req, res) => {
-    res.sendFile(path.join(__dirname, 'index.html'));
+    const user = req.session.user || {};
+    res.render('index', { user, currentPage: 'home' });
 });
 
 // Middleware
@@ -53,10 +54,14 @@ app.use(express.static('public'));
 // Import routes
 const watchlistRouter = require('./routes/watchlistRoutes');
 const movieRouter = require('./routes/movieRoutes');
+const profileRouter = require('./routes/profileRoutes'); 
+const watchHistoryRouter = require('./routes/historyRoutes');
 
 // Use routes
 app.use('/watchlist', requireAuth, watchlistRouter);
 app.use('/movie', movieRouter);
+app.use('/profile', profileRouter);
+app.use('/watchHistory', watchHistoryRouter); 
 
 app.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;
@@ -113,13 +118,6 @@ app.post("/login", async (req, res) => {
         res.status(500).json({ message: "Server error" });
     }
 });
-
-// app.get('/index.html', (req, res) => {
-//     if (!req.session.user) {
-//         return res.redirect('/login.html');
-//     }
-//     res.redirect('/index');
-// });
 
 app.get('/logout', (req, res) => {
     req.session.destroy(() => {
