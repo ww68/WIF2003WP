@@ -56,12 +56,14 @@ const watchlistRouter = require('./routes/watchlistRoutes');
 const movieRouter = require('./routes/movieRoutes');
 const profileRouter = require('./routes/profileRoutes'); 
 const watchHistoryRouter = require('./routes/historyRoutes');
+const trendingRouter = require('./routes/trendingRoutes');
 
 // Use routes
 app.use('/watchlist', requireAuth, watchlistRouter);
 app.use('/movie', movieRouter);
 app.use('/profile', profileRouter);
 app.use('/watchHistory', watchHistoryRouter); 
+app.use('/trending', trendingRouter);
 
 app.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;
@@ -124,6 +126,7 @@ app.get('/logout', (req, res) => {
         res.redirect('/login.html');
     });
 });
+
 
 app.use((req, res) => {
     res.status(404).render('404', { title: 'Page Not Found' });
