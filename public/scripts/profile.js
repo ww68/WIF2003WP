@@ -28,7 +28,7 @@ function createMovieCard(movie) {
 }
 
 async function loadHistory() {
-    const response = await fetch(`/watchHistory/getHistory`);
+    const response = await fetch(`/profile/getHistory`);
     const history = await response.json();
 
     if (history.length === 0) {
@@ -85,7 +85,12 @@ document.getElementById("genreForm").addEventListener("submit", function(e) {
         })
         .then(response => response.json())
         .then(data => {
-            alert('Preferences saved!');
+            if (data.message === "Preferences saved successfully") {
+                alert('Genre preferences updated successfully!');
+            } else {
+                alert('Error saving genre preferences');
+            }
+            locaation.reload();
         })
         .catch(error => {
             console.error('Error saving genre preferences:', error);
@@ -132,7 +137,7 @@ document.getElementById("submitNewPassword").addEventListener("click", function(
         return;
     }
 
-    fetch('/profile/changePassword', {
+    fetch('/changePassword', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword, confirmNewPassword })
@@ -141,7 +146,12 @@ document.getElementById("submitNewPassword").addEventListener("click", function(
     .then(data => {
         if (data.message === "Password updated successfully") {
             alert(data.message);
-            // Reset fields and close modal if using one
+            // Reset fields and close modal
+            document.getElementById("currentPassword").value = '';
+            document.getElementById("newPassword").value = '';
+            document.getElementById("confirmNewPassword").value = '';
+            const modal = bootstrap.Modal.getInstance(document.getElementById('changePasswordModal'));
+            modal.hide();
         } else {
             alert(data.message);
         }
@@ -151,3 +161,8 @@ document.getElementById("submitNewPassword").addEventListener("click", function(
         alert("Server error occurred");
     });
 });
+
+function confirmDelete() {
+    const confirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
+    return confirmed; // If the user clicks "OK", it will proceed, otherwise the form will not submit.
+}

@@ -55,13 +55,15 @@ app.use(express.static('public'));
 const watchlistRouter = require('./routes/watchlistRoutes');
 const movieRouter = require('./routes/movieRoutes');
 const profileRouter = require('./routes/profileRoutes'); 
-const watchHistoryRouter = require('./routes/historyRoutes');
+const historyRouter = require('./routes/historyRoutes');
+const editProfileRouter = require('./routes/editProfileRoutes');
 
 // Use routes
 app.use('/watchlist', requireAuth, watchlistRouter);
 app.use('/movie', movieRouter);
-app.use('/profile', profileRouter);
-app.use('/watchHistory', watchHistoryRouter); 
+app.use('/profile', requireAuth, profileRouter);
+app.use('/history', requireAuth, historyRouter);
+app.use('/editprofile', requireAuth, editProfileRouter);
 
 app.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;
@@ -117,12 +119,6 @@ app.post("/login", async (req, res) => {
         console.error("Login error:", err);
         res.status(500).json({ message: "Server error" });
     }
-});
-
-app.get('/logout', (req, res) => {
-    req.session.destroy(() => {
-        res.redirect('/login.html');
-    });
 });
 
 app.use((req, res) => {
