@@ -2,6 +2,7 @@
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
+const Review = require('../models/reviews');
 
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
 const API_KEY = '9a56291f8d522c5f874ed7812f062758';
@@ -63,11 +64,13 @@ router.get('/:id', async (req, res) => {
         // Find trailer
         const trailer = videos.results.find(v => v.type === "Trailer" && v.site === "YouTube");
 
-        // Get reviews (in real app, fetch from database)
-        const reviews = getReviews(movieId);
-        
+        // Get reviews from MongoDB
+        const reviews = await Review.find({ movieId }).sort({ date: -1 });
+
         // Calculate average rating
-        const avgRating = getAverageRating(movieId, reviews);
+        const avgRating = reviews.length
+            ? reviews.reduce((sum, r) => sum + r.rating, 0) / reviews.length
+            : 0;
 
         let inWatchlist = false;
         if (req.session.userId) {

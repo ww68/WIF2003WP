@@ -50,6 +50,26 @@ textarea.form-control {
     padding: 10px;
     background: #333;
     border-radius: 8px;
+    background-color: #000000;
+}
+
+.review-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 5px;
+  width: 100%;
+}
+
+.review-user {
+  font-weight: bold;
+}
+
+.review-date {
+  font-size: 0.85rem;
+  color: #ffffff;
+  white-space: nowrap;
+  text-align: right;
 }
 
 .gold-star {

@@ -140,7 +140,10 @@
                     <div id="review-list">
                         <% reviews.forEach(review => { %>
                             <div class="review">
-                                <div class="review-user"><strong><%= review.username %></strong></div>
+                                <div class="review-header">
+                                    <div class="review-user"><strong><%= review.username %></strong></div>
+                                    <div class="review-date text-muted"><%= new Date(review.date).toLocaleString() %></div>
+                                </div>
                                 <div class="review-rating">
                                     <% for(let i = 0; i < review.rating; i++) { %>
                                         <span class="gold-star">★</span>
@@ -150,10 +153,10 @@
                                     <% } %>
                                 </div>
                                 <div class="review-text"><%= review.text %></div>
-                                <div class="review-date text-muted"><%= review.date %></div>
                             </div>
                         <% }); %>
                     </div>
+                    
                 </div>
 
                 <div class="tab-pane fade" id="similar" role="tabpanel">

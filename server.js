@@ -60,6 +60,7 @@ const profileRouter = require('./routes/profileRoutes');
 const trendingRouter = require('./routes/trendingRoutes');
 const historyRouter = require('./routes/historyRoutes');
 const editprofileRouter = require('./routes/editprofileRoutes');
+const reviewRouter = require('./routes/reviewRoutes');
 
 // Use routes
 app.use('/watchlist', requireAuth, watchlistRouter);
@@ -68,7 +69,7 @@ app.use('/trending', trendingRouter);
 app.use('/profile', requireAuth, profileRouter);
 app.use('/history', requireAuth, historyRouter);
 app.use('/editprofile', requireAuth, editprofileRouter);
-
+app.use('/reviews', reviewRouter);
 
 app.post("/signup", async (req, res) => {
     const { username, email, password } = req.body;

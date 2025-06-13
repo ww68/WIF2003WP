@@ -391,34 +391,49 @@
 // movie-client.js - Client-side JavaScript for movie details page
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
-document.addEventListener('DOMContentLoaded', function() {
+let selectedRating = 0;
+
+document.addEventListener('DOMContentLoaded', function () {
     // Initialize the page
     setupBookmarkButton();
     setupSimilarMoviesButtons();
     setupReviewForm();
-    
-    // Load initial watchlist states
     updateWatchlistButtons();
+
+    // Set up star rating system
+    const ratingDisplay = document.getElementById('rating-number');
+    const stars = document.querySelectorAll('.star');
+
+    if (stars.length > 0) {
+        stars.forEach(star => {
+            star.addEventListener('click', () => {
+                selectedRating = parseInt(star.dataset.value);
+                stars.forEach(s => s.classList.remove('selected'));
+                for (let i = 0; i < selectedRating; i++) {
+                    stars[i].classList.add('selected');
+                }
+                if (ratingDisplay) {
+                    ratingDisplay.textContent = selectedRating.toFixed(1);
+                }
+            });
+        });
+    }
+
+    // Load reviews
+    const movieIdInput = document.getElementById('movie-id');
+    if (movieIdInput) {
+        const movieId = movieIdInput.value;
+        loadReviews(movieId);
+    }
+
+    // Add to history if movie data exists
+    if (window.movieData && window.movieData.id) {
+        addToHistory(window.movieData.id, window.movieData.title);
+    }
 });
 
-// Setup star rating system
-let selectedRating = 0;
-const ratingDisplay = document.getElementById('rating-number');
-
-if (document.querySelectorAll('.star').length > 0) {
-    document.querySelectorAll('.star').forEach(star => {
-        star.addEventListener('click', () => {
-            selectedRating = parseInt(star.dataset.value);
-            document.querySelectorAll('.star').forEach(s => s.classList.remove('selected'));
-            for (let i = 0; i < selectedRating; i++) {
-                document.querySelectorAll('.star')[i].classList.add('selected');
-            }
-            ratingDisplay.textContent = selectedRating.toFixed(1);
-        });
-    });
-}
-
 function updateRatingNumber(rating) {
+    const ratingDisplay = document.getElementById('rating-number');
     if (ratingDisplay) {
         ratingDisplay.textContent = rating.toFixed(1);
     }
@@ -429,81 +444,136 @@ function setupReviewForm() {
     const reviewForm = document.getElementById('review-form');
     if (!reviewForm) return;
 
-    reviewForm.addEventListener('submit', function (e) {
+    reviewForm.addEventListener('submit', async function (e) {
         e.preventDefault();
 
         const movieId = document.getElementById('movie-id').value;
         const text = document.getElementById('comment').value.trim();
-        
+
         if (selectedRating === 0 || text === '') {
             alert('Please provide a rating and review text.');
             return;
         }
 
-        saveReview(movieId, selectedRating, text);
-        loadReviews(movieId);
+        const success = await saveReview(movieId, selectedRating, text);
+        if (success) {
+            await loadReviews(movieId);
 
-        // Reset the form and rating display
-        reviewForm.reset();
-        selectedRating = 0;
-        document.querySelectorAll('.star').forEach(s => s.classList.remove('selected'));
-        updateRatingNumber(0);
+            // Reset the form and star rating
+            reviewForm.reset();
+            selectedRating = 0;
+            document.querySelectorAll('.star').forEach(s => s.classList.remove('selected'));
+            updateRatingNumber(0);
+        }
     });
 }
 
-// Save review to localStorage with movieId
-function saveReview(movieId, rating, reviewText) {
-    const reviews = JSON.parse(localStorage.getItem('movie-reviews')) || [];
-    const review = {
-        username: 'Alice123',
-        movieId,
-        rating,
-        text: reviewText,
-        date: new Date().toLocaleString(),
-    };
-    reviews.push(review);
-    localStorage.setItem('movie-reviews', JSON.stringify(reviews));
+// Save review to MongoDB
+async function saveReview(movieId, rating, reviewText) {
+    try {
+        const res = await fetch('/reviews', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ movieId, rating, text: reviewText })
+        });
+
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.message || 'Failed to submit review');
+
+        alert('Review submitted!');
+        return true;
+    } catch (err) {
+        console.error('Error saving review:', err);
+        alert(err.message || 'Something went wrong.');
+        return false;
+    }
 }
 
-// Load reviews from localStorage
-function loadReviews(movieId) {
-    const reviews = JSON.parse(localStorage.getItem('movie-reviews')) || [];
+// Load reviews from server
+async function loadReviews(movieId) {
     const reviewList = document.getElementById('review-list');
     const commentCount = document.getElementById('comment-count');
-    
+
     if (!reviewList || !commentCount) return;
 
-    const movieReviews = reviews.filter(review => review.movieId === movieId);
-    movieReviews.sort((a, b) => new Date(b.date) - new Date(a.date));
+    try {
+        const res = await fetch(`/reviews/${movieId}`);
+        const data = await res.json();
+        const reviews = data.reviews || [];
 
-    // Update comment count
-    if (movieReviews.length === 0) {
-        commentCount.textContent = 'No comments yet';
-    } else if (movieReviews.length === 1) {
-        commentCount.textContent = '1 comment has been posted';
-    } else {
-        commentCount.textContent = `${movieReviews.length} comments have been posted`;
-    }
+        // Update comment count
+        if (reviews.length === 0) {
+            commentCount.textContent = 'No comments yet';
+        } else if (reviews.length === 1) {
+            commentCount.textContent = '1 comment has been posted';
+        } else {
+            commentCount.textContent = `${reviews.length} comments have been posted`;
+        }
 
-    // Clear existing reviews from localStorage and add them
-    const serverReviews = reviewList.innerHTML;
-    reviewList.innerHTML = serverReviews; // Keep server-rendered reviews
-
-    // Add localStorage reviews
-    movieReviews.forEach(review => {
-        const reviewHTML = `
-            <div class="review">
-                <div class="review-user"><strong>${review.username}</strong></div>
-                <div class="review-rating">
-                    ${'★'.repeat(review.rating).split('').map(() => '<span class="gold-star">★</span>').join('')}
-                    ${'☆'.repeat(5 - review.rating).split('').map(() => '<span class="empty-star">☆</span>').join('')}
+        // Clear and render reviews
+        reviewList.innerHTML = '';
+        reviews.forEach(review => {
+            const reviewHTML = `
+                <div class="review">
+                    <div class="review-user"><strong>${review.username}</strong></div>
+                    <div class="review-rating">
+                        ${'<span class="gold-star">★</span>'.repeat(review.rating)}
+                        ${'<span class="empty-star">☆</span>'.repeat(5 - review.rating)}
+                    </div>
+                    <div class="review-text">${review.text}</div>
+                    <div class="review-date text-muted">${new Date(review.date).toLocaleString()}</div>
                 </div>
-                <div class="review-text">${review.text}</div>
-                <div class="review-date text-muted">${review.date}</div>
-            </div>
-        `;
-        reviewList.innerHTML += reviewHTML;
-    });
+            `;
+            reviewList.innerHTML += reviewHTML;
+        });
+
+    } catch (err) {
+        console.error('Error loading reviews:', err);
+        commentCount.textContent = 'Failed to load reviews.';
+    }
+}
+
+async function loadReviews(movieId) {
+    const reviewList = document.getElementById('review-list');
+    const commentCount = document.getElementById('comment-count');
+
+    if (!reviewList || !commentCount) return;
+
+    try {
+        const res = await fetch(`/reviews/${movieId}`);
+        const data = await res.json();
+        const reviews = data.reviews || [];
+
+        // Update comment count
+        commentCount.textContent = reviews.length === 0
+            ? 'No comments yet'
+            : `${reviews.length} comment${reviews.length > 1 ? 's have' : ' has'} been posted`;
+
+        // Clear existing reviews
+        reviewList.innerHTML = '';
+
+        // Add each review to the DOM
+        reviews.forEach(review => {
+            const reviewHTML = `
+                <div class="review">
+                    <div class="review-user"><strong>${review.username}</strong></div>
+                    <div class="review-rating">
+                        ${'<span class="gold-star">★</span>'.repeat(review.rating)}
+                        ${'<span class="empty-star">☆</span>'.repeat(5 - review.rating)}
+                    </div>
+                    <div class="review-text">${review.text}</div>
+                    <div class="review-date text-muted">${new Date(review.date).toLocaleString()}</div>
+                </div>
+            `;
+            reviewList.innerHTML += reviewHTML;
+        });
+
+    } catch (err) {
+        console.error('Error loading reviews:', err);
+        commentCount.textContent = 'Failed to load reviews.';
+    }
 }
 
 // Setup main bookmark button
