@@ -37,7 +37,15 @@ app.use((req, res, next) => {
 });
 
 app.get('/', (req, res) => {
-    res.sendFile(path.join(__dirname, 'welcome.html'));
+    res.render('welcome');
+});
+
+app.get('/login', (req, res) => {
+    res.render('login'); 
+});
+
+app.get('/signup', (req, res) => {
+    res.render('signup');
 });
 
 app.get('/index', (req, res) => {
@@ -48,9 +56,8 @@ app.get('/index', (req, res) => {
 // Middleware
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
-app.use(express.static(__dirname));
 app.use(express.json());
-app.use(express.static('public'));
+app.use(express.static(path.join(__dirname, 'public')));
 app.use('/uploads', express.static('uploads'));
 
 // Import routes

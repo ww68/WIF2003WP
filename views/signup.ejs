@@ -4,67 +4,46 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Movie Explorer</title>
-    <link rel="stylesheet" href="style/pages/common.css">
+    <link rel="stylesheet" href="/style/pages/common.css">
 </head>
 <body>
     <div class="container">
-        <!-- Left side - Image -->
         <div class="image-side">
             <div class="image-overlay"></div>
-            <img src="images/signup.png" alt="Fire performance" class="background-image">
+            <img src="/images/signup.png" alt="Fire performance" class="background-image">
             <div class="caption">Catch Vibes, Not Sanders.</div>
         </div>
-        
-        <!-- Right side - Form -->
+
         <div class="form-side">
             <div class="form-container">
                 <div class="header">
                     <h2>START SIGN UP</h2>
                     <p>Explore Movie</p>
                 </div>
-                
+
                 <div class="form-box">
                     <form id="signup-form" action="/signup" method="POST">
                         <div class="form-group">
                             <label for="username">Username</label>
-                            <input 
-                                type="text" 
-                                id="username" 
-                                name="username" 
-                                placeholder="Enter your username" 
-                                required
-                            >
+                            <input type="text" id="username" name="username" placeholder="Enter your username" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="email">Email</label>
-                            <input 
-                                type="email" 
-                                id="email" 
-                                name="email" 
-                                placeholder="Enter your email" 
-                                required
-                            >
+                            <input type="email" id="email" name="email" placeholder="Enter your email" required>
                         </div>
-                        
+
                         <div class="form-group">
                             <label for="password">Password</label>
-                            <input 
-                                type="password" 
-                                id="password" 
-                                name="password" 
-                                placeholder="Set a password" 
-                                required
-                                minlength="6"
-                            >
+                            <input type="password" id="password" name="password" placeholder="Set a password" required minlength="6">
                         </div>
-                        
+
                         <button type="submit" class="btn-primary">Sign Up</button>
                     </form>
                 </div>
-                
+
                 <div class="form-footer">
-                    Already have account? <a href="login.html">LOG IN HERE</a>
+                    Already have account? <a href="/login">LOG IN HERE</a>
                 </div>
             </div>
         </div>
@@ -79,7 +58,6 @@
             saveBtn.disabled = true;
             saveBtn.textContent = "Signing up...";
 
-            // Get form data
             const username = document.getElementById("username").value;
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
@@ -87,9 +65,7 @@
             try {
                 const response = await fetch("/signup", {
                     method: "POST",
-                    headers: {
-                        "Content-Type": "application/json"
-                    },
+                    headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ username, email, password })
                 });
 
@@ -98,7 +74,7 @@
                 if (response.ok) {
                     setTimeout(() => {
                         alert("Signup successful!");
-                        window.location.href = "login.html";
+                        window.location.href = "/login";
                     }, 1000);
                 } else {
                     alert(result.message || "Signup failed.");
@@ -113,6 +89,5 @@
             }
         });
     </script>
-
 </body>
 </html>
