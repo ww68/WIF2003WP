@@ -115,8 +115,8 @@ document.addEventListener("DOMContentLoaded", () => {
             localStorage.setItem("recentSearches", JSON.stringify(recent.slice(0, 10)));
 
             // Navigate
-            window.location.href = `search.html?query=${encodeURIComponent(query)}`;
-        });
+// Change this line in the form submit event:
+window.location.href = `/search?query=${encodeURIComponent(query)}`;        });
 
         // === Voice Search ===
         if (voiceBtn) {
