@@ -260,7 +260,17 @@ function populateDropdowns() {
 }
 
 function updateSearch() {
-    if (currentQuery) {
+    // Always use searchMovies() when filters are active, regardless of query
+    const genre = document.getElementById('filterGenre')?.value || '';
+    const year = document.getElementById('filterYear')?.value || '';
+    const minDuration = document.getElementById('filterMinDuration')?.value || '';
+    const maxDuration = document.getElementById('filterMaxDuration')?.value || '';
+    const language = document.getElementById('filterLanguage')?.value || '';
+    const minRating = document.getElementById('filterRating')?.value || '';
+    
+    const hasFilters = genre || year || minDuration || maxDuration || language || minRating;
+    
+    if (hasFilters || currentQuery) {
         searchMovies();
     } else {
         loadTrending();
@@ -301,10 +311,21 @@ function searchMovies() {
     updateHeader(currentQuery ? `Search results for "${currentQuery}"` : "Browse Movies");
 
     let url;
-    if (currentQuery) {
-        // Always use search endpoint when we have a query
+    // Use discover endpoint when we have filters but no query
+    if (!currentQuery && (genre || year || minDuration || maxDuration || language || minRating)) {
+        url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}&page=${currentPage}`;
+        if (genre) url += `&with_genres=${genre}`;
+        if (year) url += `&primary_release_year=${year}`;
+        if (language) url += `&with_original_language=${language}`;
+        if (minRating) url += `&vote_average.gte=${minRating}`;
+        if (minDuration) url += `&with_runtime.gte=${minDuration}`;
+        if (maxDuration) url += `&with_runtime.lte=${maxDuration}`;
+    } 
+    // Use search endpoint when we have a query
+    else if (currentQuery) {
         url = `${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
         
+        // If we have filters with a query, we'll need to apply them client-side
         fetch(url)
             .then(res => res.json())
             .then(data => {
@@ -327,12 +348,8 @@ function searchMovies() {
                     results = results.filter(movie => 
                         movie.vote_average >= Number(minRating));
                 }
-                if (minDuration || maxDuration) {
-                    // Note: Runtime isn't included in search results by default
-                    // We'd need to fetch movie details to filter by runtime
-                    // So we'll skip this filter for search results
-                }
-
+                // Runtime filtering not available for search results
+                
                 renderMovies(results);
                 updatePagination(data.total_pages);
             })
@@ -340,27 +357,24 @@ function searchMovies() {
                 console.error('Error fetching movies:', error);
                 showError();
             });
-    } else {
-        // No query - use discover endpoint with filters
-        url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}&page=${currentPage}`;
-        if (genre) url += `&with_genres=${genre}`;
-        if (year) url += `&primary_release_year=${year}`;
-        if (language) url += `&with_original_language=${language}`;
-        if (minRating) url += `&vote_average.gte=${minRating}`;
-        if (minDuration) url += `&with_runtime.gte=${minDuration}`;
-        if (maxDuration) url += `&with_runtime.lte=${maxDuration}`;
-
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                renderMovies(data.results || []);
-                updatePagination(data.total_pages);
-            })
-            .catch(error => {
-                console.error('Error fetching movies:', error);
-                showError();
-            });
+        return;
     }
+    // Default to trending if no query and no filters (shouldn't happen due to updateSearch logic)
+    else {
+        loadTrending();
+        return;
+    }
+
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            renderMovies(data.results || []);
+            updatePagination(data.total_pages);
+        })
+        .catch(error => {
+            console.error('Error fetching movies:', error);
+            showError();
+        });
 }
 
 function renderMovies(movies) {
