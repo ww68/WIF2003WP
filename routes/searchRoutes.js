@@ -1,62 +1,85 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-
 const TMDB_API_KEY = 'b5ca748da01c92488ef670a84e31c784';
-const API_BASE = 'https://api.themoviedb.org/3';
 
-// Search page route
+// Search route
 router.get('/', async (req, res) => {
     try {
-        // Get initial query from URL parameters
         const query = req.query.query || '';
-        
-        // Render the search page with initial data
-        res.render('search', { 
+        const genre = req.query.genre || '';
+        const year = req.query.year || '';
+        const language = req.query.language || '';
+        const page = req.query.page || 1;
+
+        res.render('search', {
             title: query ? `Search: ${query}` : 'Browse Movies',
-            query: query,
-            // You can add more initial data here if needed
+            query,
+            genre,
+            year,
+            language,
+            page
         });
     } catch (error) {
-        console.error('Error rendering search page:', error);
-        res.status(500).send('Internal Server Error');
+        console.error('Search route error:', error);
+        res.status(500).render('error', { title: 'Server Error', error: error.message });
     }
 });
 
-// API endpoint for client-side to fetch movies
-router.get('/api/movies', async (req, res) => {
+// API endpoint for search suggestions
+router.get('/suggestions', async (req, res) => {
     try {
-        const { query, page = 1, genre, year, language, minRating } = req.query;
+        const query = req.query.query;
+        if (!query) {
+            return res.json([]);
+        }
+
+        const response = await axios.get(`https://api.themoviedb.org/3/search/movie`, {
+            params: {
+                api_key: TMDB_API_KEY,
+                query: query,
+                page: 1
+            }
+        });
+
+        const suggestions = response.data.results.slice(0, 5).map(movie => movie.title);
+        res.json(suggestions);
+    } catch (error) {
+        console.error('Suggestions error:', error);
+        res.status(500).json({ error: 'Failed to fetch suggestions' });
+    }
+});
+
+// API endpoint for search results
+router.get('/results', async (req, res) => {
+    try {
+        const { query, genre, year, language, minDuration, maxDuration, minRating, page } = req.query;
         
         let url;
+        let params = {
+            api_key: TMDB_API_KEY,
+            page: page || 1
+        };
+
         if (query) {
-            // Search endpoint for text queries
-            url = `${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=${page}`;
+            url = 'https://api.themoviedb.org/3/search/movie';
+            params.query = query;
         } else {
-            // Discover endpoint for browsing/filtering
-            url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}&page=${page}`;
-            
-            // Add filters if they exist
-            if (genre) url += `&with_genres=${genre}`;
-            if (year) url += `&primary_release_year=${year}`;
-            if (language) url += `&with_original_language=${language}`;
-            if (minRating) url += `&vote_average.gte=${minRating}`;
+            url = 'https://api.themoviedb.org/3/discover/movie';
+            if (genre) params.with_genres = genre;
+            if (year) params.primary_release_year = year;
+            if (language) params.with_original_language = language;
+            if (minRating) params.vote_average_gte = minRating;
+            if (minDuration) params.with_runtime_gte = minDuration;
+            if (maxDuration) params.with_runtime_lte = maxDuration;
         }
-        
-        const response = await axios.get(url);
+
+        const response = await axios.get(url, { params });
         res.json(response.data);
     } catch (error) {
-        console.error('Error fetching movies:', error);
-        res.status(500).json({ error: 'Failed to fetch movies' });
+        console.error('Search API error:', error);
+        res.status(500).json({ error: 'Failed to fetch search results' });
     }
 });
 
 module.exports = router;
-
-
-
-
-
-
-
-
