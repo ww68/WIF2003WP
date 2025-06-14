@@ -12,12 +12,12 @@ const movieSchema = new mongoose.Schema({
 });
 
 const userSchema = new mongoose.Schema({
-    username: { type: String, required: true },
+    username: { type: String, required: false },
     email: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     watchlist: [movieSchema],
-    firstName: { type: String, required: false },
-    lastName: { type: String, required: false },
+    firstName: { type: String, required: true },
+    lastName: { type: String, required: true },
     phoneNum: { type: String, required: false },
     gender: { type: String, required: false },
     dob: { type: Date, required:false },

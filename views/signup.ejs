@@ -24,8 +24,13 @@
                 <div class="form-box">
                     <form id="signup-form" action="/signup" method="POST">
                         <div class="form-group">
-                            <label for="username">Username</label>
-                            <input type="text" id="username" name="username" placeholder="Enter your username" required>
+                            <label for="firstName">First Name</label>
+                            <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="lastName">Username</label>
+                            <input type="text" id="lastName" name="lastName" placeholder="Enter your last name" required>
                         </div>
 
                         <div class="form-group">
@@ -58,15 +63,23 @@
             saveBtn.disabled = true;
             saveBtn.textContent = "Signing up...";
 
-            const username = document.getElementById("username").value;
+            const firstName = document.getElementById("firstName").value.trim();
+            const lastName = document.getElementById("lastName").value.trim();
             const email = document.getElementById("email").value;
             const password = document.getElementById("password").value;
 
+            if (!firstName || !lastName || !email || !password) {
+                alert("Please fill in all fields.");
+                saveBtn.disabled = false;
+                saveBtn.textContent = "Sign Up";
+                return;
+            }
+        
             try {
                 const response = await fetch("/signup", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username, email, password })
+                    body: JSON.stringify({ firstName, lastName, email, password })
                 });
 
                 const result = await response.json();

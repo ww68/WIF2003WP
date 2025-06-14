@@ -79,8 +79,9 @@ app.use('/editprofile', requireAuth, editprofileRouter);
 app.use('/reviews', reviewRouter);
 
 app.post("/signup", async (req, res) => {
-    const { username, email, password } = req.body;
-
+    const { firstName, lastName, email, password } = req.body;
+    const username = firstName + " " + lastName;
+    
     try {
         const existingUser = await User.findOne({ email });
         if (existingUser) {
@@ -91,6 +92,8 @@ app.post("/signup", async (req, res) => {
 
         const newUser = new User({
             username,
+            firstName,
+            lastName,
             email,
             password: hashedPassword
         });
