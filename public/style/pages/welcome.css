@@ -104,6 +104,21 @@ h1 {
     transform: translateY(-2px);
 }
 
+.container-footer {
+    text-align: center;
+    margin-top: 24px;
+    font-size: 14px;
+}
+
+.container-footer a {
+    color: #00c8ff;
+    text-decoration: none;
+}
+
+.container-footer a:hover {
+    text-decoration: underline;
+}
+
 .footer {
     position: absolute;
     bottom: 20px;
