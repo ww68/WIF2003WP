@@ -52,3 +52,11 @@ router.get('/api/movies', async (req, res) => {
 });
 
 module.exports = router;
+
+
+
+
+
+
+
+
