@@ -5,6 +5,59 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Sign Up - Movie Explorer</title>
     <link rel="stylesheet" href="/style/pages/common.css">
+
+    <style>
+        .verification-notice {
+            background-color: #e8f4fd;
+            border: 1px solid #b8daff;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 20px 0;
+            display: none;
+        }
+        .verification-notice.show {
+            display: block;
+        }
+        .verification-notice h4 {
+            color: #004085;
+            margin: 0 0 10px 0;
+        }
+        .verification-notice p {
+            color: #004085;
+            margin: 5px 0;
+            font-size: 14px;
+        }
+        .resend-btn {
+            background-color: #6c757d;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-top: 10px;
+        }
+        .resend-btn:hover {
+            background-color: #5a6268;
+        }
+        .resend-btn:disabled {
+            background-color: #6c757d;
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 8px;
+            padding: 10px;
+            margin: 10px 0;
+            color: #721c24;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -21,8 +74,18 @@
                     <p>Explore Movie</p>
                 </div>
 
+                <div class="error-message" id="error-message"></div>
+
+                <div class="verification-notice" id="verification-notice">
+                    <h4>Check Your Email!</h4>
+                    <p>We've sent a verification link to your email address.</p>
+                    <p>Please click the link in the email to verify your account before logging in.</p>
+                    <p><strong>Didn't receive the email?</strong></p>
+                    <button class="resend-btn" id="resend-btn">Resend Verification Email</button>
+                </div>
+
                 <div class="form-box">
-                    <form id="signup-form" action="/signup" method="POST">
+                    <form id="signup-form" action="/api/auth/signup" method="POST">
                         <div class="form-group">
                             <label for="firstName">First Name</label>
                             <input type="text" id="firstName" name="firstName" placeholder="Enter your first name" required>
@@ -56,6 +119,25 @@
 
     <script>
         const saveBtn = document.querySelector(".btn-primary");
+        const verificationNotice = document.getElementById("verification-notice");
+        const signupFormContainer = document.getElementById("signup-form");
+        const errorMessage = document.getElementById("error-message");
+        const resendBtn = document.getElementById("resend-btn");
+        let userEmail = '';
+
+        function showError(message) {
+            errorMessage.textContent = message;
+            errorMessage.classList.add("show");
+            setTimeout(() => {
+                errorMessage.classList.remove("show");
+            }, 5000);
+        }
+
+        function showVerificationNotice(email) {
+            userEmail = email;
+            signupFormContainer.style.display = 'none';
+            verificationNotice.classList.add("show");
+        }
 
         document.querySelector("form").addEventListener("submit", async (e) => {
             e.preventDefault();
@@ -75,8 +157,15 @@
                 return;
             }
         
+            if (password.length < 6) {
+                showError("Password must be at least 6 characters long.");
+                saveBtn.disabled = false;
+                saveBtn.textContent = "Sign Up";
+                return;
+            }
+
             try {
-                const response = await fetch("/signup", {
+                const response = await fetch("/api/auth/signup", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ firstName, lastName, email, password })
@@ -85,12 +174,10 @@
                 const result = await response.json();
 
                 if (response.ok) {
-                    setTimeout(() => {
-                        alert("Signup successful!");
-                        window.location.href = "/login";
-                    }, 1000);
+                    // Show verification notice instead of redirecting
+                    showVerificationNotice(email);
                 } else {
-                    alert(result.message || "Signup failed.");
+                    showError(result.message || "Signup failed.");
                     saveBtn.disabled = false;
                     saveBtn.textContent = "Sign Up";
                 }
@@ -100,6 +187,33 @@
                 saveBtn.disabled = false;
                 saveBtn.textContent = "Sign Up";
             }
+        });
+
+        // Resend verification email
+        resendBtn.addEventListener("click", async () => {
+            resendBtn.disabled = true;
+            resendBtn.textContent = "Sending...";
+
+            try {
+                const response = await fetch("/api/auth/resend-verification", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email: userEmail })
+                });
+
+                const result = await response.json();
+
+                if (response.ok) {
+                    alert("Verification email sent! Please check your inbox.");
+                } else {
+                    showError(result.message || "Failed to resend email.");
+                }
+            } catch (error) {
+                showError("An error occurred. Please try again.");
+            }
+
+            resendBtn.disabled = false;
+            resendBtn.textContent = "Resend Verification Email";
         });
     </script>
 </body>

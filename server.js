@@ -1,3 +1,5 @@
+require('dotenv').config({ path: './verification.env' });
+
 const express = require('express');
 const mongoose = require('mongoose');
 const path = require('path');
@@ -69,7 +71,7 @@ const historyRouter = require('./routes/historyRoutes');
 const editprofileRouter = require('./routes/editprofileRoutes');
 const reviewRouter = require('./routes/reviewRoutes');
 const searchRouter = require('./routes/searchRoutes');
-
+const authRoutes = require('./routes/authRoutes');
 
 // Use routes
 app.use('/watchlist', requireAuth, watchlistRouter);
@@ -80,71 +82,70 @@ app.use('/history', requireAuth, historyRouter);
 app.use('/editprofile', requireAuth, editprofileRouter);
 app.use('/reviews', reviewRouter);
 app.use('/search', searchRouter);
+app.use('/api/auth', authRoutes);
 
-
-app.post("/signup", async (req, res) => {
-    const { firstName, lastName, email, password } = req.body;
-    const username = firstName + " " + lastName;
+// app.post("/signup", async (req, res) => {
+//     const { firstName, lastName, email, password } = req.body;
+//     const username = firstName + " " + lastName;
     
-    try {
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: "Email already exists" });
-        }
+//     try {
+//         const existingUser = await User.findOne({ email });
+//         if (existingUser) {
+//             return res.status(400).json({ message: "Email already exists" });
+//         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
+//         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const newUser = new User({
-            username,
-            firstName,
-            lastName,
-            email,
-            password: hashedPassword
-        });
+//         const newUser = new User({
+//             username,
+//             firstName,
+//             lastName,
+//             email,
+//             password: hashedPassword
+//         });
 
-        await newUser.save();
+//         await newUser.save();
 
-        res.status(200).json({ message: "Signup successful" });
-    } catch (err) {
-        console.error("Signup error:", err);
-        res.status(500).json({ message: "Server error" });
-    }
-});
+//         res.status(200).json({ message: "Signup successful" });
+//     } catch (err) {
+//         console.error("Signup error:", err);
+//         res.status(500).json({ message: "Server error" });
+//     }
+// });
 
+// app.post("/login", async (req, res) => {
+//     const { email, password } = req.body;
 
-app.post("/login", async (req, res) => {
-    const { email, password } = req.body;
+//     try {
+//         const user = await User.findOne({ email });
+//         if (!user) {
+//             return res.status(400).json({ message: "Invalid email or password" });
+//         }
 
-    try {
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(400).json({ message: "Invalid email or password" });
-        }
+//         const isMatch = await bcrypt.compare(password, user.password);
+//         if (!isMatch) {
+//             return res.status(400).json({ message: "Invalid email or password" });
+//         }
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if (!isMatch) {
-            return res.status(400).json({ message: "Invalid email or password" });
-        }
+//         // Store user ID in session for watchlist access
+//         req.session.userId = user._id;
+//         req.session.user = {
+//             id: user._id,
+//             username: user.username,
+//             email: user.email
+//         };
 
-        // Store user ID in session for watchlist access
-        req.session.userId = user._id;
-        req.session.user = {
-            id: user._id,
-            username: user.username,
-            email: user.email
-        };
-
-        res.status(200).json({ message: "Login successful" });
-    } catch (err) {
-        console.error("Login error:", err);
-        res.status(500).json({ message: "Server error" });
-    }
-});
+//         res.status(200).json({ message: "Login successful" });
+//     } catch (err) {
+//         console.error("Login error:", err);
+//         res.status(500).json({ message: "Server error" });
+//     }
+// });
 
 
 app.get('/logout', (req, res) => {
     req.session.destroy(() => {
-        res.redirect('/login.html');
+        res.redirect('/login');
     });
 });
 
