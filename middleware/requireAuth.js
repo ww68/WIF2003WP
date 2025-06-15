@@ -12,7 +12,7 @@ function requireAuth(req, res, next) {
     return res.status(401).json({ message: 'Please log in first' });
   }
 
-  return res.redirect('/login.html');
+  return res.redirect('/login');
 }
 
 

@@ -72,7 +72,7 @@ class OptimisticWatchlist {
         });
         
         if (response.status === 401) {
-            location.href = '/login.html';
+            location.href = '/login';
             return null;
         }
         
