@@ -305,7 +305,7 @@ function searchMovies() {
     if (year) params.set('year', year);
     if (language) params.set('language', language);
     if (minRating) params.set('rating', minRating);
-    window.history.pushState({}, '', `search.html?${params.toString()}`);
+    window.history.pushState({}, '', `search?${params.toString()}`);
 
     // Update header
     updateHeader(currentQuery ? `Search results for "${currentQuery}"` : "Browse Movies");
@@ -405,7 +405,7 @@ function renderMovies(movies) {
         const displayedGenres = genres?.slice(0, 3).join(', ') || 'Unknown Genre';
 
         const movieCard = document.createElement('div');
-        movieCard.className = 'col-sm-12 col-md-6 col-xl-4 movie-card';
+        movieCard.className = 'col-sm-12 col-md-6 col-xl-4 mb-4 movie-card';
         movieCard.setAttribute('data-id', movie.id);
         movieCard.innerHTML = `
             <div class="card h-100 text-white">

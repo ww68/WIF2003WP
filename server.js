@@ -84,64 +84,6 @@ app.use('/reviews', reviewRouter);
 app.use('/search', searchRouter);
 app.use('/api/auth', authRoutes);
 
-// app.post("/signup", async (req, res) => {
-//     const { firstName, lastName, email, password } = req.body;
-//     const username = firstName + " " + lastName;
-    
-//     try {
-//         const existingUser = await User.findOne({ email });
-//         if (existingUser) {
-//             return res.status(400).json({ message: "Email already exists" });
-//         }
-
-//         const hashedPassword = await bcrypt.hash(password, 10);
-
-//         const newUser = new User({
-//             username,
-//             firstName,
-//             lastName,
-//             email,
-//             password: hashedPassword
-//         });
-
-//         await newUser.save();
-
-//         res.status(200).json({ message: "Signup successful" });
-//     } catch (err) {
-//         console.error("Signup error:", err);
-//         res.status(500).json({ message: "Server error" });
-//     }
-// });
-
-// app.post("/login", async (req, res) => {
-//     const { email, password } = req.body;
-
-//     try {
-//         const user = await User.findOne({ email });
-//         if (!user) {
-//             return res.status(400).json({ message: "Invalid email or password" });
-//         }
-
-//         const isMatch = await bcrypt.compare(password, user.password);
-//         if (!isMatch) {
-//             return res.status(400).json({ message: "Invalid email or password" });
-//         }
-
-//         // Store user ID in session for watchlist access
-//         req.session.userId = user._id;
-//         req.session.user = {
-//             id: user._id,
-//             username: user.username,
-//             email: user.email
-//         };
-
-//         res.status(200).json({ message: "Login successful" });
-//     } catch (err) {
-//         console.error("Login error:", err);
-//         res.status(500).json({ message: "Server error" });
-//     }
-// });
-
 // Route to get user preferences (returns preferences for authenticated users, null for non-authenticated)
 app.get('/index/getPreferences', async (req, res) => {
     try {

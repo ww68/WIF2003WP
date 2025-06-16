@@ -138,7 +138,8 @@ router.post('/login', async (req, res) => {
         req.session.user = {
             id: user._id,
             username: user.username,
-            email: user.email
+            email: user.email,
+            profilePicture: user.profilePicture
         };
 
         res.status(200).json({ message: "Login successful" });

@@ -482,40 +482,9 @@ function handleNextPage() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-// Utility functions
-async function watchMovie(movieId, movieTitle = null) {
-    // If movieTitle isn't provided, try to get it from DOM
-    if (!movieTitle) {
-        const titleEl = document.querySelector(
-            `.movie-list-item[data-id="${movieId}"] .movie-list-item-title`
-        );
-        movieTitle = titleEl ? titleEl.textContent.trim() : '';
-    }
-
-    try {
-        // Send request to add to watch history
-        const response = await fetch('/watchHistory/add', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ movieId: movieId, title: movieTitle }),
-        });
-
-        const data = await response.json();
-
-        if (data.message === 'Movie added to watch history') {
-            // Redirect after successful save
-            window.location.href = `/movie/${movieId}`;
-        } else {
-            alert('Error adding movie to history');
-        }
-    } catch (error) {
-        console.error('Error adding to watch history:', error);
-        alert('Error adding to history');
-    }
+function watchMovie(movieId) {
+    window.location.href = `/movie/${movieId}`;
 }
-
 
 function showToast(message) {
   toastElement.textContent = message;
