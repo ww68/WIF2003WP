@@ -26,16 +26,18 @@
     <h2 class="fw-bold text-white text-center">Top Entertainment Chart</h2>
 </div> 
          
-<div class="chart-container">
-    <div id="genreChartContainer">
+<div class="chart-section">
+    <div class="left-chart">
         <canvas id="genreChart"></canvas>
     </div>
-    <div id="left-side">
-        <div id="line-chart">
+
+    <div class="right-charts">
+        <div class="line-chart">
             <canvas id="top5LineChart"></canvas>
         </div>
+
         <div class="movies-list-container1">
-            <h6>Top 5 Upcoming Movies</h6>
+        <h6>Top 5 Upcoming Movies</h6>
             <div class="table">
                 <div class="table-header">
                     <div class="number">#</div>
@@ -43,23 +45,22 @@
                     <div class="movie-genre">Genre</div>
                     <div class="movie-release-date">Release Date</div>
                 </div>
-
-                <ul id="movies-list">
-                    <% upcomingMovies.forEach((movie, index) => { %>
-                        <li class="table-row">
-                            <div class="number"><%= index + 1 %></div>
-                            <div class="movie-name"><%= movie.title %></div>
-                            <div class="movie-genre">
-                                <% if (movie.genre_ids && movie.genre_ids.length > 0) { %>
-                                    <%= GENRE_MAP[movie.genre_ids[0]] || 'Unknown' %>
-                                <% } else { %>
-                                    Unknown
-                                <% } %>
-                            </div>
-                            <div class="movie-release-date"><%= movie.release_date %></div>
-                        </li>
-                    <% }); %>
-                </ul>
+                    <div id="movies-list">
+                        <% upcomingMovies.forEach((movie, index) => { %>
+                            <li class="table-row">
+                                <div class="number"><%= index + 1 %></div>
+                                <div class="movie-name"><%= movie.title %></div>
+                                <div class="movie-genre">
+                                    <% if (movie.genre_ids && movie.genre_ids.length > 0) { %>
+                                        <%= GENRE_MAP[movie.genre_ids[0]] || 'Unknown' %>
+                                    <% } else { %>
+                                        Unknown
+                                    <% } %>
+                                </div>
+                                <div class="movie-release-date"><%= movie.release_date %></div>
+                            </li>
+                        <% }); %>
+                    </div>
             </div>
         </div>                
     </div>     
@@ -113,6 +114,14 @@
     <div class="page" id="prev">Previous Page</div>
     <div class="current" id="current"><%= currentPage %></div>
     <div class="page" id="next">Next Page</div>
+</div>
+
+<!-- Trailer Modal -->
+<div id="trailer-modal" class="modal">
+  <div class="modal-content">
+    <span id="close-trailer-modal" class="closeBtn">&times;</span>
+    <div id="trailer-container" class="trailer-container"></div>
+  </div>
 </div>
 
     </main>
