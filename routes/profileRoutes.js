@@ -40,8 +40,7 @@ router.post('/updateGenres', requireAuth, async (req, res) => {
         }, { new: true });
 
         req.session.user = updatedUser; // Update session data
-        res.redirect('/');
-        res.json({ message: 'Preferences saved successfully' }); // Send success message
+        return res.json({ message: 'Preferences saved successfully' }); // Send success message
     } catch (err) {
         console.error(err);
         res.status(500).send('Error updating genres');

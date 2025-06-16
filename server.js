@@ -142,6 +142,32 @@ app.use('/api/auth', authRoutes);
 //     }
 // });
 
+// Route to get user preferences (returns preferences for authenticated users, null for non-authenticated)
+app.get('/index/getPreferences', async (req, res) => {
+    try {
+        // Check if user is authenticated (adjust this based on your auth system)
+        if (!req.session || !req.session.userId) {
+            return res.status(401).json({ message: 'Not authenticated' });
+        }
+
+        // Find user in database
+        const user = await User.findById(req.session.userId);
+        if (!user) {
+            return res.status(404).json({ message: 'User not found' });
+        }
+
+        // Return user preferences
+        res.status(200).json({
+            preferences: user.genres || [],
+            isAuthenticated: true
+        });
+    } catch (error) {
+        console.error('Error getting user preferences:', error);
+        if (!res.headersSent) {
+            return res.status(500).json({ message: 'Server error' });
+        }
+    }
+});
 
 app.get('/logout', (req, res) => {
     req.session.destroy(() => {
