@@ -47,13 +47,22 @@ function createHistoryMovieCard(movie, timestamp) {
         </div>
     `;
     
-    // Add delete functionality
+    // Add delete functionality 
     const deleteBtn = movieItem.querySelector('.history-delete-icon');
-    deleteBtn.addEventListener('click', (e) => {
+    deleteBtn.addEventListener('click', async (e) => {
         e.stopPropagation();
-        removeFromHistory(movie.id, timestamp);
-        movieItem.remove();
-        checkEmptyState();
+        
+        // Call removeFromHistory and wait for the result
+        const wasRemoved = await removeFromHistory(movie.id, timestamp, {
+            title: movie.title,
+            id: movie.id
+        });
+        
+        // Only remove from DOM if the server deletion was successful
+        if (wasRemoved) {
+            movieItem.remove();
+            checkEmptyState();
+        }
     });
     
     return movieItem;
@@ -70,11 +79,7 @@ async function loadHistory() {
 
     // Group by date
     const grouped = {};
-    let lastMovieId = null;
     history.forEach(entry => {
-        if (entry.movieId === lastMovieId) return; // skip consecutive duplicates
-        lastMovieId = entry.movieId;
-
         const dateLabel = getDateLabel(entry.timestamp);
         if (!grouped[dateLabel]) grouped[dateLabel] = [];
         grouped[dateLabel].push(entry);
@@ -144,7 +149,12 @@ function getDateLabel(dateStr) {
     return watchDate.toLocaleDateString('en-US', { day: 'numeric', month: 'short' }); // e.g., "2 May"
 }
 
-async function removeFromHistory(movieId, timestamp) {
+async function removeFromHistory(movieId, timestamp, movieData = {}) {
+    const confirmed = await showDeleteConfirmation(movieData);
+    if (!confirmed) {
+        return false; // User cancelled
+    }
+
     try {
         const response = await fetch('/history/remove', {
             method: 'POST',
@@ -156,11 +166,14 @@ async function removeFromHistory(movieId, timestamp) {
 
         if (data.message === 'Movie removed from history') {
             console.log('Movie successfully removed from history');
+            return true;
         } else {
             console.log('Error removing movie from history');
+            return false;
         }
     } catch (error) {
         console.error('Error removing movie from history:', error);
+        return false;
     }
 }
 
@@ -174,21 +187,125 @@ function checkEmptyState() {
     }
 }
 
-document.getElementById('clear-history').addEventListener('click', () => {
-    if (confirm('Are you sure you want to delete all watch history?')) {
-        fetch('/history/clear', { method: 'POST' })
-            .then(response => response.json())
-            .then(data => {
-                if (data.message === 'History cleared') {
-                    historyContainer.innerHTML = '';
-                    checkEmptyState();
-                }
-            });
+document.getElementById('clear-history').addEventListener('click', async () => {
+    const confirmed = await showClearAllConfirmation();
+    
+    if (confirmed) {
+        try {
+            const response = await fetch('/history/clear', { method: 'POST' });
+            const data = await response.json();
+            
+            if (data.message === 'History cleared') {
+                await showSuccessModal('All history cleared successfully');
+
+                historyContainer.innerHTML = '';
+                checkEmptyState();
+                console.log('All history cleared successfully');
+            } else {
+                console.error('Failed to clear history');
+                // Optionally show an error message to user
+            }
+        } catch (error) {
+            console.error('Error clearing history:', error);
+            // Optionally show an error message to user
+        }
     }
 });
 
 function watchMovie(movieId) {
     window.location.href = `/movie/${movieId}`;
+}
+
+// Generic reusable modal function
+function showConfirmationModal(options = {}) {
+    const {
+        title = 'Confirm Action',
+        message = 'Are you sure you want to proceed?',
+        subMessage = 'This action cannot be undone.',
+        confirmText = 'Confirm',
+        cancelText = 'Cancel',
+        confirmIcon = 'fas fa-check',
+        warningIcon = 'fas fa-exclamation-triangle',
+        confirmButtonClass = 'btn-danger',
+        showWarningIcon = true
+    } = options;
+
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div class="delete-modal-backdrop" onclick="resolveConfirmation(false)">
+                <div class="delete-modal-content" onclick="event.stopPropagation()">
+                    ${showWarningIcon ? `
+                        <div class="delete-icon">
+                            <i class="${warningIcon}"></i>
+                        </div>
+                    ` : ''}
+                    <h3>${title}</h3>
+                    <p>${message}</p>
+                    ${subMessage ? `<p><small>${subMessage}</small></p>` : ''}
+                    <div class="modal-buttons">
+                        <button class="${confirmButtonClass}" onclick="resolveConfirmation(true)">
+                            <i class="${confirmIcon}"></i> ${confirmText}
+                        </button>
+                        ${cancelText ? `
+                            <button class="btn-secondary" onclick="resolveConfirmation(false)">
+                                ${cancelText}
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const modal = document.createElement('div');
+        modal.innerHTML = modalHTML;
+        document.body.appendChild(modal);
+        
+        window.resolveConfirmation = (confirmed) => {
+            document.body.removeChild(modal);
+            delete window.resolveConfirmation;
+            resolve(confirmed);
+        };
+    });
+}
+
+// Updated delete single movie function
+function showDeleteConfirmation(movieData) {
+    return showConfirmationModal({
+        title: 'Remove from History?',
+        message: `Remove "${movieData.title || 'this movie'}" from your viewing history?`,
+        subMessage: 'This action cannot be undone.',
+        confirmText: 'Remove',
+        confirmIcon: 'fas fa-trash',
+        confirmButtonClass: 'btn-danger'
+    });
+}
+
+// New clear all history confirmation function
+function showClearAllConfirmation() {
+    return showConfirmationModal({
+        title: 'Clear All History?',
+        message: 'This will permanently delete your entire watch history.',
+        subMessage: 'All your viewing history will be lost forever. This action cannot be undone.',
+        confirmText: 'Clear All',
+        confirmIcon: 'fas fa-trash-alt',
+        confirmButtonClass: 'btn-danger',
+        warningIcon: 'fas fa-exclamation-triangle'
+    });
+}
+
+// Example usage for other confirmations (bonus)
+function showSuccessModal(message) {
+    return showConfirmationModal({
+        title: 'Success!',
+        message: message,
+        subMessage: '',
+        confirmText: 'OK',
+        cancelText: '',
+        confirmIcon: 'fas fa-check',
+        warningIcon: 'fas fa-check-circle',
+        confirmButtonClass: 'btn-success',
+        showWarningIcon: true
+    });
 }
 
 // Initialize the page

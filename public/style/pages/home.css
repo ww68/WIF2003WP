@@ -115,8 +115,7 @@
     opacity: 0.5;
 }
 
-.movie-list-item:hover .movie-list-item-title,
-.movie-list-item:hover .movie-list-item-desc,
+.movie-list-item:hover .movie-info-container,
 .movie-list-item:hover .movie-list-item-button {
     opacity: 1;
 }
@@ -129,32 +128,55 @@
     border-radius: 20px;
 }
 
-.movie-list-item-title {
-    padding: 0 10px;
-    font-size: 28px;
-    font-weight: bold;
+.movie-info-container {
     position: absolute;
     top: 10%;
     left: 30px;
-    width: 180px;
-    opacity: 0;
-    transition: all 0.5s ease-in-out;
-}
-
-.movie-list-item-desc {
-    padding: 10px;
-    font-size: 14px;
-    position: absolute;
-    top: 40%; /* Adjust positioning based on your layout */
-    left: 30px;
     width: 190px;
-    max-height: 100px; /* Limit height */
-    overflow-y: auto; /* Make the content scrollable */
+    max-height: 200px; /* Adjust based on your needs */
+    overflow-y: auto;
     opacity: 0;
     transition: all 0.5s ease-in-out;
     z-index: 2;
+    padding: 10px;
+    border-radius: 8px;
+    /* Custom scrollbar styling */
+    scrollbar-width: thin;
+    scrollbar-color: #666 transparent;
 }
 
+.movie-info-container::-webkit-scrollbar {
+    width: 4px;
+}
+
+.movie-info-container::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.movie-info-container::-webkit-scrollbar-thumb {
+    background: #666;
+    border-radius: 2px;
+}
+
+.movie-info-container::-webkit-scrollbar-thumb:hover {
+    background: #888;
+}
+
+.movie-list-item-title {
+    font-size: 28px;
+    font-weight: bold;
+    color: white;
+    margin-bottom: 10px;
+    word-wrap: break-word;
+    line-height: 1.2;
+}
+
+.movie-list-item-desc {
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.4;
+    word-wrap: break-word;
+}
 
 .movie-list-item-button {
     padding-left: 12px;

@@ -67,34 +67,34 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
-document.getElementById("genreForm").addEventListener("submit", function(e) {
+document.getElementById("genreForm").addEventListener("submit", async function(e) {
     e.preventDefault();
-    
-    const selectedGenres = Array.from(document.querySelectorAll('#genreForm input[type="checkbox"]:checked'))
-    .map(input => input.value);
 
-    const userConfirmed = confirm("Are you sure you want to save your genre preferences?");
-    if (userConfirmed) {
-        // Send selected genres to the backend to save
-        fetch('/profile/updateGenres', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({ selectedGenres })
-        })
-        .then(response => response.json())
-        .then(data => {
+    const selectedGenres = Array.from(document.querySelectorAll('#genreForm input[type="checkbox"]:checked'))
+        .map(input => input.value);
+
+    const confirmed = await showPreferencesConfirmation();
+
+    if (confirmed) {
+        try {
+            const response = await fetch('/profile/updateGenres', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({ selectedGenres })
+            });
+
+            const data = await response.json();
             if (data.message === "Preferences saved successfully") {
-                alert('Genre preferences updated successfully!');
+                await showSuccessModal('Your genre preferences have been updated!');
+                location.reload(); // Only reload after user acknowledges
             } else {
                 alert('Error saving genre preferences');
             }
-            locaation.reload();
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error saving genre preferences:', error);
-        });
+        }
     }
 });
 
@@ -137,15 +137,15 @@ document.getElementById("submitNewPassword").addEventListener("click", function(
         return;
     }
 
-    fetch('/changePassword', {
+    fetch('/profile/changePassword', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ currentPassword, newPassword, confirmNewPassword })
     })
     .then(res => res.json())
-    .then(data => {
+    .then(async data => {
         if (data.message === "Password updated successfully") {
-            alert(data.message);
+            await showSuccessModal('Password updated successfully!');
             // Reset fields and close modal
             document.getElementById("currentPassword").value = '';
             document.getElementById("newPassword").value = '';
@@ -162,7 +162,124 @@ document.getElementById("submitNewPassword").addEventListener("click", function(
     });
 });
 
-function confirmDelete() {
-    const confirmed = confirm("Are you sure you want to delete your account? This action cannot be undone.");
-    return confirmed; // If the user clicks "OK", it will proceed, otherwise the form will not submit.
+document.getElementById('delete-account').addEventListener('click', async () => {
+    const confirmed = await showConfirmationModal();
+    
+    if (confirmed) {
+        try {
+            const response = await fetch('/profile/deleteAccount', { method: 'POST' });
+            const data = await response.text();
+
+            await showSuccessModal('Your account has been deleted successfully!');
+            // Redirect user manually to login
+            window.location.href = '/';
+        } catch (error) {
+            console.error('Error deleting account:', error);
+            alert("Error deleting account. Please try again.");
+        }
+    }
+});
+
+// Generic reusable modal function
+function showConfirmationModal(options = {}) {
+    const {
+        title = 'Delete Account Permanently?',
+        message = 'Are you sure you want to delete your account?',
+        subMessage = 'This action cannot be undone.',
+        confirmText = 'Confirm',
+        cancelText = 'Cancel',
+        confirmIcon = 'fas fa-check',
+        warningIcon = 'fas fa-exclamation-triangle',
+        confirmButtonClass = 'btn-danger',
+        showWarningIcon = true
+    } = options;
+
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div class="delete-modal-backdrop" onclick="resolveConfirmation(false)">
+                <div class="delete-modal-content" onclick="event.stopPropagation()">
+                    ${showWarningIcon ? `
+                        <div class="delete-icon">
+                            <i class="${warningIcon}"></i>
+                        </div>
+                    ` : ''}
+                    <h3>${title}</h3>
+                    <p>${message}</p>
+                    ${subMessage ? `<p><small>${subMessage}</small></p>` : ''}
+                    <div class="modal-buttons">
+                        <button class="${confirmButtonClass}" onclick="resolveConfirmation(true)">
+                            <i class="${confirmIcon}"></i> ${confirmText}
+                        </button>
+                        ${cancelText ? `
+                            <button class="btn-secondary" onclick="resolveConfirmation(false)">
+                                ${cancelText}
+                            </button>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+        
+        const modal = document.createElement('div');
+        modal.innerHTML = modalHTML;
+        document.body.appendChild(modal);
+        
+        window.resolveConfirmation = (confirmed) => {
+            document.body.removeChild(modal);
+            delete window.resolveConfirmation;
+            resolve(confirmed);
+        };
+    });
+}
+
+document.getElementById('logout-button').addEventListener('click', async (e) => {
+    e.preventDefault(); // Prevent direct navigation
+
+    const confirmed = await showLogoutConfirmation();
+
+    if (confirmed) {
+        window.location.href = '/profile/logout';
+    }
+});
+
+function showLogoutConfirmation() {
+    return showConfirmationModal({
+        title: 'Log Out?',
+        message: 'Are you sure you want to log out?',
+        subMessage: '',
+        confirmText: 'Log Out',
+        cancelText: 'Cancel',
+        confirmIcon: 'fas fa-sign-out-alt',
+        warningIcon: 'fas fa-sign-out-alt',
+        confirmButtonClass: 'btn-warning',
+        showWarningIcon: true
+    });
+}
+
+function showPreferencesConfirmation() {
+    return showConfirmationModal({
+        title: 'Save Genre Preferences?',
+        message: 'Are you sure you want to update your genre preferences?',
+        subMessage: 'You can update this anytime later.',
+        confirmText: 'Save',
+        cancelText: 'Cancel',
+        confirmIcon: 'fas fa-save',
+        warningIcon: 'fas fa-list',
+        confirmButtonClass: 'btn-primary',
+        showWarningIcon: true
+    });
+}
+
+function showSuccessModal(message) {
+    return showConfirmationModal({
+        title: 'Success!',
+        message: message,
+        subMessage: '',
+        confirmText: 'OK',
+        cancelText: '',
+        confirmIcon: 'fas fa-check',
+        warningIcon: 'fas fa-check-circle',
+        confirmButtonClass: 'btn-success',
+        showWarningIcon: true
+    });
 }

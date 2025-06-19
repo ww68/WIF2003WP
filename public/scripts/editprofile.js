@@ -104,20 +104,151 @@ function debounce(func, delay) {
     };
 }
 
-document.querySelector(".btn-secondary").addEventListener("click", () => {
-    if (confirm("Are you sure you want to discard your changes?")) {
+document.querySelector(".btn-secondary").addEventListener("click", async () => {
+     if (!hasFormChanged()) {
+        window.history.back();
+        return;
+    }
+
+    const discardConfirmed = await showConfirmationModal({
+        title: 'Discard Changes?',
+        message: 'Are you sure you want to discard your changes?',
+        subMessage: 'Your unsaved edits will be lost.',
+        confirmText: 'Discard',
+        cancelText: 'Cancel',
+        confirmIcon: 'fas fa-times',
+        warningIcon: 'fas fa-exclamation-triangle',
+        confirmButtonClass: 'btn-danger',
+        showWarningIcon: true
+    });
+
+    if (discardConfirmed) {
         window.history.back();
     }
 });
 
-
 const saveBtn = document.querySelector(".btn-primary");
-document.querySelector("form").addEventListener("submit", (e) => {
-    saveBtn.disabled = true;
-    saveBtn.textContent = "Saving...";
+const form = document.querySelector("form");
+const originalFormData = new FormData(form);
 
-    // setTimeout(() => {
-    //     alert("Your profile has been updated successfully!");
-    //     window.location.href = "profile";
-    // }, 1000); // simulate 1s delay
+function hasFormChanged() {
+    const currentData = new FormData(form);
+
+    for (const [key, value] of currentData.entries()) {
+        const originalValue = originalFormData.get(key);
+
+        if (value instanceof File) {
+            if (value.name !== originalValue?.name || value.size !== originalValue?.size) {
+                return true;
+            }
+        } else if (originalValue !== value) {
+            return true;
+        }
+    }
+
+    return false; // No changes
+}
+
+
+
+form.addEventListener("submit", async (e) => {
+    e.preventDefault(); // Prevent direct submit
+
+    if (!hasFormChanged()) {
+        await showSuccessModal({
+            title: 'No Changes Made',
+            message: 'You haven’t changed anything in your profile.',
+            confirmText: 'OK'
+        });
+
+        return;
+    }
+
+    const confirmed = await showConfirmationModal({
+        title: 'Save Changes?',
+        message: 'Are you sure you want to update your profile?',
+        subMessage: 'You can always edit it again later.',
+        confirmText: 'Save',
+        cancelText: 'Cancel',
+        confirmIcon: 'fas fa-save',
+        warningIcon: 'fas fa-user-edit',
+        confirmButtonClass: 'btn-primary',
+        showWarningIcon: true
+    });
+
+    if (confirmed) {
+        saveBtn.disabled = true;
+        saveBtn.textContent = "Saving...";
+
+        // Simulate save delay (or send AJAX if needed)
+        setTimeout(async () => {
+            await showSuccessModal({
+            message: "Your profile has been updated successfully!"
+        });
+            form.submit(); // Real form submit after modal confirmation
+        }, 500);
+    }
 });
+
+function showConfirmationModal(options = {}) {
+    const {
+        title = 'Confirm Action',
+        message = 'Are you sure?',
+        subMessage = '',
+        confirmText = 'Confirm',
+        cancelText = 'Cancel',
+        confirmIcon = 'fas fa-check',
+        warningIcon = 'fas fa-exclamation-triangle',
+        confirmButtonClass = 'btn-primary',
+        showWarningIcon = true
+    } = options;
+
+    return new Promise((resolve) => {
+        const modalHTML = `
+            <div class="delete-modal-backdrop" onclick="resolveConfirmation(false)">
+                <div class="delete-modal-content" onclick="event.stopPropagation()">
+                    ${showWarningIcon ? `
+                        <div class="delete-icon">
+                            <i class="${warningIcon}"></i>
+                        </div>` : ''}
+                    <h3>${title}</h3>
+                    <p>${message}</p>
+                    ${subMessage ? `<p><small>${subMessage}</small></p>` : ''}
+                    <div class="modal-buttons">
+                        <button class="${confirmButtonClass}" onclick="resolveConfirmation(true)">
+                            <i class="${confirmIcon}"></i> ${confirmText}
+                        </button>
+                        ${cancelText ? `
+                            <button class="btn-secondary" onclick="resolveConfirmation(false)">
+                                ${cancelText}
+                            </button>` : ''}
+                    </div>
+                </div>
+            </div>
+        `;
+
+        const modal = document.createElement('div');
+        modal.innerHTML = modalHTML;
+        document.body.appendChild(modal);
+
+        window.resolveConfirmation = (confirmed) => {
+            document.body.removeChild(modal);
+            delete window.resolveConfirmation;
+            resolve(confirmed);
+        };
+    });
+}
+
+function showSuccessModal(options = {}) {
+    return showConfirmationModal({
+        title: options.title || 'Success!',
+        message: options.message || 'Action completed successfully.',
+        confirmText: options.confirmText || 'OK',
+        cancelText: '',
+        confirmIcon: options.confirmIcon || 'fas fa-check',
+        warningIcon: options.warningIcon || 'fas fa-check-circle',
+        confirmButtonClass: options.confirmButtonClass || 'btn-success',
+        showWarningIcon: options.showWarningIcon !== false
+    });
+}
+
