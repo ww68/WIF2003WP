@@ -324,14 +324,26 @@ async function fetchTop5Movies() {
 
 async function fetchUpcomingMovies() {
   try {
-    const res = await fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}&page=1`);
-    const data = await res.json();
-    const movies = data.results
-      .filter(movie => new Date(movie.release_date) > new Date())
+    let allUpcoming = [];
+
+    for (let page = 1; page <= 10; page++) {
+      const res = await fetch(`${BASE_URL}/movie/upcoming?api_key=${API_KEY}&page=${page}`);
+      const data = await res.json();
+      allUpcoming = allUpcoming.concat(data.results);
+    }
+
+    // Filter future movies and limit to 5
+    const today = new Date();
+    const upcomingFiltered = allUpcoming
+      .filter(movie => new Date(movie.release_date) > today)
+      .sort((a, b) => new Date(a.release_date) - new Date(b.release_date)) // Optional: sort by date
       .slice(0, 5);
-      
+
+    console.log("Filtered upcoming movies:", upcomingFiltered);
+
+    // Render
     const moviesList = document.getElementById('movies-list');
-    moviesList.innerHTML = movies.map((movie, index) => `
+    moviesList.innerHTML = upcomingFiltered.map((movie, index) => `
       <li class="table-row">
         <div class="number">${index + 1}</div>
         <div class="movie-name">${movie.title}</div>
@@ -339,10 +351,12 @@ async function fetchUpcomingMovies() {
         <div class="movie-release-date">${movie.release_date}</div>
       </li>
     `).join('');
+    
   } catch (error) {
     console.error('Error fetching upcoming movies:', error);
   }
 }
+
 
 function getFirstGenre(genreIds) {
   return genreIds?.length ? GENRE_MAP[genreIds[0]] || 'Unknown' : 'Unknown';
