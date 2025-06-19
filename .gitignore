@@ -1,4 +1,4 @@
 # Dependency folders
 node_modules/
-verification.env
+.env
 
