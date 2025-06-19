@@ -15,25 +15,77 @@ router.get('/', requireAuth, async (req, res) => {
 });
 
 // Save movie to watch history
-router.post('/add', requireAuth, async (req, res) => {
-    const { movieId, title } = req.body;  // Expecting movie data from frontend
-    const userId = req.session.userId;
+// router.post('/add', requireAuth, async (req, res) => {
+//     const { movieId, title } = req.body;  // Expecting movie data from frontend
+//     const userId = req.session.userId;
 
-    console.log("Incoming history add:", req.body);
+//     console.log("Incoming history add:", req.body);
+
+//     if (!movieId || !title) {
+//         return res.status(400).json({ message: 'Missing movieId or title' });
+//     }
+
+//     try {
+//         // Find the user by ID and add movie to watchHistory
+//         const user = await User.findById(userId);
+//         if (!user) {
+//             return res.status(401).json({ message: 'Unauthorized' });
+//         }
+
+//         // Add the movie to the watchHistory and save
+//         user.watchHistory.push({ movieId, title, timestamp: new Date()});
+//         await user.save();
+
+//         res.status(200).json({ message: 'Movie added to watch history' });
+//     } catch (error) {
+//         console.error('Error adding to watch history:', error);
+//         res.status(500).json({ message: 'Error adding to watch history' });
+//     }
+// });
+router.post('/add', requireAuth, async (req, res) => {
+    const { movieId, title, timestamp } = req.body;
+    const userId = req.session.userId;
 
     if (!movieId || !title) {
         return res.status(400).json({ message: 'Missing movieId or title' });
     }
 
     try {
-        // Find the user by ID and add movie to watchHistory
         const user = await User.findById(userId);
         if (!user) {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        // Add the movie to the watchHistory and save
-        user.watchHistory.push({ movieId, title, timestamp: new Date()});
+        // Check if the same movie was added today
+        const today = new Date();
+        const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
+        const endOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate() + 1);
+
+        // Find existing entry for this movie today
+        const existingTodayIndex = user.watchHistory.findIndex(entry => 
+            String(entry.movieId) === String(movieId) && 
+            new Date(entry.timestamp) >= startOfToday &&
+            new Date(entry.timestamp) < endOfToday
+        );
+
+        if (existingTodayIndex !== -1) {
+            // Remove the old entry and add the new one
+            user.watchHistory.splice(existingTodayIndex, 1);
+            user.watchHistory.push({ 
+                movieId: String(movieId), 
+                title, 
+                timestamp: new Date(timestamp)
+            });
+            await user.save();
+            return res.status(200).json({ message: 'Movie history updated for today' });
+        }
+
+        // Add new entry if no recent duplicate found
+        user.watchHistory.push({ 
+            movieId: String(movieId), 
+            title, 
+            timestamp: new Date(timestamp)
+        });
         await user.save();
 
         res.status(200).json({ message: 'Movie added to watch history' });
@@ -67,16 +119,14 @@ router.post('/remove', requireAuth, async (req, res) => {
             return res.status(401).json({ message: 'Unauthorized' });
         }
 
-        // Find the index of the *exact* movie entry using movieId AND timestamp
-        const index = user.watchHistory.findIndex(
-            movie =>
-                String(movie.movieId) === String(movieId) &&
-                new Date(movie.timestamp).toISOString() === new Date(timestamp).toISOString()
+        // Remove ALL entries for this movieId (to handle any existing duplicates)
+        const initialLength = user.watchHistory.length;
+        user.watchHistory = user.watchHistory.filter(
+            movie => String(movie.movieId) !== String(movieId)
         );
 
-        if (index !== -1) {
-            user.watchHistory.splice(index, 1); // Removes the entry from the array
-            await user.save(); // Saves the updated document to MongoDB
+        if (user.watchHistory.length < initialLength) {
+            await user.save();
             return res.status(200).json({ message: 'Movie removed from history' });
         } else {
             return res.status(404).json({ message: 'Movie entry not found' });

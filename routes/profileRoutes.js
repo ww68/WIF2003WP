@@ -51,6 +51,10 @@ router.post('/changePassword', requireAuth, async (req, res) => {
     const { currentPassword, newPassword, confirmNewPassword } = req.body;
     const userId = req.session.userId;
 
+    if (!currentPassword || !newPassword) {
+        return res.status(400).json({ message: 'Missing current or new password' });
+    }
+    
     try {
         const user = await User.findById(userId);
         if (!user) return res.status(404).json({ message: 'User not found' });
