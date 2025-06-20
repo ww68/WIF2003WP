@@ -2,6 +2,7 @@ const TMDB_API_KEY = 'b5ca748da01c92488ef670a84e31c784';
 const API_BASE = 'https://api.themoviedb.org/3';
 const IMG_BASE = 'https://image.tmdb.org/t/p/w200';
 
+// scripts/searchBarNav.js
 document.addEventListener("DOMContentLoaded", () => {
     const searchForms = document.querySelectorAll('form[role="search"]');
   
@@ -16,41 +17,44 @@ document.addEventListener("DOMContentLoaded", () => {
         dropdown.style.left = "0";
         dropdown.style.zIndex = 1050;
         dropdown.style.display = "none";
-        dropdown.style.backgroundColor = "#212529"; // Dark bg
-        dropdown.style.border = "1px solid #343a40"; // Darker border
+        dropdown.style.backgroundColor = "#212529";
+        dropdown.style.border = "1px solid #343a40";
         form.style.position = "relative";
         form.appendChild(dropdown);
 
-        const loadSuggestions = () => {
+        const loadSuggestions = async () => {
+            const searches = await loadRecentSearches();
             dropdown.innerHTML = "";
-            const recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-            if (recent.length === 0) return;
+            
+            if (searches.length === 0) {
+                dropdown.style.display = "none";
+                return;
+            }
 
-            recent.slice(0, 5).forEach(item => {
+            searches.forEach(search => {
                 const li = document.createElement("li");
                 li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white border-secondary";
 
                 const text = document.createElement("span");
-                text.textContent = item;
+                text.textContent = search.query;
                 text.className = "flex-grow-1";
                 text.style.cursor = "pointer";
                 text.onclick = () => {
-                    input.value = item;
+                    input.value = search.query;
                     form.requestSubmit();
                 };
 
                 const deleteBtn = document.createElement("button");
                 deleteBtn.innerHTML = `<i class="fas fa-trash-alt text-white"></i>`;
                 deleteBtn.className = "btn deleteBtn p-1";
-                deleteBtn.onmousedown = (e) => e.preventDefault(); // Prevent background on click
-                deleteBtn.onfocus = (e) => e.target.style.background = "transparent"; // Ensure focus doesn't change background
-                deleteBtn.onclick = (e) => {
+                deleteBtn.onclick = async (e) => {
                     e.stopPropagation();
-                    let recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-                    recent = recent.filter(q => q !== item);
-                    localStorage.setItem("recentSearches", JSON.stringify(recent));
-                    loadSuggestions();
+                    const success = await deleteSearchHistory(search.query);
+                    if (success) {
+                        loadSuggestions();
+                    }
                 };
+                
                 li.appendChild(text);
                 li.appendChild(deleteBtn);
                 dropdown.appendChild(li);
@@ -60,43 +64,43 @@ document.addEventListener("DOMContentLoaded", () => {
         };
 
         input.addEventListener("focus", loadSuggestions);
+        
         input.addEventListener("input", () => {
-         const query = input.value.trim();
+            const query = input.value.trim();
 
-  if (query === "") {
-    loadSuggestions(); // fallback to recent searches
-    return;
-  }
+            if (query === "") {
+                loadSuggestions();
+                return;
+            }
 
-  fetch(`${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=1`)
-    .then(res => res.json())
-    .then(data => {
-      dropdown.innerHTML = "";
+            fetch(`${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=1`)
+                .then(res => res.json())
+                .then(data => {
+                    dropdown.innerHTML = "";
 
-      data.results.slice(0, 5).forEach(movie => {
-        const li = document.createElement("li");
-        li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white";
+                    data.results.slice(0, 5).forEach(movie => {
+                        const li = document.createElement("li");
+                        li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white";
 
-        const text = document.createElement("span");
-        text.textContent = movie.title;
-        text.className = "flex-grow-1";
-        text.style.cursor = "pointer";
-        text.onclick = () => {
-          input.value = movie.title;
-          form.requestSubmit(); // triggers search
-        };
+                        const text = document.createElement("span");
+                        text.textContent = movie.title;
+                        text.className = "flex-grow-1";
+                        text.style.cursor = "pointer";
+                        text.onclick = () => {
+                            input.value = movie.title;
+                            form.requestSubmit();
+                        };
 
-        li.appendChild(text);
-        dropdown.appendChild(li);
-      });
+                        li.appendChild(text);
+                        dropdown.appendChild(li);
+                    });
 
-      dropdown.style.display = "block";
-    })
-    .catch(err => {
-      console.error("Error fetching movie suggestions:", err);
-    });
-});
-
+                    dropdown.style.display = "block";
+                })
+                .catch(err => {
+                    console.error("Error fetching movie suggestions:", err);
+                });
+        });
 
         document.addEventListener("click", e => {
             if (!form.contains(e.target)) {
@@ -104,21 +108,18 @@ document.addEventListener("DOMContentLoaded", () => {
             }
         });
 
-        form.addEventListener("submit", e => {
+        form.addEventListener("submit", async (e) => {
             e.preventDefault();
             const query = input.value.trim();
             if (!query) return;
 
-            // Save to recent
-            let recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-            recent = [query, ...recent.filter(q => q !== query)];
-            localStorage.setItem("recentSearches", JSON.stringify(recent.slice(0, 10)));
+            // Save to search history
+            await saveSearchHistory(query, {});
+            
+            window.location.href = `/search?query=${encodeURIComponent(query)}`;
+        });
 
-            // Navigate
-// Change this line in the form submit event:
-window.location.href = `/search?query=${encodeURIComponent(query)}`;        });
-
-        // === Voice Search ===
+        // Voice search
         if (voiceBtn) {
             window.SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
 
@@ -128,17 +129,20 @@ window.location.href = `/search?query=${encodeURIComponent(query)}`;        });
                 recognition.interimResults = false;
                 recognition.maxAlternatives = 1;
 
-                voiceBtn.addEventListener('click', () => {
+                voiceBtn.addEventListener('click', async () => {
                     recognition.start();
                 });
 
-                recognition.onresult = function (event) {
+                recognition.onresult = async function(event) {
                     const transcript = event.results[0][0].transcript;
                     input.value = transcript;
+                    
+                    // Save voice search to history
+                    await saveSearchHistory(transcript, {});
                     form.requestSubmit();
                 };
 
-                recognition.onerror = function (event) {
+                recognition.onerror = function(event) {
                     console.error("Speech recognition error:", event.error);
                     alert(`Voice recognition error: ${event.error}`);
                 };
@@ -149,3 +153,61 @@ window.location.href = `/search?query=${encodeURIComponent(query)}`;        });
         }
     });
 });
+
+// Shared functions with search.js
+async function saveSearchHistory(query, filters = {}) {
+    try {
+        const response = await fetch('/search/history', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query,
+                genre: filters.genre || '',
+                year: filters.year || '',
+                language: filters.language || ''
+            }),
+            credentials: 'include'
+        });
+        
+        return response.ok;
+    } catch (error) {
+        console.error('Error saving search history:', error);
+        return false;
+    }
+}
+
+async function loadRecentSearches() {
+    try {
+        const response = await fetch('/search/history', {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            return data.history || [];
+        }
+        return [];
+    } catch (error) {
+        console.error('Error loading recent searches:', error);
+        return [];
+    }
+}
+
+async function deleteSearchHistory(query) {
+    try {
+        const response = await fetch('/search/history', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ query }),
+            credentials: 'include'
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Error deleting search:', error);
+        return false;
+    }
+}
