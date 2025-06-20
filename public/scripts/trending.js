@@ -371,13 +371,21 @@ async function attachWatchlistListeners() {
     const title = item.querySelector('.movie-list-title');
 
     try {
-      const res = await fetch(`/watchlist/check/${movieId}`);
-      const data = await res.json();
-      if (data.inWatchlist) {
-        icon.classList.add('active');
-      }
-    } catch (err) {
-      console.error('Error checking watchlist:', err);
+      const res = await fetch(`/watchlist/check/${movieId}`, {
+        headers: { 'Accept': 'application/json' },
+        credentials: 'include',
+        redirect: 'manual'
+      });
+
+      if (res.status === 200) {
+        const data = await res.json();
+        if (data.inWatchlist) {
+          icon.classList.add('active');
+        }
+      } 
+
+    } catch(err) {
+      console.error('Status check failed:', err);
     }
 
     // Attach listeners
@@ -396,6 +404,8 @@ async function toggleWatchlist(icon, movieId) {
   const isAdding = !icon.classList.contains('active');
 
   try {
+    let res;
+
     if (isAdding) {
       const movie = await fetchMovieDetails(movieId);
       const movieData = {
@@ -408,33 +418,43 @@ async function toggleWatchlist(icon, movieId) {
         watched: false
       };
 
-      const res = await fetch('/watchlist/add', {
+      res = await fetch('/watchlist/add', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+        redirect: 'manual',
         body: JSON.stringify(movieData)
       });
 
-      const result = await res.json();
-      if (!result.success) throw new Error(result.message || 'Failed to add');
-
-      icon.classList.add('active');
-      showToast('Added to Watchlist');
     } else {
-      const res = await fetch('/watchlist/remove', {
+      res = await fetch('/watchlist/remove', {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: { 
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        credentials: 'include',
+        redirect: 'manual',
         body: JSON.stringify({ movieId })
       });
+    }  
 
-      const result = await res.json();
-      if (!result.success) throw new Error(result.message || 'Failed to remove');
-
-      icon.classList.remove('active');
-      showToast('Removed from Watchlist');
+    if (res.status === 401 || res.status === 302) {
+      promptLogin('Please log in to add movies to your watchlist.');
+      return;
     }
 
-  } catch (error) {
-    console.error('Error updating watchlist:', error);
+    const { success, message } = await res.json();
+    if (!success) throw new Error(message || 'Operation failed');
+
+    icon.classList.toggle('active', isAdding);
+    showToast(isAdding ? 'Added to Watchlist' : 'Removed from Watchlist');
+    
+  } catch (err) {
+    console.error('Error updating watchlist:', err);
     showToast('Watchlist update failed');
   }
 }
@@ -504,4 +524,12 @@ function showToast(message) {
   toastElement.textContent = message;
   toastElement.classList.add('show');
   setTimeout(() => toastElement.classList.remove('show'), 2000);
+}
+
+function promptLogin(msg = 'Please log in to view your watchlist.') {
+  if (typeof showAuthModal === 'function') {
+    showAuthModal(msg);                 
+  } else {
+    window.location.href = '/login';    
+  }
 }

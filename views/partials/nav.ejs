@@ -37,17 +37,16 @@
                 </li>
         
                 <li class="nav-item"><a class="nav-link <%= currentPage === 'home' ? 'active' : '' %>" href="/index">Home</a></li>
-                <li class="nav-item"><a class="nav-link <%= currentPage === 'watchlist' ? 'active' : '' %>" href="/watchlist">WatchList</a></li>
+                <li class="nav-item"><a id="watchlist-link" class="nav-link <%= currentPage === 'watchlist' ? 'active' : '' %>" href="/watchlist">WatchList</a></li>
                 <li class="nav-item"><a class="nav-link <%= currentPage === 'trending' ? 'active' : '' %>" href="/trending">Trending</a></li>
         
                 <li class="nav-item d-lg-none"><a class="nav-link profile-mobile <%= currentPage === 'profile' ? 'active' : '' %>" href="/profile">Profile</a></li>
             </ul>
     
-            <a href="/profile" class="ms-3 d-none d-lg-block profile-desktop">
-                <img src="<%= (locals.user && locals.user.profilePicture) ? locals.user.profilePicture : '/images/defaultAvatarProfile.jpg' %>" alt="Profile" class="navbar-profile-img">
+            <a href="/profile" id="profile-link" class="ms-3 d-none d-lg-block profile-desktop">
+                <img src="<%= (locals.user && locals.user.profilePicture) ? locals.user.profilePicture : '/images/defaultAvatarProfile.jpg' %>" alt="Profile" id="profile-avatar" class="navbar-profile-img">
             </a>
     
         </div>
     </div>
 </nav>
-
