@@ -271,16 +271,19 @@ async function updateWatchlistButtons() {
 // Check if movie is in watchlist (MongoDB)
 async function isInWatchlist(movieId) {
     try {
-        const response = await fetch(`/watchlist/check/${movieId}`);
-        if (response.ok) {
+        const response = await fetch(`/watchlist/check/${movieId}`, {
+            headers: { 'Accept': 'application/json' }, 
+            credentials: 'include',
+            redirect: 'manual'                         
+        });
+
+        if (response.status === 200) {
             const data = await response.json();
             return data.inWatchlist;
-        } else if (response.status === 401) {
-            // User not logged in
-            showToast('Please log in to use watchlist');
-            return false;
-        }
+        } 
+
         return false;
+        
     } catch (error) {
         console.error('Error checking watchlist:', error);
         return false;
@@ -299,7 +302,10 @@ async function toggleWatchlistForDetailPage(buttonElement, movieId, movieData) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
+                credentials: 'include',
+                redirect: 'manual',
                 body: JSON.stringify(movieData)
             });
 
@@ -309,19 +315,21 @@ async function toggleWatchlistForDetailPage(buttonElement, movieId, movieData) {
                 buttonElement.setAttribute('data-watchlisted', 'true');
                 showToast('Added to Watchlist');
             } else if (response.status === 401) {
-                showToast('Please log in to add to watchlist');
+                promptLogin('Please log in to add movies to your watchlist.');
+                return;
             } else {
                 const data = await response.json();
                 showToast(data.message || 'Error adding to watchlist');
             }
         } else {
-            // Remove from watchlist
-            // const response = await fetch(`/watchlist/remove/${movieId}`, {
-            //     method: 'DELETE'
-            // });
             const response = await fetch('/watchlist/remove', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include',
+                redirect: 'manual',
                 body: JSON.stringify({ movieId })
             });
 
@@ -331,7 +339,7 @@ async function toggleWatchlistForDetailPage(buttonElement, movieId, movieData) {
                 buttonElement.setAttribute('data-watchlisted', 'false');
                 showToast('Removed from Watchlist');
             } else if (response.status === 401) {
-                showToast('Please log in to manage watchlist');
+                promptLogin('Please log in to add movies to your watchlist.');
             } else {
                 const data = await response.json();
                 showToast(data.message || 'Error removing from watchlist');
@@ -382,4 +390,13 @@ async function addToHistory(movieId, title) {
     } catch (error) {
         console.error('Error adding movie to history:', error);
     }
+}
+
+function promptLogin(message = 'Please log in to view your watchlist.') {
+  if (typeof showAuthModal === 'function') {
+    showAuthModal(message);
+  } else {
+    // fallback (should never fire once modal assets load)
+    window.location.href = '/login';
+  }
 }

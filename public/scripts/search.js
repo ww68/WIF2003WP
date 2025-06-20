@@ -516,13 +516,22 @@ function renderMovies(movies) {
 
 async function checkWatchlistStatus(movieId) {
     try {
-        const response = await fetch(`/watchlist/check/${movieId}`);
-        const result = await response.json();
+        const response = await fetch(`/watchlist/check/${movieId}`, {
+            headers: {
+                'Accept': 'application/json'
+            },
+            credentials: 'include',
+            redirect: 'manual'
+        });
         
-        if (result.inWatchlist) {
-            const bookmark = document.querySelector(`.movie-card[data-id="${movieId}"] .bookmark-icon`);
-            if (bookmark) {
-                bookmark.classList.add('text-warning');
+        if (response.status === 200) {
+            const result = await response.json();
+        
+            if (result.inWatchlist) {
+                const bookmark = document.querySelector(`.movie-card[data-id="${movieId}"] .bookmark-icon`);
+                if (bookmark) {
+                    bookmark.classList.add('text-warning');
+                }
             }
         }
     } catch (error) {
@@ -545,10 +554,18 @@ async function addToWatchlist(movieId, title, description, img, rating, year) {
         const response = await fetch('/watchlist/add', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
+            credentials: 'include',
+            redirect: 'manual',
             body: JSON.stringify(movieData)
         });
+
+        if (response.status === 401 || response.status === 302) {
+            promptLogin('Please log in to add movies to your watchlist.');
+            return;
+        }
         
         const result = await response.json();
         
@@ -672,6 +689,14 @@ function showError() {
     }
 }
 
+function promptLogin(msg='Please log in to view your watchlist.') {
+  if (typeof showAuthModal === 'function') {
+    showAuthModal(msg);
+  } else {
+    window.location.href = '/login';
+  }
+}
+
 
 // scripts/search.js
 async function saveSearchHistory(query, filters = {}) {
@@ -774,4 +799,3 @@ function updateRecentSearchesDropdown(searches) {
     
     dropdown.style.display = searches.length ? 'block' : 'none';
 }
-

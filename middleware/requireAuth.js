@@ -6,7 +6,8 @@ function requireAuth(req, res, next) {
   const wantsJson =
     req.xhr ||
     req.headers.accept?.includes('application/json') ||
-    req.headers['content-type'] === 'application/json';
+    req.headers['content-type'] === 'application/json'||
+    req.headers['x-requested-with'] === 'XMLHttpRequest'; 
 
   if (wantsJson) {
     return res.status(401).json({ message: 'Please log in first' });
