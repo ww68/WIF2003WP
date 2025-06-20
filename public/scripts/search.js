@@ -799,11 +799,3 @@ function updateRecentSearchesDropdown(searches) {
     
     dropdown.style.display = searches.length ? 'block' : 'none';
 }
-
-function promptLogin(msg='Please log in to view your watchlist.') {
-  if (typeof showAuthModal === 'function') {
-    showAuthModal(msg);
-  } else {
-    window.location.href = '/login';
-  }
-}
