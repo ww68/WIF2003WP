@@ -1,4 +1,4 @@
-.auth-modal-backdrop {
+.base-modal-backdrop {
     position: fixed;
     top: 0;
     left: 0;
@@ -12,7 +12,7 @@
     backdrop-filter: blur(4px);
 }
 
-.auth-modal-content {
+.base-modal-content {
     background: #1a1a1a;
     border-radius: 12px;
     padding: 30px;
@@ -35,30 +35,35 @@
     }
 }
 
-.auth-icon {
+.base-icon {
+    font-size: 48px;
     margin-bottom: 20px;
 }
 
-.auth-icon i {
-    font-size: 48px;
+.auth-blue {
     color: #0d6efd;
 }
 
-.auth-modal-content h3 {
+.remove-red {
+    font-size: 48px;
+    color: #dc3545;
+}
+
+.base-modal-content h3 {
     color: #fff;
     margin-bottom: 15px;
     font-size: 24px;
     font-weight: 600;
 }
 
-.auth-modal-content p {
+.base-modal-content p {
     color: #ccc;
     margin-bottom: 10px;
     font-size: 16px;
     line-height: 1.4;
 }
 
-.auth-modal-content small {
+.base-modal-content small {
     color: #888;
     font-size: 14px;
 }
