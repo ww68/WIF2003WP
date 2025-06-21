@@ -127,51 +127,11 @@ async function loadReviews(movieId) {
         reviews.forEach(review => {
             const reviewHTML = `
                 <div class="review">
-                    <div class="review-user"><strong>${review.username}</strong></div>
+                    <div class="review review-box position-relative border p-3 mb-3 rounded">
+                    <div class="review-user"><strong>${review.userId?.username || 'Unknown User'}</strong></div>
                     <div class="review-rating">
                         ${'<span class="gold-star">★</span>'.repeat(review.rating)}
-                        ${'<span class="empty-star">☆</span>'.repeat(5 - review.rating)}
-                    </div>
-                    <div class="review-text">${review.text}</div>
-                    <div class="review-date text-muted">${new Date(review.date).toLocaleString()}</div>
-                </div>
-            `;
-            reviewList.innerHTML += reviewHTML;
-        });
-
-    } catch (err) {
-        console.error('Error loading reviews:', err);
-        commentCount.textContent = 'Failed to load reviews.';
-    }
-}
-
-async function loadReviews(movieId) {
-    const reviewList = document.getElementById('review-list');
-    const commentCount = document.getElementById('comment-count');
-
-    if (!reviewList || !commentCount) return;
-
-    try {
-        const res = await fetch(`/reviews/${movieId}`);
-        const data = await res.json();
-        const reviews = data.reviews || [];
-
-        // Update comment count
-        commentCount.textContent = reviews.length === 0
-            ? 'No comments yet'
-            : `${reviews.length} comment${reviews.length > 1 ? 's have' : ' has'} been posted`;
-
-        // Clear existing reviews
-        reviewList.innerHTML = '';
-
-        // Add each review to the DOM
-        reviews.forEach(review => {
-            const reviewHTML = `
-                <div class="review">
-                    <div class="review-user"><strong>${review.username}</strong></div>
-                    <div class="review-rating">
-                        ${'<span class="gold-star">★</span>'.repeat(review.rating)}
-                        ${'<span class="empty-star">☆</span>'.repeat(5 - review.rating)}
+                        ${'<span class="empty-star">☆</span>'.repeat(10 - review.rating)}
                     </div>
                     <div class="review-text">${review.text}</div>
                     <div class="review-date text-muted">${new Date(review.date).toLocaleString()}</div>

@@ -4,8 +4,8 @@ const reviewSchema = new mongoose.Schema({
     movieId: { type: String, required: true },
     rating: { type: Number, required: true },
     text: { type: String, required: true },
-    username: { type: String, required: true },
-    date: { type: String, required: true } // You can also use type: Date if you prefer
+    userId: { type: mongoose.Schema.Types.ObjectId, ref: 'user', required: true },
+    date: { type: Date, required: true } 
 });
 
 module.exports = mongoose.model('Review', reviewSchema);

@@ -65,7 +65,7 @@ router.get('/:id', async (req, res) => {
         const trailer = videos.results.find(v => v.type === "Trailer" && v.site === "YouTube");
 
         // Get reviews from MongoDB
-        const reviews = await Review.find({ movieId }).sort({ date: -1 });
+        const reviews = await Review.find({ movieId }).sort({ date: -1 }).populate('userId', 'username');
 
         // Calculate average rating
         const avgRating = reviews.length

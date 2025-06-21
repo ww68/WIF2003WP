@@ -20,8 +20,8 @@ router.post('/', async (req, res) => {
             movieId,
             rating,
             text,
-            username: user.username,
-            date: new Date() // Save as Date object, better for sorting and formatting
+            userId: user.id,
+            date: new Date() 
         });
 
         await newReview.save();
@@ -37,8 +37,11 @@ router.post('/', async (req, res) => {
 router.get('/:movieId', async (req, res) => {
     try {
         const { movieId } = req.params;
-        const reviews = await Review.find({ movieId }).sort({ date: -1 });
-        res.json({ reviews }); // ✅ Wrap in object
+        const reviews = await Review.find({ movieId }).sort({ date: -1 }).populate('userId', 'username');
+
+        console.log('✅ Populated review sample:', reviews[0]);
+
+        res.json({ reviews }); 
     } catch (error) {
         console.error('Error fetching reviews:', error);
         res.status(500).json({ message: 'Server error while fetching reviews.' });
