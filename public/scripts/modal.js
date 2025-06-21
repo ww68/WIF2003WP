@@ -1,11 +1,11 @@
 function showAuthModal(message) {
-  if (document.querySelector('.auth-modal-backdrop')) return; // guard
+  if (document.querySelector('.base-modal-backdrop')) return; // guard
 
   const backdrop = document.createElement('div');
-  backdrop.className = 'auth-modal-backdrop';
+  backdrop.className = 'base-modal-backdrop';
   backdrop.innerHTML = `
-    <div class="auth-modal-content">
-      <div class="auth-icon">
+    <div class="base-modal-content">
+      <div class="base-icon auth-blue">
         <i class="fa fa-sign-in-alt"></i>
       </div>
       <h3>Authentication Required</h3>
@@ -29,4 +29,33 @@ function showAuthModal(message) {
   });
 }
 
+function showConfirmModal(message, onConfirm) {
+  console.log('showConfirmModal called:', message); 
+  const backdrop = document.createElement('div');
+  backdrop.className = 'base-modal-backdrop';     
+  backdrop.innerHTML = `
+    <div class="base-modal-content">
+      <div class="base-icon remove-red">
+        <i class="fa fa-trash-alt"></i>
+      </div>
+      <h3>Remove Movie</h3>
+      <p>${message}</p>
+      <div class="modal-buttons">
+        <button id="confirm-ok" class="btn btn-danger">Remove</button>
+        <button id="confirm-cancel" class="btn btn-secondary">Cancel</button>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(backdrop);
+
+  backdrop.querySelector('#confirm-ok')
+          .addEventListener('click', () => {
+            backdrop.remove();
+            onConfirm();                    
+          });
+  backdrop.querySelector('#confirm-cancel')
+          .addEventListener('click', () => backdrop.remove());
+}
+
 window.showAuthModal = showAuthModal; // visible to all scripts
+window.showConfirmModal = showConfirmModal;

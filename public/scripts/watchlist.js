@@ -15,36 +15,33 @@ document.addEventListener("DOMContentLoaded", function() {
 });
 
 async function removeFromWatchlist(movieId) {
-    try {
-        const response = await fetch('/watchlist/remove', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ movieId: movieId })
-        });
-        
-        const result = await response.json();
-        
-        if (result.success) {
-            // Remove the card from DOM
-            const card = document.querySelector(`.movie-card[data-id="${movieId}"]`);
-            if (card) {
-                card.remove();
-            }
+    console.log('removeFromWatchlist called for', movieId);  
+    showConfirmModal('Remove this movie from your watchlist?', async () => {
+        try {
+            const response = await fetch('/watchlist/remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                credentials: 'include',
+                body: JSON.stringify({ movieId: movieId })
+            });
             
-            // Check if we need to reload the page to show empty state
-            const remainingCards = document.querySelectorAll('.movie-card');
-            if (remainingCards.length === 0) {
-                // Reload to show empty state
-                window.location.reload();
+            const result = await response.json();
+            
+            if (result.success) {
+                // Remove the card from DOM
+                document.querySelector(`.movie-card[data-id="${movieId}"]`)?.remove();
+                if (!document.querySelector('.movie-card')) {
+                    location.reload();
+                } else {
+                    console.error('Failed to remove movie from watchlist');
+                }
             }
-        } else {
-            console.error('Failed to remove movie from watchlist');
+        } catch (error) {
+            console.error('Error removing movie from watchlist:', error);
         }
-    } catch (error) {
-        console.error('Error removing movie from watchlist:', error);
-    }
+    });
 }
 
 async function toggleWatchedStatus(movieId) {
