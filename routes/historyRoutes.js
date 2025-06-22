@@ -14,34 +14,6 @@ router.get('/', requireAuth, async (req, res) => {
     }
 });
 
-// Save movie to watch history
-// router.post('/add', requireAuth, async (req, res) => {
-//     const { movieId, title } = req.body;  // Expecting movie data from frontend
-//     const userId = req.session.userId;
-
-//     console.log("Incoming history add:", req.body);
-
-//     if (!movieId || !title) {
-//         return res.status(400).json({ message: 'Missing movieId or title' });
-//     }
-
-//     try {
-//         // Find the user by ID and add movie to watchHistory
-//         const user = await User.findById(userId);
-//         if (!user) {
-//             return res.status(401).json({ message: 'Unauthorized' });
-//         }
-
-//         // Add the movie to the watchHistory and save
-//         user.watchHistory.push({ movieId, title, timestamp: new Date()});
-//         await user.save();
-
-//         res.status(200).json({ message: 'Movie added to watch history' });
-//     } catch (error) {
-//         console.error('Error adding to watch history:', error);
-//         res.status(500).json({ message: 'Error adding to watch history' });
-//     }
-// });
 router.post('/add', requireAuth, async (req, res) => {
     const { movieId, title, timestamp } = req.body;
     const userId = req.session.userId;
