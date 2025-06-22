@@ -61,13 +61,18 @@ class OptimisticWatchlist {
         
         const response = await fetch(url, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: { 
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
+            },
+            credentials: 'include',
+            redirect: 'manual',
             body: JSON.stringify(body)
         });
         
         if (response.status === 401) {
-            location.href = '/login';
-            return null;
+            promptLogin('Please log in to update your watchlist.');
+            return { success: false };
         }
         
         return response.json();
@@ -403,9 +408,7 @@ function displayMovies(movies, containerId) {
 
         circle.addEventListener('click', async () => {
             if (!isAuthenticated) {
-                if (confirm('Please log in to add movies to your watchlist. Redirect to login?')) {
-                    window.location.href = '/login';
-                }
+                promptLogin('Please log in to add movies to your watchlist.');
                 return;
             }
             await watchlistManager.toggleWatchlist(movieData, icon);
@@ -490,4 +493,13 @@ function initializeScrolling() {
 
 function watchMovie(movieId) {
     window.location.href = `/movie/${movieId}`;
+}
+
+function promptLogin(msg = 'Please log in to view your watchlist.') {
+  if (typeof showAuthModal === 'function') {
+    showAuthModal(msg);          // dark overlay with Log-In / Cancel
+  } else {
+    // fallback (should never happen now)
+    window.location.href = '/login';
+  }
 }

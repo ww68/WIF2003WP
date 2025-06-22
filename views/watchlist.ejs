@@ -13,6 +13,7 @@
 
     <link rel="stylesheet" href="/style/shared/navBar.css">
     <link rel="stylesheet" href="/style/pages/watchlist.css">
+    <link rel="stylesheet" href="/style/shared/modal.css">
     
     <title>Watchlist</title>
 </head>
@@ -123,12 +124,12 @@
     crossorigin="anonymous"></script>
 
     <script>
-        window.watchlistData = '<%- JSON.stringify(watchlist) %>';
+        window.watchlistData = <%- JSON.stringify(watchlist) %>;
         window.currentFilter = '<%= filter %>';
     </script>
 
+    <script src="/scripts/modal.js"></script>
     <script src="/scripts/watchlist.js"></script>
     <script src="/scripts/searchBarNav.js"></script>
-
 </body>
 </html>

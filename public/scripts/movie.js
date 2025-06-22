@@ -127,51 +127,11 @@ async function loadReviews(movieId) {
         reviews.forEach(review => {
             const reviewHTML = `
                 <div class="review">
-                    <div class="review-user"><strong>${review.username}</strong></div>
+                    <div class="review review-box position-relative border p-3 mb-3 rounded">
+                    <div class="review-user"><strong>${review.userId?.username || 'Unknown User'}</strong></div>
                     <div class="review-rating">
                         ${'<span class="gold-star">★</span>'.repeat(review.rating)}
-                        ${'<span class="empty-star">☆</span>'.repeat(5 - review.rating)}
-                    </div>
-                    <div class="review-text">${review.text}</div>
-                    <div class="review-date text-muted">${new Date(review.date).toLocaleString()}</div>
-                </div>
-            `;
-            reviewList.innerHTML += reviewHTML;
-        });
-
-    } catch (err) {
-        console.error('Error loading reviews:', err);
-        commentCount.textContent = 'Failed to load reviews.';
-    }
-}
-
-async function loadReviews(movieId) {
-    const reviewList = document.getElementById('review-list');
-    const commentCount = document.getElementById('comment-count');
-
-    if (!reviewList || !commentCount) return;
-
-    try {
-        const res = await fetch(`/reviews/${movieId}`);
-        const data = await res.json();
-        const reviews = data.reviews || [];
-
-        // Update comment count
-        commentCount.textContent = reviews.length === 0
-            ? 'No comments yet'
-            : `${reviews.length} comment${reviews.length > 1 ? 's have' : ' has'} been posted`;
-
-        // Clear existing reviews
-        reviewList.innerHTML = '';
-
-        // Add each review to the DOM
-        reviews.forEach(review => {
-            const reviewHTML = `
-                <div class="review">
-                    <div class="review-user"><strong>${review.username}</strong></div>
-                    <div class="review-rating">
-                        ${'<span class="gold-star">★</span>'.repeat(review.rating)}
-                        ${'<span class="empty-star">☆</span>'.repeat(5 - review.rating)}
+                        ${'<span class="empty-star">☆</span>'.repeat(10 - review.rating)}
                     </div>
                     <div class="review-text">${review.text}</div>
                     <div class="review-date text-muted">${new Date(review.date).toLocaleString()}</div>
@@ -271,16 +231,19 @@ async function updateWatchlistButtons() {
 // Check if movie is in watchlist (MongoDB)
 async function isInWatchlist(movieId) {
     try {
-        const response = await fetch(`/watchlist/check/${movieId}`);
-        if (response.ok) {
+        const response = await fetch(`/watchlist/check/${movieId}`, {
+            headers: { 'Accept': 'application/json' }, 
+            credentials: 'include',
+            redirect: 'manual'                         
+        });
+
+        if (response.status === 200) {
             const data = await response.json();
             return data.inWatchlist;
-        } else if (response.status === 401) {
-            // User not logged in
-            showToast('Please log in to use watchlist');
-            return false;
-        }
+        } 
+
         return false;
+        
     } catch (error) {
         console.error('Error checking watchlist:', error);
         return false;
@@ -299,7 +262,10 @@ async function toggleWatchlistForDetailPage(buttonElement, movieId, movieData) {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
+                    'Accept': 'application/json'
                 },
+                credentials: 'include',
+                redirect: 'manual',
                 body: JSON.stringify(movieData)
             });
 
@@ -309,19 +275,21 @@ async function toggleWatchlistForDetailPage(buttonElement, movieId, movieData) {
                 buttonElement.setAttribute('data-watchlisted', 'true');
                 showToast('Added to Watchlist');
             } else if (response.status === 401) {
-                showToast('Please log in to add to watchlist');
+                promptLogin('Please log in to add movies to your watchlist.');
+                return;
             } else {
                 const data = await response.json();
                 showToast(data.message || 'Error adding to watchlist');
             }
         } else {
-            // Remove from watchlist
-            // const response = await fetch(`/watchlist/remove/${movieId}`, {
-            //     method: 'DELETE'
-            // });
             const response = await fetch('/watchlist/remove', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                credentials: 'include',
+                redirect: 'manual',
                 body: JSON.stringify({ movieId })
             });
 
@@ -331,7 +299,7 @@ async function toggleWatchlistForDetailPage(buttonElement, movieId, movieData) {
                 buttonElement.setAttribute('data-watchlisted', 'false');
                 showToast('Removed from Watchlist');
             } else if (response.status === 401) {
-                showToast('Please log in to manage watchlist');
+                promptLogin('Please log in to add movies to your watchlist.');
             } else {
                 const data = await response.json();
                 showToast(data.message || 'Error removing from watchlist');
@@ -382,4 +350,13 @@ async function addToHistory(movieId, title) {
     } catch (error) {
         console.error('Error adding movie to history:', error);
     }
+}
+
+function promptLogin(message = 'Please log in to view your watchlist.') {
+  if (typeof showAuthModal === 'function') {
+    showAuthModal(message);
+  } else {
+    // fallback (should never fire once modal assets load)
+    window.location.href = '/login';
+  }
 }

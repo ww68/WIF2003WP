@@ -15,6 +15,7 @@
     <link rel="stylesheet" href="/style/shared/navBar.css">
     <link rel="stylesheet" href="/style/pages/movie.css">
     <link rel="stylesheet" href="/style/pages/reviews.css">
+    <link rel="stylesheet" href="/style/shared/modal.css">
 </head>
 <body>
     <%- include('partials/nav', { 
@@ -28,7 +29,7 @@
                 <div class="movie-meta">
                     <span><i class="far fa-calendar-alt me-2"></i> <%= movie.release_date ? movie.release_date.split('-')[0] : 'N/A' %></span>
                     <span><i class="far fa-clock me-2"></i> <%= movie.runtime || 'N/A' %> min</span>
-                    <span><i class="fas fa-star text-warning me-2"></i> <%= avgRating.toFixed(1) %>/5</span>
+                    <span><i class="fas fa-star text-warning me-2"></i> <%= avgRating.toFixed(1) %>/10.0</span>
                     <span><i class="fas fa-user me-2"></i> Director: <%= director %></span>
                 </div>
                 <div class="mb-3">
@@ -115,9 +116,14 @@
                                 <span class="star" data-value="3">★</span>
                                 <span class="star" data-value="4">★</span>
                                 <span class="star" data-value="5">★</span>
+                                <span class="star" data-value="6">★</span>
+                                <span class="star" data-value="7">★</span>
+                                <span class="star" data-value="8">★</span>
+                                <span class="star" data-value="9">★</span>
+                                <span class="star" data-value="10">★</span>
                             </div>
                             <div class="rating-number">
-                                <span id="rating-number">0</span>/5.0
+                                <span id="rating-number">0</span>/10.0
                             </div>
                         </div>
                         <div class="form-group">
@@ -141,14 +147,14 @@
                         <% reviews.forEach(review => { %>
                             <div class="review">
                                 <div class="review-header">
-                                    <div class="review-user"><strong><%= review.username %></strong></div>
+                                    <%= review.userId && review.userId.username ? review.userId.username : 'Unknown User' %>
                                     <div class="review-date text-muted"><%= new Date(review.date).toLocaleString() %></div>
                                 </div>
                                 <div class="review-rating">
                                     <% for(let i = 0; i < review.rating; i++) { %>
                                         <span class="gold-star">★</span>
                                     <% } %>
-                                    <% for(let i = review.rating; i < 5; i++) { %>
+                                    <% for(let i = review.rating; i < 10; i++) { %>
                                         <span class="empty-star">☆</span>
                                     <% } %>
                                 </div>
@@ -210,6 +216,8 @@
 
     <script src="/scripts/movie.js"></script>
     <script src="/scripts/searchBarNav.js"></script>
+    <script src="/scripts/modal.js" defer></script>
+    <script src="/scripts/nav.js" defer></script>
 
 </body>
 </html>

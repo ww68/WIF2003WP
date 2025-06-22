@@ -74,7 +74,21 @@ textarea.form-control {
 
 .gold-star {
     color: gold;
+    font-size: 24px;
 }
+
+.empty-star {
+    font-size: 24px;
+}
+
+.review-box {
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 10px;
+    margin-bottom: 15px;
+    position: relative;
+}
+
 
 
 

@@ -9,8 +9,82 @@ const genreMap = {};
 let availableGenres = [];
 let availableLanguages = [];
 
+// Save search to user's history in MongoDB
+async function saveSearchHistory(query, filters = {}) {
+    try {
+        // First check if user is authenticated
+        const authCheck = await fetch('/auth/check');
+        if (!authCheck.ok) return false;
+        
+        const authData = await authCheck.json();
+        if (!authData.authenticated) return false;
+
+        const response = await fetch('/search/history', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query,
+                genre: filters.genre || '',
+                year: filters.year || '',
+                language: filters.language || ''
+            }),
+            credentials: 'include'
+        });
+        
+        return response.ok;
+    } catch (error) {
+        console.error('Error saving search history:', error);
+        return false;
+    }
+}
+
+// Load recent searches from MongoDB
+async function loadRecentSearches() {
+    try {
+        // First check if user is authenticated
+        const authCheck = await fetch('/auth/check');
+        if (!authCheck.ok) return [];
+        
+        const authData = await authCheck.json();
+        if (!authData.authenticated) return [];
+
+        const response = await fetch('/search/history', {
+            credentials: 'include'
+        });
+        
+        if (response.ok) {
+            const data = await response.json();
+            return data.history || [];
+        }
+        return [];
+    } catch (error) {
+        console.error('Error loading recent searches:', error);
+        return [];
+    }
+}
+
+// Delete search from history
+async function deleteSearchHistory(query) {
+    try {
+        const response = await fetch('/search/history', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ query }),
+            credentials: 'include'
+        });
+        return response.ok;
+    } catch (error) {
+        console.error('Error deleting search:', error);
+        return false;
+    }
+}
+
 // Initialize
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     // Initialize search form with dropdown
     const searchForm = document.querySelector('form[role="search"]');
     if (searchForm) {
@@ -29,47 +103,51 @@ document.addEventListener('DOMContentLoaded', function() {
         searchForm.style.position = "relative";
         searchForm.appendChild(dropdown);
 
-        // Load suggestions function
-        const loadSuggestions = () => {
-            dropdown.innerHTML = "";
-            const recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-            if (recent.length === 0) return;
+        // Load suggestions from DB
+        const loadSuggestions = async () => {
+        const searches = await loadRecentSearches();
+        dropdown.innerHTML = "";
+        
+        if (searches.length === 0) {
+            dropdown.style.display = "none";
+            return;
+        }
 
-            recent.slice(0, 5).forEach(item => {
-                const li = document.createElement("li");
-                li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white border-secondary";
+        searches.slice(0, 5).forEach(search => {
+            const li = document.createElement("li");
+            li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white border-secondary";
 
-                const text = document.createElement("span");
-                text.textContent = item;
-                text.className = "flex-grow-1";
-                text.style.cursor = "pointer";
-                text.onclick = () => {
-                    input.value = item;
-                    currentQuery = item;
-                    currentPage = 1;
-                    dropdown.style.display="none";
-                    updateSearch();
-                };
+            const text = document.createElement("span");
+            text.textContent = search.query;
+            text.className = "flex-grow-1";
+            text.style.cursor = "pointer";
+            text.onclick = () => {
+                input.value = search.query;
+                currentQuery = search.query;
+                currentPage = 1;
+                dropdown.style.display="none";
+                updateSearch();
+            };
 
-                const deleteBtn = document.createElement("button");
-                deleteBtn.innerHTML = `<i class="fas fa-trash-alt text-white"></i>`;
-                deleteBtn.className = "btn deleteBtn p-1";
-                deleteBtn.onmousedown = (e) => e.preventDefault();
-                deleteBtn.onfocus = (e) => e.target.style.background = "transparent";
-                deleteBtn.onclick = (e) => {
-                    e.stopPropagation();
-                    let recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-                    recent = recent.filter(q => q !== item);
-                    localStorage.setItem("recentSearches", JSON.stringify(recent));
+            const deleteBtn = document.createElement("button");
+            deleteBtn.innerHTML = `<i class="fas fa-trash-alt text-white"></i>`;
+            deleteBtn.className = "btn deleteBtn p-1";
+            deleteBtn.onmousedown = (e) => e.preventDefault();
+            deleteBtn.onfocus = (e) => e.target.style.background = "transparent";
+            deleteBtn.onclick = async (e) => {
+                e.stopPropagation();
+                const success = await deleteSearchHistory(search.query);
+                if (success) {
                     loadSuggestions();
-                };
-                li.appendChild(text);
-                li.appendChild(deleteBtn);
-                dropdown.appendChild(li);
-            });
+                }
+            };
+            li.appendChild(text);
+            li.appendChild(deleteBtn);
+            dropdown.appendChild(li);
+        });
 
-            dropdown.style.display = "block";
-        };
+        dropdown.style.display = "block";
+    };
 
         // Auto-suggestions while typing
         input.addEventListener("input", () => {
@@ -98,11 +176,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             currentQuery = movie.title;
                             currentPage = 1;
                             dropdown.style.display="none";
-
-                            // Save to recent searches
-                            let recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-                            recent = [movie.title, ...recent.filter(q => q !== movie.title)];
-                            localStorage.setItem("recentSearches", JSON.stringify(recent.slice(0, 10)));
                             updateSearch();
                         };
 
@@ -128,21 +201,21 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Update search on form submit
-        searchForm.addEventListener('submit', function(e) {
-            e.preventDefault();
-            currentQuery = input.value.trim();
-            currentPage = 1;
-            
-            // Store recent search
-            if (currentQuery) {
-                let recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-                recent = [currentQuery, ...recent.filter(q => q !== currentQuery)];
-                localStorage.setItem("recentSearches", JSON.stringify(recent.slice(0, 10)));
-            }
-            
-            dropdown.style.display="none";
-            updateSearch();
+       searchForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        currentQuery = input.value.trim();
+        currentPage = 1;
+        
+        // Save to search history
+        await saveSearchHistory(currentQuery, {
+            genre: document.getElementById('filterGenre')?.value || '',
+            year: document.getElementById('filterYear')?.value || '',
+            language: document.getElementById('filterLanguage')?.value || ''
         });
+        
+        dropdown.style.display = "none";
+        updateSearch();
+    });
     }
 
     // Load genres and languages
@@ -175,8 +248,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // Setup filters
     setupFilters();
     setupPagination();
-    // Initialize voice search
-setupVoiceSearch();
+    setupVoiceSearch();
 });
 
 // Voice Search
@@ -191,7 +263,7 @@ function setupVoiceSearch() {
         return;
     }
 
-    const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
+     const recognition = new (window.SpeechRecognition || window.webkitSpeechRecognition)();
     recognition.continuous = false;
     recognition.interimResults = false;
     recognition.lang = 'en-US';
@@ -207,17 +279,14 @@ function setupVoiceSearch() {
             
             recognition.start();
             
-            recognition.onresult = function(event) {
+            recognition.onresult = async function(event) {
                 const transcript = event.results[0][0].transcript;
                 searchInput.value = transcript;
                 currentQuery = transcript;
                 currentPage = 1;
                 
-                // Store recent search
-                let recent = JSON.parse(localStorage.getItem("recentSearches") || "[]");
-                recent = [transcript, ...recent.filter(q => q !== transcript)];
-                localStorage.setItem("recentSearches", JSON.stringify(recent.slice(0, 10)));
-                
+                // Save voice search to history
+                await saveSearchHistory(transcript, {});
                 updateSearch();
             };
             
@@ -260,12 +329,17 @@ function populateDropdowns() {
 }
 
 function updateSearch() {
-    // Always use searchMovies() when filters are active, regardless of query
     const genre = document.getElementById('filterGenre')?.value || '';
     const year = document.getElementById('filterYear')?.value || '';
+    const language = document.getElementById('filterLanguage')?.value || '';
+
+    // Save to history if there's a query or filters
+    if (currentQuery || genre || year || language) {
+        saveSearchHistory(currentQuery, { genre, year, language });
+    }
+
     const minDuration = document.getElementById('filterMinDuration')?.value || '';
     const maxDuration = document.getElementById('filterMaxDuration')?.value || '';
-    const language = document.getElementById('filterLanguage')?.value || '';
     const minRating = document.getElementById('filterRating')?.value || '';
     
     const hasFilters = genre || year || minDuration || maxDuration || language || minRating;
@@ -305,13 +379,12 @@ function searchMovies() {
     if (year) params.set('year', year);
     if (language) params.set('language', language);
     if (minRating) params.set('rating', minRating);
-    window.history.pushState({}, '', `search?${params.toString()}`);
+    window.history.pushState({}, '', `search.html?${params.toString()}`);
 
     // Update header
     updateHeader(currentQuery ? `Search results for "${currentQuery}"` : "Browse Movies");
 
     let url;
-    // Use discover endpoint when we have filters but no query
     if (!currentQuery && (genre || year || minDuration || maxDuration || language || minRating)) {
         url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}&page=${currentPage}`;
         if (genre) url += `&with_genres=${genre}`;
@@ -321,34 +394,18 @@ function searchMovies() {
         if (minDuration) url += `&with_runtime.gte=${minDuration}`;
         if (maxDuration) url += `&with_runtime.lte=${maxDuration}`;
     } 
-    // Use search endpoint when we have a query
     else if (currentQuery) {
         url = `${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
         
-        // If we have filters with a query, we'll need to apply them client-side
         fetch(url)
             .then(res => res.json())
             .then(data => {
                 let results = data.results || [];
                 
-                // Apply filters client-side
-                if (genre) {
-                    results = results.filter(movie => 
-                        movie.genre_ids?.includes(Number(genre)));
-                }
-                if (year) {
-                    results = results.filter(movie => 
-                        movie.release_date?.startsWith(year));
-                }
-                if (language) {
-                    results = results.filter(movie => 
-                        movie.original_language === language);
-                }
-                if (minRating) {
-                    results = results.filter(movie => 
-                        movie.vote_average >= Number(minRating));
-                }
-                // Runtime filtering not available for search results
+                if (genre) results = results.filter(movie => movie.genre_ids?.includes(Number(genre)));
+                if (year) results = results.filter(movie => movie.release_date?.startsWith(year));
+                if (language) results = results.filter(movie => movie.original_language === language);
+                if (minRating) results = results.filter(movie => movie.vote_average >= Number(minRating));
                 
                 renderMovies(results);
                 updatePagination(data.total_pages);
@@ -359,7 +416,6 @@ function searchMovies() {
             });
         return;
     }
-    // Default to trending if no query and no filters (shouldn't happen due to updateSearch logic)
     else {
         loadTrending();
         return;
@@ -377,6 +433,8 @@ function searchMovies() {
         });
 }
 
+// Rest of the functions (renderMovies, checkWatchlistStatus, addToWatchlist, etc.) remain the same...
+// [Previous implementations of these functions can stay unchanged]
 function renderMovies(movies) {
     const container = document.getElementById('resultsContainer');
     if (!container) return;
@@ -405,7 +463,7 @@ function renderMovies(movies) {
         const displayedGenres = genres?.slice(0, 3).join(', ') || 'Unknown Genre';
 
         const movieCard = document.createElement('div');
-        movieCard.className = 'col-sm-12 col-md-6 col-xl-4 mb-4 movie-card';
+        movieCard.className = 'col-sm-12 col-md-6 col-xl-4 movie-card';
         movieCard.setAttribute('data-id', movie.id);
         movieCard.innerHTML = `
             <div class="card h-100 text-white">
@@ -458,13 +516,22 @@ function renderMovies(movies) {
 
 async function checkWatchlistStatus(movieId) {
     try {
-        const response = await fetch(`/watchlist/check/${movieId}`);
-        const result = await response.json();
+        const response = await fetch(`/watchlist/check/${movieId}`, {
+            headers: {
+                'Accept': 'application/json'
+            },
+            credentials: 'include',
+            redirect: 'manual'
+        });
         
-        if (result.inWatchlist) {
-            const bookmark = document.querySelector(`.movie-card[data-id="${movieId}"] .bookmark-icon`);
-            if (bookmark) {
-                bookmark.classList.add('text-warning');
+        if (response.status === 200) {
+            const result = await response.json();
+        
+            if (result.inWatchlist) {
+                const bookmark = document.querySelector(`.movie-card[data-id="${movieId}"] .bookmark-icon`);
+                if (bookmark) {
+                    bookmark.classList.add('text-warning');
+                }
             }
         }
     } catch (error) {
@@ -487,10 +554,18 @@ async function addToWatchlist(movieId, title, description, img, rating, year) {
         const response = await fetch('/watchlist/add', {
             method: 'POST',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Accept': 'application/json'
             },
+            credentials: 'include',
+            redirect: 'manual',
             body: JSON.stringify(movieData)
         });
+
+        if (response.status === 401 || response.status === 302) {
+            promptLogin('Please log in to add movies to your watchlist.');
+            return;
+        }
         
         const result = await response.json();
         
@@ -612,4 +687,115 @@ function showError() {
             </div>
         `;
     }
+}
+
+function promptLogin(msg='Please log in to view your watchlist.') {
+  if (typeof showAuthModal === 'function') {
+    showAuthModal(msg);
+  } else {
+    window.location.href = '/login';
+  }
+}
+
+
+// scripts/search.js
+async function saveSearchHistory(query, filters = {}) {
+    try {
+        console.group('💾 Saving search history');
+        console.log('Query:', query);
+        console.log('Filters:', filters);
+
+        const response = await fetch('/search/history', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({
+                query,
+                genre: filters.genre || '',
+                year: filters.year || '',
+                language: filters.language || ''
+            }),
+            credentials: 'include'
+        });
+
+        console.log('Response status:', response.status);
+
+        if (!response.ok) {
+            const error = await response.json();
+            console.error('Save failed:', error);
+            console.groupEnd();
+            return false;
+        }
+
+        const data = await response.json();
+        console.log('Save successful:', data);
+        console.groupEnd();
+        return true;
+    } catch (error) {
+        console.error('Network error:', error);
+        console.groupEnd();
+        return false;
+    }
+}
+
+async function loadRecentSearches() {
+    try {
+        console.log('🔍 Loading recent searches...');
+        const response = await fetch('/search/history', {
+            credentials: 'include'
+        });
+        
+        console.log('Response status:', response.status);
+        
+        if (!response.ok) {
+            console.error('Failed to fetch history');
+            return [];
+        }
+
+        const data = await response.json();
+        console.log('Received history:', data.history);
+        return data.history || [];
+    } catch (error) {
+        console.error('Error loading searches:', error);
+        return [];
+    }
+}
+
+async function deleteSearchHistory(query) {
+    try {
+        console.log('🗑️ Deleting search:', query);
+        const response = await fetch('/search/history', {
+            method: 'DELETE',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ query }),
+            credentials: 'include'
+        });
+        
+        return response.ok;
+    } catch (error) {
+        console.error('Error deleting search:', error);
+        return false;
+    }
+}
+
+// Update the dropdown function to use DB searches
+function updateRecentSearchesDropdown(searches) {
+    const dropdown = document.querySelector('.search-dropdown');
+    if (!dropdown) return;
+    
+    dropdown.innerHTML = searches.length 
+        ? searches.map(search => `
+            <a href="/search?query=${encodeURIComponent(search.query)}${search.filters.genre ? `&genre=${search.filters.genre}` : ''}${search.filters.year ? `&year=${search.filters.year}` : ''}${search.filters.language ? `&language=${search.filters.language}` : ''}" 
+               class="dropdown-item">
+                ${search.query}
+                ${search.filters.genre || search.filters.year || search.filters.language ? 
+                 `<small class="text-muted d-block">Filters: ${[search.filters.genre, search.filters.year, search.filters.language].filter(Boolean).join(', ')}</small>` : ''}
+            </a>
+        `).join('')
+        : '<div class="dropdown-item">No recent searches</div>';
+    
+    dropdown.style.display = searches.length ? 'block' : 'none';
 }
