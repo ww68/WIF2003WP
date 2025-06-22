@@ -42,6 +42,7 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 });
 
+// Update rating number
 function updateRatingNumber(rating) {
     const ratingDisplay = document.getElementById('rating-number');
     if (ratingDisplay) {
