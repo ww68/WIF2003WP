@@ -27,6 +27,7 @@ function createMovieCard(movie) {
     return div;
 }
 
+// Dynamic movie history loading with TMDb API integration
 async function loadHistory() {
     const response = await fetch(`/profile/getHistory`);
     const history = await response.json();
@@ -39,12 +40,8 @@ async function loadHistory() {
     }
 
     // Fetch movie details and create movie cards
-    let lastId = null;
     for (const entry of history.slice().reverse()) {
         const movieId = entry.movieId;
-
-        if (movieId === lastId) continue;  // skip consecutive duplicates
-        lastId = movieId;
 
         try {
             const movie = await getMovieDetails(movieId);
@@ -67,6 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 });
 
+// Client-side preference management
 document.getElementById("genreForm").addEventListener("submit", async function(e) {
     e.preventDefault();
 

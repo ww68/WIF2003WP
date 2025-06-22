@@ -96,6 +96,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadCarouselMovies('heroCarousel', 'carousel-content', 'movie/now_playing');
     loadCarouselMovies('heroCarousel1', 'carousel-content-1', 'trending/movie/week');
     
+    fetchMovies('movie/popular', 'top-trending');
+    fetchMovies('movie/upcoming', 'new-releases');
+    
     // Load content based on user preferences
     await loadPersonalizedContent();
 });
@@ -123,9 +126,6 @@ async function checkAuthAndLoadPreferences() {
 
 // Load personalized content based on user preferences
 async function loadPersonalizedContent() {
-    fetchMovies('movie/popular', 'top-trending');
-    fetchMovies('movie/upcoming', 'new-releases');
-
     if (isAuthenticated && userPreferences && userPreferences.length > 0) {
         // Show personalized content
         await loadPersonalizedSections();
