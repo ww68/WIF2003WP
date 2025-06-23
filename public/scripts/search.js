@@ -379,7 +379,7 @@ function searchMovies() {
     if (year) params.set('year', year);
     if (language) params.set('language', language);
     if (minRating) params.set('rating', minRating);
-    window.history.pushState({}, '', `search.html?${params.toString()}`);
+    window.history.pushState({}, '', `search?${params.toString()}`);
 
     // Update header
     updateHeader(currentQuery ? `Search results for "${currentQuery}"` : "Browse Movies");
