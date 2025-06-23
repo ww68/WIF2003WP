@@ -8,7 +8,7 @@ const movieSchema = new mongoose.Schema({
     description: { type: String },
     img: { type: String },
     watched: { type: Boolean, default: false },
-    addedAt: { type: Date, default: Date.now }
+    lastUpdated: { type: Date, default: Date.now }
 });
 
 const userSchema = new mongoose.Schema({

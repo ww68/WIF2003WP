@@ -23,7 +23,7 @@ mongoose.connect('mongodb://127.0.0.1:27017/movie_explorer', {
     .catch(err => console.error('MongoDB connection error:', err));
 
 app.use(session({
-    secret: 'yourSecretKey',
+    secret: process.env.SESSION_SECRET,
     resave: false,
     saveUninitialized: false,
     cookie: {
@@ -107,6 +107,33 @@ app.get('/index/getPreferences', async (req, res) => {
         if (!res.headersSent) {
             return res.status(500).json({ message: 'Server error' });
         }
+    }
+});
+
+app.get('/api/movie/:id', async (req, res) => {
+    try {
+        const movieId = req.params.id;
+        const apiKey = process.env.TMDB_API_KEY;
+
+        if (!apiKey) {
+            return res.status(500).json({ error: 'API key not configured' });
+        }
+        
+        // Fetch from TMDB api
+        const response = await fetch(`https://api.themoviedb.org/3/movie/${movieId}?api_key=${apiKey}`);
+
+        if (!response.ok) {
+            throw new Error(`TMDB API error: ${response.status}`);
+        }
+
+        const movieData = await response.json();
+        
+        res.json({
+            rating: movieData.vote_average,
+            description: movieData.overview,
+        });
+    } catch (error) {
+        res.status(500).json({ error: 'Failed to fetch movie details' });
     }
 });
 

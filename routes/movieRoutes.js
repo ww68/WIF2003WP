@@ -1,11 +1,11 @@
-// movie-route.js - Express route handler for movie details page
+require('dotenv').config();
 const express = require('express');
 const router = express.Router();
 const User = require('../models/user');
 const Review = require('../models/reviews');
 
 const fetch = (...args) => import('node-fetch').then(({default: f}) => f(...args));
-const API_KEY = '9a56291f8d522c5f874ed7812f062758';
+const API_KEY = process.env.TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
