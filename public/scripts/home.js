@@ -90,6 +90,7 @@ class OptimisticWatchlist {
 // Global variables
 const watchlistManager = new OptimisticWatchlist();
 let userPreferences = null;
+let userCountry = null;
 let isAuthenticated = false;
 
 // Load movies when DOM is ready
@@ -116,16 +117,20 @@ async function checkAuthAndLoadPreferences() {
             const data = await response.json();
             isAuthenticated = true;
             userPreferences = data.preferences || [];
+            userCountry = data.country || null; // Get user's country
             console.log('User preferences loaded:', userPreferences);
+            console.log('User country:', userCountry);
         } else {
             isAuthenticated = false;
             userPreferences = null;
+            userCountry = null;
             console.log('User not authenticated or no preferences found');
         }
     } catch (error) {
         console.error('Error checking authentication:', error);
         isAuthenticated = false;
         userPreferences = null;
+        userCountry = null;
     }
 }
 
@@ -146,6 +151,11 @@ async function loadPersonalizedSections() {
     // First, show "Recommended for You" section with mixed genres
     await createRecommendedSection();
     
+    // Add country-specific section if user has a country
+    if (userCountry) {
+        await createCountrySection();
+    }
+
     // Then show preferred genre sections
     const genreResponse = await fetch(`${BASE_URL}/genre/movie/list?api_key=${API_KEY}&language=en-US`);
     const genreData = await genreResponse.json();
@@ -172,6 +182,228 @@ async function loadPersonalizedSections() {
             await fetchMoviesByGenre(genre.id, createGenreSection(genre.name, genre.id, false));
         }
     }
+}
+
+// Create country-specific movie section
+async function createCountrySection() {
+    const countryCode = getCountryCode(userCountry);
+    if (!countryCode) {
+        console.log('Country code not found for:', userCountry);
+        return;
+    }
+    
+    const containerId = createCountryMovieSection(userCountry);
+    await fetchMoviesByCountry(countryCode, containerId);
+}
+
+// Create country section UI
+function createCountryMovieSection(countryName) {
+    const container = document.createElement('div');
+    container.classList.add('page-black');
+
+    const containerId = `country-${countryName.toLowerCase().replace(/\s+/g, '-')}`;
+
+    // Get country flag emoji
+    const flagEmoji = getCountryFlag(countryName);
+
+    container.innerHTML = `
+        <div class="movie-list-container">
+            <h1 class="movie-list-title">
+                ${flagEmoji} Popular in ${countryName}
+            </h1>
+            <div class="movie-list-wrapper">
+                <i class="fas fa-chevron-left arrow left-arrow"></i>
+                <div class="movie-list" id="${containerId}"></div>
+                <i class="fas fa-chevron-right arrow right-arrow"></i>
+            </div>
+        </div>
+    `;
+
+    const genreSections = document.getElementById('genre-sections');
+    // Insert after recommended section if it exists, otherwise at the beginning
+    const recommendedSection = genreSections.querySelector('[style*="order: -1"]');
+    if (recommendedSection && recommendedSection.nextSibling) {
+        genreSections.insertBefore(container, recommendedSection.nextSibling);
+    } else {
+        genreSections.insertBefore(container, genreSections.firstChild);
+    }
+    
+    return containerId;
+}
+
+// Fetch movies by country
+async function fetchMoviesByCountry(countryCode, containerId) {
+    let allMovies = [];
+    const maxPages = 3;
+
+    for (let page = 1; page <= maxPages; page++) {
+        try {
+            // Try multiple approaches to get country-specific content
+            const promises = [
+                // Movies with production companies from the country
+                fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&language=en-US&sort_by=popularity.desc&with_origin_country=${countryCode}&page=${page}`),
+                // Movies with watch providers/ available in the country's streaming region
+                fetch(`${BASE_URL}/discover/movie?api_key=${API_KEY}&language=en-US&sort_by=popularity.desc&watch_region=${countryCode}&page=${page}`)
+            ];
+
+            // Handle and Merge the results
+            const responses = await Promise.allSettled(promises);
+            
+            for (const response of responses) {
+                if (response.status === 'fulfilled' && response.value.ok) {
+                    const data = await response.value.json();
+                    if (data.results && data.results.length > 0) {
+                        allMovies = allMovies.concat(data.results);
+                    }
+                }
+            }
+        } catch (error) {
+            console.error('Error fetching movies for country:', error);
+        }
+    }
+
+    // Remove duplicates based on movie ID
+    const uniqueMovies = allMovies.filter((movie, index, self) => 
+        index === self.findIndex(m => m.id === movie.id)
+    );
+
+    // If we don't have enough country-specific movies, fall back to popular movies as backup
+    if (uniqueMovies.length < 10) {
+        try {
+            const fallbackResponse = await fetch(`${BASE_URL}/movie/popular?api_key=${API_KEY}&language=en-US&page=1`);
+            const fallbackData = await fallbackResponse.json();
+            const additionalMovies = fallbackData.results.slice(0, 20 - uniqueMovies.length);
+            uniqueMovies.push(...additionalMovies);
+        } catch (error) {
+            console.error('Error fetching fallback movies:', error);
+        }
+    }
+
+    // Shuffle and limit results
+    const finalMovies = shuffleArray(uniqueMovies).slice(0, 20);
+    displayMovies(finalMovies, containerId);
+}
+
+// Get country code from country name
+function getCountryCode(countryName) {
+    const countryMap = {
+        'United States': 'US',
+        'United Kingdom': 'GB',
+        'Canada': 'CA',
+        'Australia': 'AU',
+        'Germany': 'DE',
+        'France': 'FR',
+        'Spain': 'ES',
+        'Italy': 'IT',
+        'Japan': 'JP',
+        'South Korea': 'KR',
+        'China': 'CN',
+        'India': 'IN',
+        'Brazil': 'BR',
+        'Mexico': 'MX',
+        'Russia': 'RU',
+        'Netherlands': 'NL',
+        'Sweden': 'SE',
+        'Norway': 'NO',
+        'Denmark': 'DK',
+        'Finland': 'FI',
+        'Belgium': 'BE',
+        'Switzerland': 'CH',
+        'Austria': 'AT',
+        'Poland': 'PL',
+        'Czech Republic': 'CZ',
+        'Hungary': 'HU',
+        'Portugal': 'PT',
+        'Greece': 'GR',
+        'Turkey': 'TR',
+        'Israel': 'IL',
+        'South Africa': 'ZA',
+        'Argentina': 'AR',
+        'Chile': 'CL',
+        'Colombia': 'CO',
+        'Thailand': 'TH',
+        'Malaysia': 'MY',
+        'Singapore': 'SG',
+        'Indonesia': 'ID',
+        'Philippines': 'PH',
+        'Vietnam': 'VN',
+        'Taiwan': 'TW',
+        'Hong Kong': 'HK',
+        'New Zealand': 'NZ',
+        'Ireland': 'IE',
+        'Romania': 'RO',
+        'Bulgaria': 'BG',
+        'Croatia': 'HR',
+        'Serbia': 'RS',
+        'Ukraine': 'UA',
+        'Egypt': 'EG',
+        'Morocco': 'MA',
+        'Nigeria': 'NG',
+        'Kenya': 'KE'
+    };
+    
+    return countryMap[countryName] || null;
+}
+
+// Get country flag emoji
+function getCountryFlag(countryName) {
+    const flagMap = {
+        'United States': '🇺🇸',
+        'United Kingdom': '🇬🇧',
+        'Canada': '🇨🇦',
+        'Australia': '🇦🇺',
+        'Germany': '🇩🇪',
+        'France': '🇫🇷',
+        'Spain': '🇪🇸',
+        'Italy': '🇮🇹',
+        'Japan': '🇯🇵',
+        'South Korea': '🇰🇷',
+        'China': '🇨🇳',
+        'India': '🇮🇳',
+        'Brazil': '🇧🇷',
+        'Mexico': '🇲🇽',
+        'Russia': '🇷🇺',
+        'Netherlands': '🇳🇱',
+        'Sweden': '🇸🇪',
+        'Norway': '🇳🇴',
+        'Denmark': '🇩🇰',
+        'Finland': '🇫🇮',
+        'Belgium': '🇧🇪',
+        'Switzerland': '🇨🇭',
+        'Austria': '🇦🇹',
+        'Poland': '🇵🇱',
+        'Czech Republic': '🇨🇿',
+        'Hungary': '🇭🇺',
+        'Portugal': '🇵🇹',
+        'Greece': '🇬🇷',
+        'Turkey': '🇹🇷',
+        'Israel': '🇮🇱',
+        'South Africa': '🇿🇦',
+        'Argentina': '🇦🇷',
+        'Chile': '🇨🇱',
+        'Colombia': '🇨🇴',
+        'Thailand': '🇹🇭',
+        'Malaysia': '🇲🇾',
+        'Singapore': '🇸🇬',
+        'Indonesia': '🇮🇩',
+        'Philippines': '🇵🇭',
+        'Vietnam': '🇻🇳',
+        'Taiwan': '🇹🇼',
+        'Hong Kong': '🇭🇰',
+        'New Zealand': '🇳🇿',
+        'Ireland': '🇮🇪',
+        'Romania': '🇷🇴',
+        'Bulgaria': '🇧🇬',
+        'Croatia': '🇭🇷',
+        'Serbia': '🇷🇸',
+        'Ukraine': '🇺🇦',
+        'Egypt': '🇪🇬',
+        'Morocco': '🇲🇦',
+        'Nigeria': '🇳🇬',
+        'Kenya': '🇰🇪'
+    };
+    
+    return flagMap[countryName] || '🌍';
 }
 
 // Create "Recommended for You" section mixing preferred genres
