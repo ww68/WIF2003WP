@@ -9,23 +9,6 @@ const API_KEY = process.env.TMDB_API_KEY;
 const BASE_URL = 'https://api.themoviedb.org/3';
 const IMAGE_URL = 'https://image.tmdb.org/t/p/w500';
 
-// Helper function to calculate average rating from reviews
-function getAverageRating(movieId, reviews) {
-    const movieReviews = reviews.filter(review => review.movieId === movieId);
-    
-    if (movieReviews.length === 0) return 0;
-
-    const total = movieReviews.reduce((sum, review) => sum + review.rating, 0);
-    return total / movieReviews.length;
-}
-
-// Helper function to get reviews (in real app, this would come from database)
-function getReviews(movieId) {
-    // In a real application, you would fetch from database
-    // For now, returning empty array - client-side will handle localStorage
-    return [];
-}
-
 // Route handler for movie details page
 router.get('/:id', async (req, res) => {
     const movieId = req.params.id;

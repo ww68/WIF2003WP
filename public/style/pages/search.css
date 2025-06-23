@@ -83,7 +83,7 @@
   border: none;
 }
 .list-group-item:hover {
-  background-color: #343a40;
+  background-color: black;
 }
 
 
@@ -245,7 +245,7 @@
   
 
 .container {
-    background-color: #0d0d0d;
+    background-color: black;
     min-height: calc(100vh - 50px);
     color: white;
 }

@@ -38,9 +38,7 @@ router.get('/:movieId', async (req, res) => {
     try {
         const { movieId } = req.params;
         const reviews = await Review.find({ movieId }).sort({ date: -1 }).populate('userId', 'username');
-
-        console.log('✅ Populated review sample:', reviews[0]);
-
+        
         res.json({ reviews }); 
     } catch (error) {
         console.error('Error fetching reviews:', error);

@@ -36,7 +36,8 @@ document.addEventListener('DOMContentLoaded', () => {
   [
     { selector: '#watchlist-link',  url: '/watchlist' },
     { selector: '#profile-link',    url: '/profile'  },
-    { selector: '#profile-avatar',  url: '/profile'  } // desktop avatar
+    { selector: '#profile-avatar',  url: '/profile'  }, // desktop avatar
+    { selector: '#profile-mobile-link',    url: '/profile'  }
   ].forEach(item => {
     const el = document.querySelector(item.selector);
     if (el && !el.dataset.guardAttached) {          // guard once

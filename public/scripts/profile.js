@@ -27,6 +27,7 @@ function createMovieCard(movie) {
     return div;
 }
 
+// Dynamic movie history loading with TMDb API integration
 async function loadHistory() {
     const response = await fetch(`/profile/getHistory`);
     const history = await response.json();
@@ -39,12 +40,8 @@ async function loadHistory() {
     }
 
     // Fetch movie details and create movie cards
-    let lastId = null;
     for (const entry of history.slice().reverse()) {
         const movieId = entry.movieId;
-
-        if (movieId === lastId) continue;  // skip consecutive duplicates
-        lastId = movieId;
 
         try {
             const movie = await getMovieDetails(movieId);
@@ -58,15 +55,25 @@ async function loadHistory() {
 
 loadHistory();
 
-document.addEventListener("DOMContentLoaded", () => {
-    const savedGenres = JSON.parse(localStorage.getItem("genrePreferences")) || [];
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const response = await fetch('/index/getPreferences');
+        if (!response.ok) throw new Error('Failed to load preferences');
 
-    savedGenres.forEach(genre => {
-        const checkbox = document.querySelector(`input[value="${genre}"]`);
-        if (checkbox) checkbox.checked = true;
-    });
+        const data = await response.json();
+        const savedGenres = data.genres || [];
+
+        savedGenres.forEach(genre => {
+            const checkbox = document.querySelector(`input[value="${genre}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+    } catch (error) {
+        console.error('Error loading genre preferences:', error);
+    }
 });
 
+
+// Client-side preference management
 document.getElementById("genreForm").addEventListener("submit", async function(e) {
     e.preventDefault();
 

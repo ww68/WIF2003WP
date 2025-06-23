@@ -123,16 +123,16 @@
 
 /* Responsive adjustments */
 @media (max-width: 480px) {
-    .auth-modal-content {
+    .base-modal-content {
         padding: 20px;
         margin: 20px;
     }
-    
+
     .modal-buttons {
         flex-direction: column;
         gap: 10px;
     }
-    
+
     .modal-buttons button,
     .modal-buttons a {
         width: 100%;

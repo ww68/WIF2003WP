@@ -101,6 +101,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     loadCarouselMovies('heroCarousel', 'carousel-content', 'movie/now_playing');
     loadCarouselMovies('heroCarousel1', 'carousel-content-1', 'trending/movie/week');
     
+    fetchMovies('movie/popular', 'top-trending');
+    fetchMovies('movie/upcoming', 'new-releases');
+    
     // Load content based on user preferences
     await loadPersonalizedContent();
 });
@@ -128,18 +131,13 @@ async function checkAuthAndLoadPreferences() {
 
 // Load personalized content based on user preferences
 async function loadPersonalizedContent() {
-    fetchMovies('movie/popular', 'top-trending');
-    fetchMovies('movie/upcoming', 'new-releases');
-
     if (isAuthenticated && userPreferences && userPreferences.length > 0) {
         // Show personalized content
         await loadPersonalizedSections();
         showPersonalizationMessage(true);
     } else {
         await fetchAndDisplayAllGenres();
-        if (isAuthenticated) {
-            showPersonalizationMessage(false);
-        }
+        showPersonalizationMessage(false);
     }
 }
 
@@ -228,8 +226,6 @@ function createRecommendedForYouSection() {
     const containerId = 'recommended-for-you';
 
     container.innerHTML = `
-        <div id="personalization-banner"></div>
-     
         <div class="movie-list-container">
             <h1 class="movie-list-title">
                 <i class="fas fa-star me-2"></i>Recommended for You
@@ -289,12 +285,22 @@ function showPersonalizationMessage(hasPreferences) {
     const banner = document.getElementById('personalization-banner');
     if (!banner) return;
 
-    if (hasPreferences) {
+    if (!isAuthenticated) {
+        banner.innerHTML = `
+            <div class="alert alert-primary alert-dismissible fade show" role="alert">
+                <i class="fas fa-lock me-2"></i>
+                <strong>You're missing out!</strong> 
+                <a href="/login" class="alert-link">Log in</a> or 
+                <a href="/signup" class="alert-link">Sign up</a> to get personalized movie recommendations.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        `;
+    } else if (hasPreferences) {
         banner.innerHTML = `
             <div class="alert alert-info alert-dismissible fade show" role="alert">
                 <i class="fas fa-magic me-2"></i>
                 <strong>Personalized for you!</strong> We're showing content based on your genre preferences.
-                <a href="/profile" class="alert-link">Update preferences</a>
+                <a href="/profile#genre-preferences-section" class="alert-link">Update preferences</a>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;
@@ -303,7 +309,7 @@ function showPersonalizationMessage(hasPreferences) {
             <div class="alert alert-warning alert-dismissible fade show" role="alert">
                 <i class="fas fa-user-cog me-2"></i>
                 <strong>Get personalized recommendations!</strong> 
-                <a href="<%= user ? '/profile' : '/login' %>" class="alert-link">Set your genre preferences</a>
+                <a href="/profile#genre-preferences-section" class="alert-link">Set your genre preferences</a>
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         `;
