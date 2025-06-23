@@ -9,79 +9,7 @@ const genreMap = {};
 let availableGenres = [];
 let availableLanguages = [];
 
-// Save search to user's history in MongoDB
-async function saveSearchHistory(query, filters = {}) {
-    try {
-        // First check if user is authenticated
-        const authCheck = await fetch('/auth/check');
-        if (!authCheck.ok) return false;
-        
-        const authData = await authCheck.json();
-        if (!authData.authenticated) return false;
 
-        const response = await fetch('/search/history', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                query,
-                genre: filters.genre || '',
-                year: filters.year || '',
-                language: filters.language || ''
-            }),
-            credentials: 'include'
-        });
-        
-        return response.ok;
-    } catch (error) {
-        console.error('Error saving search history:', error);
-        return false;
-    }
-}
-
-// Load recent searches from MongoDB
-async function loadRecentSearches() {
-    try {
-        // First check if user is authenticated
-        const authCheck = await fetch('/auth/check');
-        if (!authCheck.ok) return [];
-        
-        const authData = await authCheck.json();
-        if (!authData.authenticated) return [];
-
-        const response = await fetch('/search/history', {
-            credentials: 'include'
-        });
-        
-        if (response.ok) {
-            const data = await response.json();
-            return data.history || [];
-        }
-        return [];
-    } catch (error) {
-        console.error('Error loading recent searches:', error);
-        return [];
-    }
-}
-
-// Delete search from history
-async function deleteSearchHistory(query) {
-    try {
-        const response = await fetch('/search/history', {
-            method: 'DELETE',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ query }),
-            credentials: 'include'
-        });
-        return response.ok;
-    } catch (error) {
-        console.error('Error deleting search:', error);
-        return false;
-    }
-}
 
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
