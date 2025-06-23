@@ -55,14 +55,23 @@ async function loadHistory() {
 
 loadHistory();
 
-document.addEventListener("DOMContentLoaded", () => {
-    const savedGenres = JSON.parse(localStorage.getItem("genrePreferences")) || [];
+document.addEventListener("DOMContentLoaded", async () => {
+    try {
+        const response = await fetch('/index/getPreferences');
+        if (!response.ok) throw new Error('Failed to load preferences');
 
-    savedGenres.forEach(genre => {
-        const checkbox = document.querySelector(`input[value="${genre}"]`);
-        if (checkbox) checkbox.checked = true;
-    });
+        const data = await response.json();
+        const savedGenres = data.genres || [];
+
+        savedGenres.forEach(genre => {
+            const checkbox = document.querySelector(`input[value="${genre}"]`);
+            if (checkbox) checkbox.checked = true;
+        });
+    } catch (error) {
+        console.error('Error loading genre preferences:', error);
+    }
 });
+
 
 // Client-side preference management
 document.getElementById("genreForm").addEventListener("submit", async function(e) {
