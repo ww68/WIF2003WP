@@ -100,6 +100,7 @@ app.get('/index/getPreferences', async (req, res) => {
         // Return user preferences
         res.status(200).json({
             preferences: user.genres || [],
+            country: user.country || '',
             isAuthenticated: true
         });
     } catch (error) {

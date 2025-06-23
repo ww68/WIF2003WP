@@ -43,21 +43,20 @@ router.get('/', requireAuth, async (req, res) => {
 
 // Route to update user profile
 router.post('/updateProfile', requireAuth, upload.single('profilePicture'), async (req, res) => {
-    const { firstName, lastName, phoneNum, gender, dob, country, city } = req.body;
+    const { firstName, lastName, phoneNum, gender, dob, country } = req.body;
 
     // Ensure dob is correctly formatted to yyyy-mm-dd
-    const formattedDOB = new Date(dob).toISOString().split('T')[0]; 
+    const formattedDOB = dob ? new Date(dob).toISOString().split('T')[0] : null;
     const profilePictureUrl = req.file ? `/uploads/profile-pictures/${req.file.filename}` : null;
 
     // Prepare update object
     const updateFields = {
         firstName,
         lastName,
-        phoneNum,
-        gender,
+        phoneNum: phoneNum || '',
+        gender: gender || '',
         dob: formattedDOB,
-        country,
-        city,
+        country: country || '',
     };
 
     // Only set profilePicture if a new file was uploaded

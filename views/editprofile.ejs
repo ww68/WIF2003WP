@@ -70,18 +70,10 @@
                         <input type="date" class="form-control" id="dob" name="dob" value="<%= user.dob %>">
                     </div>
 
-                    <div class="row">
-                        <div class="mb-3 col-md-6 position-relative">
-                            <label for="country" class="form-label">Country</label>
-                            <input type="text" id="country" name="country" class="form-control" value="<%= user.country %>" autocomplete="on" required/>
-                            <ul id="countrySuggestions" class="list-group position-absolute z-1"></ul>
-                        </div>
-
-                        <div class="mb-3 col-md-6 position-relative">
-                            <label for="city" class="form-label">City</label>
-                            <input type="text" id="city" name="city" class="form-control" value="<%= user.city %>" autocomplete="on" disabled required />
-                            <ul id="citySuggestions" class="list-group position-absolute z-1"></ul>
-                        </div>
+                    <div class="mb-3 ">
+                        <label for="country" class="form-label">Country</label>
+                        <input type="text" id="country" name="country" class="form-control" value="<%= user.country %>" autocomplete="on"/>
+                        <ul id="countrySuggestions" class="list-group position-absolute z-1"></ul>
                     </div>
 
                     <div class="d-flex gap-2">
