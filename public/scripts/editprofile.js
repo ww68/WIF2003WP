@@ -156,10 +156,14 @@ form.addEventListener("submit", async (e) => {
 
     if (!hasFormChanged()) {
         await showSuccessModal({
-            title: 'No Changes Made',
-            message: 'You haven’t changed anything in your profile.',
-            confirmText: 'OK'
-        });
+    title: 'No Changes Made',
+    message: 'You haven’t changed anything in your profile.',
+    confirmText: 'OK',
+    warningIcon: 'fas fa-save',
+    confirmButtonClass: 'btn-info',
+    showWarningIcon: true
+});
+
 
         return;
     }
