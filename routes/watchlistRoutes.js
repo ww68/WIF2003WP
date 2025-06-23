@@ -22,43 +22,6 @@ router.get('/check/:id', requireAuth, async (req, res) => {
   }
 });
 
-// router.get('/', requireAuth, async (req, res) => {
-//     try {
-//         // Get filter from query parameter, default to 'all'
-//         const filter = req.query.filter || 'all';
-        
-//         // Get user's watchlist from database
-//         const user = await User.findById(req.session.userId);
-//         const watchlist = user ? user.watchlist : [];
-        
-//         // Filter the watchlist based on the filter parameter
-//         let filteredWatchlist = watchlist;
-//         if (filter === 'watched') {
-//             filteredWatchlist = watchlist.filter(movie => movie.watched === true);
-//         } else if (filter === 'unwatched') {
-//             filteredWatchlist = watchlist.filter(movie => movie.watched === false);
-//         }
-        
-//         // Render the EJS template with the data
-//         res.render('watchlist', {
-//             watchlist: watchlist,
-//             filteredWatchlist: filteredWatchlist,
-//             filter: filter,
-//             title: 'Your Watchlist',
-//             currentPage: 'watchlist'
-//         });
-        
-//     } catch (error) {
-//         console.error('Error fetching watchlist:', error);
-//         res.status(500).render('error', { 
-//             title: 'Server Error',
-//             error: 'Failed to load watchlist' 
-//         });
-//     }
-// });
-
-// POST /watchlist/add - Add movie to watchlist
-
 router.get('/', requireAuth, async (req, res) => {
   try {
     const filter = req.query.filter || 'all';

@@ -38,12 +38,13 @@
                     <% }); %>
                 </div>
                 <div class="action-buttons mt-4">
-                    <button class="btn btn-primary"><i class="fas fa-play me-2"></i>Watch Now</button>
+                    <a href="#trailerSection" class="btn btn-primary">
+                        <i class="fas fa-play me-2"></i>Watch Now
+                    </a>
                     <button id="bookmarkBtn" data-movie-id="<%= movie.id %>" class="btn btn-outline-light <%= inWatchlist ? 'active' : '' %>">
                         <i class="<%= inWatchlist ? 'fas' : 'far' %> fa-bookmark me-2"></i>
                         <%= inWatchlist ? ' Added' : ' Watchlist' %>
                     </button>
-                    <button class="btn btn-outline-light"><i class="fas fa-share-alt me-2"></i>Share</button>
                 </div>
             </div>
         </div>
@@ -56,7 +57,7 @@
 
             <div class="mb-5">
                 <h3 class="section-header text-uppercase">Trailer</h3>
-                <div class="trailer-container">
+                <div id="trailerSection" class="trailer-container">
                     <% if (trailer) { %>
                         <iframe width="100%" height="400" src="https://www.youtube.com/embed/<%= trailer.key %>" frameborder="0" allowfullscreen></iframe>
                     <% } else { %>
