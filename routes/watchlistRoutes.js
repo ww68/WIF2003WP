@@ -3,6 +3,8 @@ const express = require('express');
 const router = express.Router();
 const User = require('../models/user'); 
 const requireAuth = require('../middleware/requireAuth');
+const fetchMovieFromTMDb = require('../utils/fetchMovieFromTMDB');
+const DAY = 1000 * 60 * 60 * 24;
 
 router.get('/check/:id', requireAuth, async (req, res) => {
   try {
@@ -20,42 +22,86 @@ router.get('/check/:id', requireAuth, async (req, res) => {
   }
 });
 
-router.get('/', requireAuth, async (req, res) => {
-    try {
-        // Get filter from query parameter, default to 'all'
-        const filter = req.query.filter || 'all';
+// router.get('/', requireAuth, async (req, res) => {
+//     try {
+//         // Get filter from query parameter, default to 'all'
+//         const filter = req.query.filter || 'all';
         
-        // Get user's watchlist from database
-        const user = await User.findById(req.session.userId);
-        const watchlist = user ? user.watchlist : [];
+//         // Get user's watchlist from database
+//         const user = await User.findById(req.session.userId);
+//         const watchlist = user ? user.watchlist : [];
         
-        // Filter the watchlist based on the filter parameter
-        let filteredWatchlist = watchlist;
-        if (filter === 'watched') {
-            filteredWatchlist = watchlist.filter(movie => movie.watched === true);
-        } else if (filter === 'unwatched') {
-            filteredWatchlist = watchlist.filter(movie => movie.watched === false);
-        }
+//         // Filter the watchlist based on the filter parameter
+//         let filteredWatchlist = watchlist;
+//         if (filter === 'watched') {
+//             filteredWatchlist = watchlist.filter(movie => movie.watched === true);
+//         } else if (filter === 'unwatched') {
+//             filteredWatchlist = watchlist.filter(movie => movie.watched === false);
+//         }
         
-        // Render the EJS template with the data
-        res.render('watchlist', {
-            watchlist: watchlist,
-            filteredWatchlist: filteredWatchlist,
-            filter: filter,
-            title: 'Your Watchlist',
-            currentPage: 'watchlist'
-        });
+//         // Render the EJS template with the data
+//         res.render('watchlist', {
+//             watchlist: watchlist,
+//             filteredWatchlist: filteredWatchlist,
+//             filter: filter,
+//             title: 'Your Watchlist',
+//             currentPage: 'watchlist'
+//         });
         
-    } catch (error) {
-        console.error('Error fetching watchlist:', error);
-        res.status(500).render('error', { 
-            title: 'Server Error',
-            error: 'Failed to load watchlist' 
-        });
-    }
-});
+//     } catch (error) {
+//         console.error('Error fetching watchlist:', error);
+//         res.status(500).render('error', { 
+//             title: 'Server Error',
+//             error: 'Failed to load watchlist' 
+//         });
+//     }
+// });
 
 // POST /watchlist/add - Add movie to watchlist
+
+router.get('/', requireAuth, async (req, res) => {
+  try {
+    const filter = req.query.filter || 'all';
+    const user = await User.findById(req.session.userId);
+    const rawWatchlist = user ? user.watchlist : [];
+
+    const fullWatchlist = await Promise.all(rawWatchlist.map(async (movie) => {
+      const now = Date.now();
+      const lastUpdated = movie.lastUpdated || 0;
+      const isStale = (now - new Date(lastUpdated).getTime()) > 7 * DAY;
+
+      if (isStale || !movie.title) {
+        try {
+          const apiData = await fetchMovieFromTMDb(movie.id);
+          Object.assign(movie, apiData, { lastUpdated: new Date() });
+          await user.save(); // update in DB
+        } catch (err) {
+          console.error(`Failed to update TMDb info for movie ${movie.id}`);
+        }
+      }
+
+      return movie;
+    }));
+
+    const filteredWatchlist = fullWatchlist.filter(movie => {
+      if (filter === 'all') return true;
+      if (filter === 'watched') return movie.watched;
+      if (filter === 'unwatched') return !movie.watched;
+    });
+
+    res.render('watchlist', {
+      watchlist: fullWatchlist,
+      filteredWatchlist,
+      filter,
+      title: 'Your Watchlist',
+      currentPage: 'watchlist'
+    });
+  } catch (err) {
+    console.error('Watchlist error:', err);
+    res.status(500).render('error', { error: 'Failed to load watchlist' });
+  }
+});
+
 router.post('/add', requireAuth, async (req, res) => {
     try {
         const movieData = req.body;
@@ -69,20 +115,24 @@ router.post('/add', requireAuth, async (req, res) => {
         // Check if movie already exists
         const exists = user.watchlist.some(movie => movie.id === movieData.id);
         
-        if (!exists) {
-            // Add watched property if not present
-            if (movieData.watched === undefined) {
-                movieData.watched = false;
-            }
-            
-            // Add movie to user's watchlist
-            user.watchlist.push(movieData);
-            await user.save();
-            
-            res.json({ success: true, message: 'Movie added to watchlist' });
-        } else {
-            res.json({ success: false, message: 'Movie already in watchlist' });
+        if (exists) {
+            return res.json({ success: false, message: 'Movie already in watchlist' });
         }
+        
+        if (!movieData.title) {
+            const apiData = await fetchMovieFromTMDb(movieData.id);
+            Object.assign(movieData, apiData, { lastUpdated: new Date() });
+        }
+
+        if (movieData.watched === undefined) {
+            movieData.watched = false;
+        }
+            
+        // Add movie to user's watchlist
+        user.watchlist.push(movieData);
+        await user.save();
+            
+        res.json({ success: true, message: 'Movie added to watchlist' });        
         
     } catch (error) {
         console.error('Error adding to watchlist:', error);
