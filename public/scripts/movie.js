@@ -123,6 +123,17 @@ async function loadReviews(movieId) {
             commentCount.textContent = `${reviews.length} comments have been posted`;
         }
 
+        // Calculate average rating
+        const totalRating = reviews.reduce((sum, r) => sum + r.rating, 0);
+        const averageRating = reviews.length > 0 ? totalRating / reviews.length : 0;
+        updateRatingNumber(averageRating); 
+
+        // Dynamically update the number in the EJS-rendered average rating
+        const avgRatingElement = document.getElementById('average-rating');
+        if (avgRatingElement) {
+            avgRatingElement.innerHTML = `<i class="fas fa-star text-warning me-2"></i> ${averageRating.toFixed(1)}/10.0`;
+        }
+
         // Clear and render reviews
         reviewList.innerHTML = '';
         reviews.forEach(review => {

@@ -29,7 +29,7 @@
                 <div class="movie-meta">
                     <span><i class="far fa-calendar-alt me-2"></i> <%= movie.release_date ? movie.release_date.split('-')[0] : 'N/A' %></span>
                     <span><i class="far fa-clock me-2"></i> <%= movie.runtime || 'N/A' %> min</span>
-                    <span><i class="fas fa-star text-warning me-2"></i> <%= avgRating.toFixed(1) %>/10.0</span>
+                    <span id="average-rating"><i class="fas fa-star text-warning me-2"></i> <%= avgRating.toFixed(1) %>/10.0</span>
                     <span><i class="fas fa-user me-2"></i> Director: <%= director %></span>
                 </div>
                 <div class="mb-3">
