@@ -65,42 +65,43 @@ document.addEventListener("DOMContentLoaded", () => {
 
         input.addEventListener("focus", loadSuggestions);
         
-        input.addEventListener("input", () => {
-            const query = input.value.trim();
+         input.addEventListener("input", () => {
+    const query = input.value.trim();
 
-            if (query === "") {
-                loadSuggestions();
-                return;
-            }
+    if (query === "") {
+        loadSuggestions();
+        return;
+    }
 
-            fetch(`${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=1`)
-                .then(res => res.json())
-                .then(data => {
-                    dropdown.innerHTML = "";
+    fetch(`/search/suggestions?query=${encodeURIComponent(query)}`) // ✅ Use backend
+        .then(res => res.json())
+        .then(titles => {
+            dropdown.innerHTML = "";
 
-                    data.results.slice(0, 5).forEach(movie => {
-                        const li = document.createElement("li");
-                        li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white";
+            titles.slice(0, 5).forEach(title => {
+                const li = document.createElement("li");
+                li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white";
 
-                        const text = document.createElement("span");
-                        text.textContent = movie.title;
-                        text.className = "flex-grow-1";
-                        text.style.cursor = "pointer";
-                        text.onclick = () => {
-                            input.value = movie.title;
-                            form.requestSubmit();
-                        };
+                const text = document.createElement("span");
+                text.textContent = title;
+                text.className = "flex-grow-1";
+                text.style.cursor = "pointer";
+                text.onclick = () => {
+                    input.value = title;
+                    dropdown.style.display = "none";
+                    form.requestSubmit();
+                };
 
-                        li.appendChild(text);
-                        dropdown.appendChild(li);
-                    });
+                li.appendChild(text);
+                dropdown.appendChild(li);
+            });
 
-                    dropdown.style.display = "block";
-                })
-                .catch(err => {
-                    console.error("Error fetching movie suggestions:", err);
-                });
+            dropdown.style.display = "block";
+        })
+        .catch(err => {
+            console.error("Error fetching suggestions from backend:", err);
         });
+});
 
         document.addEventListener("click", e => {
             if (!form.contains(e.target)) {
