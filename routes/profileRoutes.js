@@ -2,6 +2,7 @@ const express = require('express');
 const bcrypt = require('bcryptjs');
 const router = express.Router();
 const User = require('../models/user');
+const SearchHistory = require('../models/searchHistory'); // Adjust path as needed
 const requireAuth = require('../middleware/requireAuth');
 
 // Route to view the profile
@@ -91,6 +92,7 @@ router.post('/deleteAccount', requireAuth, async (req, res) => {
     const userId = req.session.userId;
 
     try {
+        await SearchHistory.deleteOne({ userId: userId });
         // Delete the user's account from the database
         await User.findByIdAndDelete(userId);
         
