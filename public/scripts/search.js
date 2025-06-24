@@ -9,6 +9,8 @@ const genreMap = {};
 let availableGenres = [];
 let availableLanguages = [];
 
+
+
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
     // Initialize search form with dropdown
@@ -76,7 +78,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
 
         // Auto-suggestions while typing
-      input.addEventListener("input", () => {
+     input.addEventListener("input", () => {
     const query = input.value.trim();
 
     if (query === "") {
@@ -113,8 +115,6 @@ document.addEventListener('DOMContentLoaded', async function() {
             console.error("Error fetching suggestions from backend:", err);
         });
 });
-
-
 
         // Show recent searches on focus
         input.addEventListener("focus", loadSuggestions);
@@ -305,40 +305,59 @@ function searchMovies() {
     if (year) params.set('year', year);
     if (language) params.set('language', language);
     if (minRating) params.set('rating', minRating);
-    if (minDuration) params.set('minDuration', minDuration);
-    if (maxDuration) params.set('maxDuration', maxDuration);
-    params.set('page', currentPage);
-
-    window.history.pushState({}, '', `search.html?${params.toString()}`);
+    window.history.pushState({}, '', `search?${params.toString()}`);
 
     // Update header
     updateHeader(currentQuery ? `Search results for "${currentQuery}"` : "Browse Movies");
 
-    // Call backend to get results
-    fetch(`/search/results?${params.toString()}`)
-        .then(res => res.json())
-        .then(data => {
-            let results = data.results || [];
-
-            // For TMDB's `/search/movie`, we filter manually for filters not supported natively
-            if (currentQuery) {
+    let url;
+    if (!currentQuery && (genre || year || minDuration || maxDuration || language || minRating)) {
+        url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}&page=${currentPage}`;
+        if (genre) url += `&with_genres=${genre}`;
+        if (year) url += `&primary_release_year=${year}`;
+        if (language) url += `&with_original_language=${language}`;
+        if (minRating) url += `&vote_average.gte=${minRating}`;
+        if (minDuration) url += `&with_runtime.gte=${minDuration}`;
+        if (maxDuration) url += `&with_runtime.lte=${maxDuration}`;
+    } 
+    else if (currentQuery) {
+        url = `${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
+        
+        fetch(url)
+            .then(res => res.json())
+            .then(data => {
+                let results = data.results || [];
+                
                 if (genre) results = results.filter(movie => movie.genre_ids?.includes(Number(genre)));
                 if (year) results = results.filter(movie => movie.release_date?.startsWith(year));
                 if (language) results = results.filter(movie => movie.original_language === language);
                 if (minRating) results = results.filter(movie => movie.vote_average >= Number(minRating));
-                if (minDuration) results = results.filter(movie => movie.runtime >= Number(minDuration));
-                if (maxDuration) results = results.filter(movie => movie.runtime <= Number(maxDuration));
-            }
+                
+                renderMovies(results);
+                updatePagination(data.total_pages);
+            })
+            .catch(error => {
+                console.error('Error fetching movies:', error);
+                showError();
+            });
+        return;
+    }
+    else {
+        loadTrending();
+        return;
+    }
 
-            renderMovies(results);
-            updatePagination(data.total_pages || 1);
+    fetch(url)
+        .then(res => res.json())
+        .then(data => {
+            renderMovies(data.results || []);
+            updatePagination(data.total_pages);
         })
         .catch(error => {
-            console.error('Error fetching movies from backend:', error);
+            console.error('Error fetching movies:', error);
             showError();
         });
 }
-
 
 // Rest of the functions (renderMovies, checkWatchlistStatus, addToWatchlist, etc.) remain the same...
 // [Previous implementations of these functions can stay unchanged]
