@@ -9,8 +9,6 @@ const genreMap = {};
 let availableGenres = [];
 let availableLanguages = [];
 
-
-
 // Initialize
 document.addEventListener('DOMContentLoaded', async function() {
     // Initialize search form with dropdown
@@ -78,45 +76,45 @@ document.addEventListener('DOMContentLoaded', async function() {
     };
 
         // Auto-suggestions while typing
-        input.addEventListener("input", () => {
-            const query = input.value.trim();
+      input.addEventListener("input", () => {
+    const query = input.value.trim();
 
-            if (query === "") {
-                loadSuggestions();
-                return;
-            }
+    if (query === "") {
+        loadSuggestions();
+        return;
+    }
 
-            fetch(`${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(query)}&page=1`)
-                .then(res => res.json())
-                .then(data => {
-                    dropdown.innerHTML = "";
+    fetch(`/search/suggestions?query=${encodeURIComponent(query)}`) // ✅ Use backend
+        .then(res => res.json())
+        .then(titles => {
+            dropdown.innerHTML = "";
 
-                    data.results.slice(0, 5).forEach(movie => {
-                        const li = document.createElement("li");
-                        li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white";
+            titles.slice(0, 5).forEach(title => {
+                const li = document.createElement("li");
+                li.className = "list-group-item d-flex justify-content-between align-items-center bg-dark text-white";
 
-                        const text = document.createElement("span");
-                        text.textContent = movie.title;
-                        text.className = "flex-grow-1";
-                        text.style.cursor = "pointer";
-                        text.onclick = () => {
-                            input.value = movie.title;
-                            currentQuery = movie.title;
-                            currentPage = 1;
-                            dropdown.style.display="none";
-                            updateSearch();
-                        };
+                const text = document.createElement("span");
+                text.textContent = title;
+                text.className = "flex-grow-1";
+                text.style.cursor = "pointer";
+                text.onclick = () => {
+                    input.value = title;
+                    dropdown.style.display = "none";
+                    form.requestSubmit();
+                };
 
-                        li.appendChild(text);
-                        dropdown.appendChild(li);
-                    });
+                li.appendChild(text);
+                dropdown.appendChild(li);
+            });
 
-                    dropdown.style.display = "block";
-                })
-                .catch(err => {
-                    console.error("Error fetching movie suggestions:", err);
-                });
+            dropdown.style.display = "block";
+        })
+        .catch(err => {
+            console.error("Error fetching suggestions from backend:", err);
         });
+});
+
+
 
         // Show recent searches on focus
         input.addEventListener("focus", loadSuggestions);
@@ -307,59 +305,40 @@ function searchMovies() {
     if (year) params.set('year', year);
     if (language) params.set('language', language);
     if (minRating) params.set('rating', minRating);
-    window.history.pushState({}, '', `search?${params.toString()}`);
+    if (minDuration) params.set('minDuration', minDuration);
+    if (maxDuration) params.set('maxDuration', maxDuration);
+    params.set('page', currentPage);
+
+    window.history.pushState({}, '', `search.html?${params.toString()}`);
 
     // Update header
     updateHeader(currentQuery ? `Search results for "${currentQuery}"` : "Browse Movies");
 
-    let url;
-    if (!currentQuery && (genre || year || minDuration || maxDuration || language || minRating)) {
-        url = `${API_BASE}/discover/movie?api_key=${TMDB_API_KEY}&page=${currentPage}`;
-        if (genre) url += `&with_genres=${genre}`;
-        if (year) url += `&primary_release_year=${year}`;
-        if (language) url += `&with_original_language=${language}`;
-        if (minRating) url += `&vote_average.gte=${minRating}`;
-        if (minDuration) url += `&with_runtime.gte=${minDuration}`;
-        if (maxDuration) url += `&with_runtime.lte=${maxDuration}`;
-    } 
-    else if (currentQuery) {
-        url = `${API_BASE}/search/movie?api_key=${TMDB_API_KEY}&query=${encodeURIComponent(currentQuery)}&page=${currentPage}`;
-        
-        fetch(url)
-            .then(res => res.json())
-            .then(data => {
-                let results = data.results || [];
-                
+    // Call backend to get results
+    fetch(`/search/results?${params.toString()}`)
+        .then(res => res.json())
+        .then(data => {
+            let results = data.results || [];
+
+            // For TMDB's `/search/movie`, we filter manually for filters not supported natively
+            if (currentQuery) {
                 if (genre) results = results.filter(movie => movie.genre_ids?.includes(Number(genre)));
                 if (year) results = results.filter(movie => movie.release_date?.startsWith(year));
                 if (language) results = results.filter(movie => movie.original_language === language);
                 if (minRating) results = results.filter(movie => movie.vote_average >= Number(minRating));
-                
-                renderMovies(results);
-                updatePagination(data.total_pages);
-            })
-            .catch(error => {
-                console.error('Error fetching movies:', error);
-                showError();
-            });
-        return;
-    }
-    else {
-        loadTrending();
-        return;
-    }
+                if (minDuration) results = results.filter(movie => movie.runtime >= Number(minDuration));
+                if (maxDuration) results = results.filter(movie => movie.runtime <= Number(maxDuration));
+            }
 
-    fetch(url)
-        .then(res => res.json())
-        .then(data => {
-            renderMovies(data.results || []);
-            updatePagination(data.total_pages);
+            renderMovies(results);
+            updatePagination(data.total_pages || 1);
         })
         .catch(error => {
-            console.error('Error fetching movies:', error);
+            console.error('Error fetching movies from backend:', error);
             showError();
         });
 }
+
 
 // Rest of the functions (renderMovies, checkWatchlistStatus, addToWatchlist, etc.) remain the same...
 // [Previous implementations of these functions can stay unchanged]
