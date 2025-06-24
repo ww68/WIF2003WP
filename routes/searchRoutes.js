@@ -1,19 +1,14 @@
 const express = require('express');
 const router = express.Router();
 const axios = require('axios');
-const TMDB_API_KEY = 'b5ca748da01c92488ef670a84e31c784';
+const TMDB_API_KEY = process.env.TMDB_API_KEY;
 const SearchHistory = require('../models/searchHistory');
 const requireAuth = require('../middleware/requireAuth');
 
 console.log('✅ searchRoutes.js loaded');
 
-// Save search history
-// routes/searchRoutes.js
 
 // POST /search/history - Save search history
-// POST /search/history - Save or update search history
-// POST /search/history - Save or update search history, limit to 10 per user
-// Save or update user's search history (limit to 10 entries)
 router.post('/history', requireAuth, async (req, res) => {
     try {
         const { query, genre = '', year = '', language = '' } = req.body;
@@ -143,58 +138,64 @@ router.get('/', async (req, res) => {
 });
 
 // API endpoint for search suggestions
+// searchRoutes.js
 router.get('/suggestions', async (req, res) => {
-    try {
-        const query = req.query.query;
-        if (!query) {
-            return res.json([]);
-        }
+    const query = req.query.query;
+    if (!query) return res.json([]);
 
-        const response = await axios.get(`https://api.themoviedb.org/3/search/movie`, {
+    try {
+        const response = await axios.get('https://api.themoviedb.org/3/search/movie', {
             params: {
                 api_key: TMDB_API_KEY,
-                query: query,
+                query,
                 page: 1
             }
         });
 
-        const suggestions = response.data.results.slice(0, 5).map(movie => movie.title);
-        res.json(suggestions);
-    } catch (error) {
-        console.error('Suggestions error:', error);
-        res.status(500).json({ error: 'Failed to fetch suggestions' });
+        const titles = response.data.results.map(movie => movie.title);
+        const uniqueTitles = [...new Set(titles)];
+        res.json(uniqueTitles); // ✅ JSON response
+    } catch (err) {
+        console.error("TMDB error in /search/suggestions:", err.message);
+        res.status(500).json([]); // ✅ Still JSON on error
     }
 });
 
+
+module.exports = router;
 // API endpoint for search results
 router.get('/results', async (req, res) => {
+    const {
+        query, genre, year, language,
+        rating, minDuration, maxDuration, page = 1
+    } = req.query;
+
+    const params = {
+        api_key: TMDB_API_KEY,
+        page
+    };
+
+    if (query) {
+        params.query = query;
+    } else {
+        if (genre) params.with_genres = genre;
+        if (year) params.primary_release_year = year;
+        if (language) params.with_original_language = language;
+        if (rating) params['vote_average.gte'] = rating;
+        if (minDuration) params['with_runtime.gte'] = minDuration;
+        if (maxDuration) params['with_runtime.lte'] = maxDuration;
+    }
+
+    const url = query
+        ? 'https://api.themoviedb.org/3/search/movie'
+        : 'https://api.themoviedb.org/3/discover/movie';
+
     try {
-        const { query, genre, year, language, minDuration, maxDuration, minRating, page } = req.query;
-        
-        let url;
-        let params = {
-            api_key: TMDB_API_KEY,
-            page: page || 1
-        };
-
-        if (query) {
-            url = 'https://api.themoviedb.org/3/search/movie';
-            params.query = query;
-        } else {
-            url = 'https://api.themoviedb.org/3/discover/movie';
-            if (genre) params.with_genres = genre;
-            if (year) params.primary_release_year = year;
-            if (language) params.with_original_language = language;
-            if (minRating) params.vote_average_gte = minRating;
-            if (minDuration) params.with_runtime_gte = minDuration;
-            if (maxDuration) params.with_runtime_lte = maxDuration;
-        }
-
         const response = await axios.get(url, { params });
         res.json(response.data);
     } catch (error) {
-        console.error('Search API error:', error);
-        res.status(500).json({ error: 'Failed to fetch search results' });
+        console.error('TMDB error:', error.message);
+        res.status(500).json({ error: 'Failed to fetch data from TMDB' });
     }
 });
 
